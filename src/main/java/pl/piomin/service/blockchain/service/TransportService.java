@@ -29,4 +29,8 @@ public class TransportService {
     public boolean update(String addr, TransportData data) {
         return false;
     }
+
+    public TransportData get(String addr, int id) {
+        return null;
+    }
 }

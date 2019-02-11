@@ -29,4 +29,8 @@ public class ProductionService {
     public boolean update(String addr, ProductionData data) {
         return false;
     }
+
+    public ProductionData get(String addr, int id) {
+        return null;
+    }
 }

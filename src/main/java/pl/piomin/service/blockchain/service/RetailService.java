@@ -29,4 +29,8 @@ public class RetailService {
     public boolean update(String addr, RetailData data) {
         return false;
     }
+
+    public RetailData get(String addr, int id) {
+        return null;
+    }
 }

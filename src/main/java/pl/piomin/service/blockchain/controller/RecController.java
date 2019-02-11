@@ -1,9 +1,6 @@
 package pl.piomin.service.blockchain.controller;
 
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import pl.piomin.service.blockchain.model.User;
 import pl.piomin.service.blockchain.model.data.*;
 import pl.piomin.service.blockchain.service.*;
@@ -45,6 +42,11 @@ public class RecController {
         return buyerService.update(addr, data);
     }
 
+    @GetMapping("/buyer/get")
+    public BuyerData getBuyer(@RequestHeader String addr, @RequestBody int id) throws IOException {
+        return buyerService.get(addr, id);
+    }
+
     @PostMapping("/production/add")
     public boolean addProduction(@RequestHeader String addr, @RequestBody ProductionData data) throws IOException {
         return productionService.add(addr, data);
@@ -53,6 +55,11 @@ public class RecController {
     @PostMapping("/production/update")
     public boolean updateProduction(@RequestHeader String addr, @RequestBody ProductionData data) throws IOException {
         return productionService.update(addr, data);
+    }
+
+    @GetMapping("/production/get")
+    public ProductionData getProduction(@RequestHeader String addr, @RequestBody int id) throws IOException {
+        return productionService.get(addr, id);
     }
 
     @PostMapping("/retail/add")
@@ -65,6 +72,11 @@ public class RecController {
         return retailService.update(addr, data);
     }
 
+    @GetMapping("/retail/get")
+    public RetailData getRetail(@RequestHeader String addr, @RequestBody int id) throws IOException {
+        return retailService.get(addr, id);
+    }
+
     @PostMapping("/storager/add")
     public boolean addStorager(@RequestHeader String addr, @RequestBody StoragerData data) throws IOException {
         return storagerService.add(addr, data);
@@ -75,6 +87,11 @@ public class RecController {
         return storagerService.update(addr, data);
     }
 
+    @GetMapping("/storager/get")
+    public StoragerData getStorager(@RequestHeader String addr, @RequestBody int id) throws IOException {
+        return storagerService.get(addr, id);
+    }
+
     @PostMapping("/transport/add")
     public boolean addTransport(@RequestHeader String addr, @RequestBody TransportData data) throws IOException {
         return transportService.add(addr, data);
@@ -83,5 +100,10 @@ public class RecController {
     @PostMapping("/transport/update")
     public boolean updateTransport(@RequestHeader String addr, @RequestBody TransportData data) throws IOException {
         return transportService.update(addr, data);
+    }
+
+    @GetMapping("/transport/get")
+    public TransportData getTransport(@RequestHeader String addr, @RequestBody int id) throws IOException {
+        return transportService.get(addr, id);
     }
 }

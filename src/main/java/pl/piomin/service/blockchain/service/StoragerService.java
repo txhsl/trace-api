@@ -29,4 +29,8 @@ public class StoragerService {
     public boolean update(String addr, StoragerData data) {
         return false;
     }
+
+    public StoragerData get(String addr, int id) {
+        return null;
+    }
 }

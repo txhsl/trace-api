@@ -29,4 +29,8 @@ public class BuyerService {
     public boolean update(String addr, BuyerData data) {
         return false;
     }
+
+    public BuyerData get(String addr, int id) {
+        return null;
+    }
 }
