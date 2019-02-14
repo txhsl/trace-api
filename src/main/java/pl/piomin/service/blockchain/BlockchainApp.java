@@ -33,23 +33,14 @@ public class BlockchainApp {
     @PostConstruct
     public void listen() {
 
-        web3j.transactionObservable().subscribe(tx -> {
+        web3j.transactionFlowable().subscribe(tx -> {
 
             LOGGER.info("New tx: id={}, block={}, from={}, to={}, value={}", tx.getHash(), tx.getBlockHash(), tx.getFrom(), tx.getTo(), tx.getValue().intValue());
 
             try {
 
-                EthCoinbase coinbase = web3j.ethCoinbase().send();
                 EthGetTransactionCount transactionCount = web3j.ethGetTransactionCount(tx.getFrom(), DefaultBlockParameterName.LATEST).send();
                 LOGGER.info("Tx count: {}", transactionCount.getTransactionCount().intValue());
-
-                if (transactionCount.getTransactionCount().intValue() % 10 == 0) {
-
-                    EthGetTransactionCount tc = web3j.ethGetTransactionCount(coinbase.getAddress(), DefaultBlockParameterName.LATEST).send();
-                    Transaction transaction = Transaction.createEtherTransaction(coinbase.getAddress(), tc.getTransactionCount(), tx.getValue(), BigInteger.valueOf(21_000), tx.getFrom(), tx.getValue());
-                    web3j.ethSendTransaction(transaction).send();
-
-                }
 
             } catch (IOException e) {
                 LOGGER.error("Error getting transactions", e);

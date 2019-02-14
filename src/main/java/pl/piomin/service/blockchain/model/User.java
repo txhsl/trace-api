@@ -1,5 +1,7 @@
 package pl.piomin.service.blockchain.model;
 
+import org.web3j.abi.datatypes.Address;
+
 /**
  * @author: HuShili
  * @date: 2019/2/11
@@ -7,51 +9,31 @@ package pl.piomin.service.blockchain.model;
  */
 public class User {
 
-    private String name;
-    private int role;
-    private String IPAddress;
-    private String address;
+    private Address address;
+    private String password;
 
     public User() {
 
     }
 
-    public User(String name, int role, String ip, String address) {
-        this.name = name;
-        this.role = role;
-        this.IPAddress = ip;
+    public User(Address address, String password) {
         this.address = address;
+        this.password = password;
     }
 
-    public String getIPAddress() {
-        return IPAddress;
-    }
-
-    public void setIPAddress(String IPAddress) {
-        this.IPAddress = IPAddress;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public int getRole() {
-        return role;
-    }
-
-    public void setRole(int role) {
-        this.role = role;
-    }
-
-    public String getAddress() {
+    public Address getAddress() {
         return address;
     }
 
-    public void setAddress(String address) {
+    public void setAddress(Address address) {
         this.address = address;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }
