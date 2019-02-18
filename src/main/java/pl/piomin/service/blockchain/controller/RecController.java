@@ -24,6 +24,8 @@ public class RecController {
         this.systemService = systemService;
         this.userService = userService;
         this.dataService = dataService;
+
+        this.sysAddress = systemService.recover();
     }
 
     @PostMapping("/system/reset")

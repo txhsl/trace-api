@@ -2,6 +2,10 @@ package pl.piomin.service.blockchain.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.configurationprocessor.json.JSONObject;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.stereotype.Service;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.crypto.Credentials;
@@ -32,6 +36,17 @@ public class SystemService {
         } catch (Exception e){
             LOGGER.error("Connection failed. " + e.getMessage());
         }
+    }
+
+    public String recover() {
+        try {
+            Resource resource = new ClassPathResource("system.json");
+            JSONObject json = new JSONObject(new String(FileCopyUtils.copyToByteArray(resource.getFile())));
+            return json.getString("address");
+        } catch (Exception e) {
+            LOGGER.error("Address of System Contract not found. " + e.getMessage());
+        }
+        return null;
     }
 
     public String reset(Credentials credentials) throws Exception {
