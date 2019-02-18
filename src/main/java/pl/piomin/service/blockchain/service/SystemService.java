@@ -26,21 +26,34 @@ public class SystemService {
 
     public SystemService(Web3j web3j) {
         this.web3j = web3j;
+
+        try {
+            LOGGER.info("Blockchain height: " + web3j.ethBlockNumber().send().getBlockNumber() + ". Connected!");
+        } catch (Exception e){
+            LOGGER.error("Connection failed. " + e.getMessage());
+        }
     }
 
-    public Address reset(){
-        return null;
+    public String reset(Credentials credentials) throws Exception {
+        System_sol_System system = System_sol_System.deploy(web3j, credentials, GAS_PRICE, GAS_LIMIT).send();
+        LOGGER.info("System Contract deployed: " + system.getContractAddress());
+
+        return system.getContractAddress();
     }
 
-    public TransactionReceipt register(Address sysAddr, Address rcAddr, Credentials credentials) throws Exception {
-        System_sol_System system = System_sol_System.load(sysAddr.toString(), web3j, credentials, GAS_PRICE, GAS_LIMIT);
+    public TransactionReceipt register(String sysAddr, Address rcAddr, Credentials credentials) throws Exception {
+        System_sol_System system = System_sol_System.load(sysAddr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
         TransactionReceipt transactionReceipt = system.register(rcAddr).send();
+
+        LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
         return transactionReceipt;
     }
 
-    public Address getSC(Address sysAddr, Credentials credentials) throws Exception {
-        System_sol_System system = System_sol_System.load(sysAddr.toString(), web3j, credentials, GAS_PRICE, GAS_LIMIT);
+    public Address getRC(String sysAddr, Credentials credentials) throws Exception {
+        System_sol_System system = System_sol_System.load(sysAddr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
         String rcAddr = system.getRC(new Address(credentials.getAddress())).send().getValue();
+
+        LOGGER.info("Read succeed: " + rcAddr);
         return new Address(rcAddr);
     }
 }

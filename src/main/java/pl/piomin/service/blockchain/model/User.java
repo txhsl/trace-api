@@ -9,23 +9,23 @@ import org.web3j.abi.datatypes.Address;
  */
 public class User {
 
-    private Address address;
+    private String address;
     private String password;
 
     public User() {
 
     }
 
-    public User(Address address, String password) {
+    public User(String address, String password) {
         this.address = address;
         this.password = password;
     }
 
-    public Address getAddress() {
+    public String getAddress() {
         return address;
     }
 
-    public void setAddress(Address address) {
+    public void setAddress(String address) {
         this.address = address;
     }
 

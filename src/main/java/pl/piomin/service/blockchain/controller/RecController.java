@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.*;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.crypto.CipherException;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import pl.piomin.service.blockchain.PropertyType;
 import pl.piomin.service.blockchain.model.DataSwapper;
 import pl.piomin.service.blockchain.model.User;
 import pl.piomin.service.blockchain.service.*;
@@ -17,7 +18,7 @@ public class RecController {
     private final SystemService systemService;
     private final UserService userService;
     private final DataService dataService;
-    private Address sysAddress = null;
+    private String sysAddress = null;
 
     public RecController(SystemService systemService, UserService userService, DataService dataService) {
         this.systemService = systemService;
@@ -27,8 +28,8 @@ public class RecController {
 
     @PostMapping("/system/reset")
     public boolean reset() throws Exception {
-        sysAddress =  systemService.reset();
-        return true;
+        sysAddress =  systemService.reset(userService.getCurrent());
+        return userService.reset(sysAddress);
     }
 
     @PostMapping("/user/signIn")
@@ -37,12 +38,16 @@ public class RecController {
     }
 
     @PostMapping("/data/write")
-    public TransactionReceipt writeData(@RequestHeader User user, @RequestBody DataSwapper data) throws Exception {
-        return dataService.write(sysAddress ,user, data);
+    public TransactionReceipt writeData(@RequestBody DataSwapper data) throws Exception {
+        Address rcAddr = systemService.getRC(sysAddress, userService.getCurrent());
+        Address scAddr = userService.getSC(rcAddr.toString(), PropertyType.getID(data.getPropertyName()), false);
+        return dataService.write(scAddr.toString() ,userService.getCurrent(), data);
     }
 
     @GetMapping("/data/read")
-    public DataSwapper readData(@RequestHeader User user, @RequestBody DataSwapper data) throws Exception {
-        return dataService.read(sysAddress, user, data);
+    public DataSwapper readData(@RequestBody DataSwapper data) throws Exception {
+        Address rcAddr = systemService.getRC(sysAddress, userService.getCurrent());
+        Address scAddr = userService.getSC(rcAddr.toString(), PropertyType.getID(data.getPropertyName()), true);
+        return dataService.read(scAddr.toString(), userService.getCurrent(), data);
     }
 }

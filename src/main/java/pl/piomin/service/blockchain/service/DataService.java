@@ -30,18 +30,20 @@ public class DataService {
         this.web3j = web3j;
     }
 
-    public TransactionReceipt write(Address addr, Credentials credentials, DataSwapper data) throws Exception {
-        Data_sol_Data sc = Data_sol_Data.load(addr.toString(), web3j, credentials, GAS_PRICE, GAS_LIMIT);
+    public TransactionReceipt write(String addr, Credentials credentials, DataSwapper data) throws Exception {
+        Data_sol_Data sc = Data_sol_Data.load(addr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
         TransactionReceipt transactionReceipt = sc.writeDB(new Utf8String(data.getId()), new Utf8String(data.getData())).send();
 
+        LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
         return transactionReceipt;
     }
 
-    public DataSwapper read(Address addr, Credentials credentials, DataSwapper data) throws Exception {
-        Data_sol_Data sc = Data_sol_Data.load(addr.toString(), web3j, credentials, GAS_PRICE, GAS_LIMIT);
+    public DataSwapper read(String addr, Credentials credentials, DataSwapper data) throws Exception {
+        Data_sol_Data sc = Data_sol_Data.load(addr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
         String content = sc.readDB(new Utf8String(data.getId())).send().getValue();
 
         data.setData(content);
+        LOGGER.info("Read succeed: " + content);
         return data;
     }
 }
