@@ -11,6 +11,20 @@ public class DataSwapper {
     private String propertyName;
     private String data;
 
+    public DataSwapper() {
+
+    }
+
+    public DataSwapper(String id, String propertyName) {
+        this(id, propertyName, null);
+    }
+
+    public DataSwapper(String id, String propertyName, String data) {
+        this.id = id;
+        this.propertyName = propertyName;
+        this.data = data;
+    }
+
     public String getData() {
         return data;
     }
