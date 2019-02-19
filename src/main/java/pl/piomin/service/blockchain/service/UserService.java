@@ -230,7 +230,7 @@ public class UserService {
         setSC(roleAddrs[RoleType.Types.Storager.ordinal()], PropertyType.Types.Transporter_OutTime.ordinal(), new Address(dataAddrs[PropertyType.Types.Transporter_OutTime.ordinal()]), true);
         setSC(roleAddrs[RoleType.Types.Storager.ordinal()], PropertyType.Types.Transporter_Company.ordinal(), new Address(dataAddrs[PropertyType.Types.Transporter_Company.ordinal()]), true);
 
-        //Producer-Transporter
+        //Transporter-Transporter
         setSC(roleAddrs[RoleType.Types.Transporter.ordinal()], PropertyType.Types.Transporter_Operator.ordinal(), new Address(dataAddrs[PropertyType.Types.Transporter_Operator.ordinal()]), true);
         setSC(roleAddrs[RoleType.Types.Transporter.ordinal()], PropertyType.Types.Transporter_Operator.ordinal(), new Address(dataAddrs[PropertyType.Types.Transporter_Operator.ordinal()]), false);
 
@@ -339,28 +339,28 @@ public class UserService {
         setSC(roleAddrs[RoleType.Types.Seller.ordinal()], PropertyType.Types.Buyer_Amount.ordinal(), new Address(dataAddrs[PropertyType.Types.Buyer_Amount.ordinal()]), true);
         setSC(roleAddrs[RoleType.Types.Seller.ordinal()], PropertyType.Types.Buyer_Price.ordinal(), new Address(dataAddrs[PropertyType.Types.Buyer_Price.ordinal()]), true);
 
-        //Seller-Buyer
+        //Government-Buyer
         setSC(roleAddrs[RoleType.Types.Government.ordinal()], PropertyType.Types.Buyer_Name.ordinal(), new Address(dataAddrs[PropertyType.Types.Buyer_Name.ordinal()]), true);
         setSC(roleAddrs[RoleType.Types.Government.ordinal()], PropertyType.Types.Buyer_Mobile.ordinal(), new Address(dataAddrs[PropertyType.Types.Buyer_Mobile.ordinal()]), true);
         setSC(roleAddrs[RoleType.Types.Government.ordinal()], PropertyType.Types.Buyer_Time.ordinal(), new Address(dataAddrs[PropertyType.Types.Buyer_Time.ordinal()]), true);
         setSC(roleAddrs[RoleType.Types.Government.ordinal()], PropertyType.Types.Buyer_Amount.ordinal(), new Address(dataAddrs[PropertyType.Types.Buyer_Amount.ordinal()]), true);
         setSC(roleAddrs[RoleType.Types.Government.ordinal()], PropertyType.Types.Buyer_Price.ordinal(), new Address(dataAddrs[PropertyType.Types.Buyer_Price.ordinal()]), true);
 
-        //Seller-Buyer
-        setSC(roleAddrs[RoleType.Types.Government.ordinal()], PropertyType.Types.Buyer_Name.ordinal(), new Address(dataAddrs[PropertyType.Types.Buyer_Name.ordinal()]), true);
-        setSC(roleAddrs[RoleType.Types.Government.ordinal()], PropertyType.Types.Buyer_Name.ordinal(), new Address(dataAddrs[PropertyType.Types.Buyer_Name.ordinal()]), false);
+        //Buyer-Buyer
+        setSC(roleAddrs[RoleType.Types.Buyer.ordinal()], PropertyType.Types.Buyer_Name.ordinal(), new Address(dataAddrs[PropertyType.Types.Buyer_Name.ordinal()]), true);
+        setSC(roleAddrs[RoleType.Types.Buyer.ordinal()], PropertyType.Types.Buyer_Name.ordinal(), new Address(dataAddrs[PropertyType.Types.Buyer_Name.ordinal()]), false);
 
-        setSC(roleAddrs[RoleType.Types.Government.ordinal()], PropertyType.Types.Buyer_Mobile.ordinal(), new Address(dataAddrs[PropertyType.Types.Buyer_Mobile.ordinal()]), true);
-        setSC(roleAddrs[RoleType.Types.Government.ordinal()], PropertyType.Types.Buyer_Mobile.ordinal(), new Address(dataAddrs[PropertyType.Types.Buyer_Mobile.ordinal()]), false);
+        setSC(roleAddrs[RoleType.Types.Buyer.ordinal()], PropertyType.Types.Buyer_Mobile.ordinal(), new Address(dataAddrs[PropertyType.Types.Buyer_Mobile.ordinal()]), true);
+        setSC(roleAddrs[RoleType.Types.Buyer.ordinal()], PropertyType.Types.Buyer_Mobile.ordinal(), new Address(dataAddrs[PropertyType.Types.Buyer_Mobile.ordinal()]), false);
 
-        setSC(roleAddrs[RoleType.Types.Government.ordinal()], PropertyType.Types.Buyer_Time.ordinal(), new Address(dataAddrs[PropertyType.Types.Buyer_Time.ordinal()]), true);
-        setSC(roleAddrs[RoleType.Types.Government.ordinal()], PropertyType.Types.Buyer_Time.ordinal(), new Address(dataAddrs[PropertyType.Types.Buyer_Time.ordinal()]), false);
+        setSC(roleAddrs[RoleType.Types.Buyer.ordinal()], PropertyType.Types.Buyer_Time.ordinal(), new Address(dataAddrs[PropertyType.Types.Buyer_Time.ordinal()]), true);
+        setSC(roleAddrs[RoleType.Types.Buyer.ordinal()], PropertyType.Types.Buyer_Time.ordinal(), new Address(dataAddrs[PropertyType.Types.Buyer_Time.ordinal()]), false);
 
-        setSC(roleAddrs[RoleType.Types.Government.ordinal()], PropertyType.Types.Buyer_Amount.ordinal(), new Address(dataAddrs[PropertyType.Types.Buyer_Amount.ordinal()]), true);
-        setSC(roleAddrs[RoleType.Types.Government.ordinal()], PropertyType.Types.Buyer_Amount.ordinal(), new Address(dataAddrs[PropertyType.Types.Buyer_Amount.ordinal()]), false);
+        setSC(roleAddrs[RoleType.Types.Buyer.ordinal()], PropertyType.Types.Buyer_Amount.ordinal(), new Address(dataAddrs[PropertyType.Types.Buyer_Amount.ordinal()]), true);
+        setSC(roleAddrs[RoleType.Types.Buyer.ordinal()], PropertyType.Types.Buyer_Amount.ordinal(), new Address(dataAddrs[PropertyType.Types.Buyer_Amount.ordinal()]), false);
 
-        setSC(roleAddrs[RoleType.Types.Government.ordinal()], PropertyType.Types.Buyer_Price.ordinal(), new Address(dataAddrs[PropertyType.Types.Buyer_Price.ordinal()]), true);
-        setSC(roleAddrs[RoleType.Types.Government.ordinal()], PropertyType.Types.Buyer_Price.ordinal(), new Address(dataAddrs[PropertyType.Types.Buyer_Price.ordinal()]), false);
+        setSC(roleAddrs[RoleType.Types.Buyer.ordinal()], PropertyType.Types.Buyer_Price.ordinal(), new Address(dataAddrs[PropertyType.Types.Buyer_Price.ordinal()]), true);
+        setSC(roleAddrs[RoleType.Types.Buyer.ordinal()], PropertyType.Types.Buyer_Price.ordinal(), new Address(dataAddrs[PropertyType.Types.Buyer_Price.ordinal()]), false);
 
         return true;
     }
