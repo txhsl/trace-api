@@ -1,22 +1,20 @@
 package pl.piomin.service.blockchain.model;
 
-import org.web3j.abi.datatypes.Address;
-
 /**
  * @author: HuShili
  * @date: 2019/2/11
  * @description: none
  */
-public class User {
+public class UserSwapper {
 
     private String address;
     private String password;
 
-    public User() {
+    public UserSwapper() {
 
     }
 
-    public User(String address, String password) {
+    public UserSwapper(String address, String password) {
         this.address = address;
         this.password = password;
     }

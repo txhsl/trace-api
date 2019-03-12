@@ -56,7 +56,7 @@ public class SystemService {
         return system.getContractAddress();
     }
 
-    public TransactionReceipt register(String sysAddr, Address rcAddr, Credentials credentials) throws Exception {
+    public TransactionReceipt setRC(String sysAddr, Address rcAddr, Credentials credentials) throws Exception {
         System_sol_System system = System_sol_System.load(sysAddr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
         TransactionReceipt transactionReceipt = system.register(rcAddr).send();
 
@@ -65,8 +65,12 @@ public class SystemService {
     }
 
     public Address getRC(String sysAddr, Credentials credentials) throws Exception {
+        return getRC(sysAddr, credentials.getAddress(), credentials);
+    }
+
+    public Address getRC(String sysAddr, String userAddr, Credentials credentials) throws Exception {
         System_sol_System system = System_sol_System.load(sysAddr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
-        String rcAddr = system.getRC(new Address(credentials.getAddress())).send().getValue();
+        String rcAddr = system.getRC(new Address(userAddr)).send().getValue();
 
         LOGGER.info("Read succeed: " + rcAddr);
         return new Address(rcAddr);
