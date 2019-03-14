@@ -42,7 +42,7 @@ public class RecController {
     public TransactionReceipt addRole(@RequestBody String roleName) throws Exception {
         String rcAddr = userService.addRole();
         RoleType.Types.add(roleName);
-        return systemService.setRC(sysAddress, new Address(rcAddr), userService.getCurrent());
+        return systemService.addRC(sysAddress, roleName, new Address(rcAddr), userService.getCurrent());
     }
 
     @PostMapping("/user/signIn")
@@ -58,30 +58,26 @@ public class RecController {
     }
 
     @PostMapping("/user/addProperty")
-    public TransactionReceipt[] addProperty(@RequestBody PermissionSwapper permission) throws Exception {
+    public TransactionReceipt addProperty(@RequestBody PermissionSwapper permission) throws Exception {
         Address rcAddr = systemService.getRC(sysAddress, userService.getCurrent());
         String scAddr = dataService.addProperty(userService.getCurrent());
         PropertyType.Types.add(permission.getPropertyName());
 
-        TransactionReceipt[] result = {
-                userService.setSC(rcAddr.toString(), PropertyType.getID(permission.getPropertyName()), new Address(scAddr), true),
-                userService.setSC(rcAddr.toString(), PropertyType.getID(permission.getPropertyName()), new Address(scAddr), false)
-        };
-        return result;
+        return userService.setOwned(rcAddr.toString(), permission.getPropertyName(), new Address(scAddr));
     }
 
     @PostMapping("/user/assign")
     public TransactionReceipt assign(@RequestBody PermissionSwapper permission) throws Exception {
         Address rcAddr = systemService.getRC(sysAddress, userService.getCurrent());
-        Address scAddr = userService.getSC(rcAddr.toString(), PropertyType.getID(permission.getPropertyName()),permission.isRead());
+        Address scAddr = userService.getOwned(rcAddr.toString(), permission.getPropertyName());
         Address targetRC = systemService.getRC(sysAddress, permission.getTarget(), userService.getCurrent());
-        return userService.setSC(targetRC.toString(), PropertyType.getID(permission.getPropertyName()), scAddr, permission.isRead());
+        return userService.setManaged(targetRC.toString(), permission.getPropertyName(), scAddr);
     }
 
     @PostMapping("/data/write")
     public TransactionReceipt writeData(@RequestBody DataSwapper data) throws Exception {
         Address rcAddr = systemService.getRC(sysAddress, userService.getCurrent());
-        Address scAddr = userService.getSC(rcAddr.toString(), PropertyType.getID(data.getPropertyName()), false);
+        Address scAddr = userService.getOwned(rcAddr.toString(), data.getPropertyName());
         return dataService.write(scAddr.toString() ,userService.getCurrent(), data.getId(), data.getData());
     }
 
@@ -92,7 +88,7 @@ public class RecController {
 
         for (String property: data.getData().keySet()) {
             Map<String, String> single = data.getData().get(property);
-            Address scAddr = userService.getSC(rcAddr.toString(), PropertyType.getID(property), false);
+            Address scAddr = userService.getOwned(rcAddr.toString(), property);
 
             for (String id : single.keySet()) {
                 result.add(dataService.write(scAddr.toString(), userService.getCurrent(), id, single.get(id)));
@@ -104,7 +100,7 @@ public class RecController {
     @GetMapping("/data/read")
     public DataSwapper readData(@RequestBody DataSwapper data) throws Exception {
         Address rcAddr = systemService.getRC(sysAddress, userService.getCurrent());
-        Address scAddr = userService.getSC(rcAddr.toString(), PropertyType.getID(data.getPropertyName()), true);
+        Address scAddr = userService.getManaged(rcAddr.toString(), data.getPropertyName());
         String content = dataService.read(scAddr.toString(), userService.getCurrent(), data.getId());
         data.setData(content);
         return data;
@@ -116,7 +112,7 @@ public class RecController {
         Address rcAddr = systemService.getRC(sysAddress, userService.getCurrent());
 
         for (String property : data.getPropertyNames()) {
-            Address scAddr = userService.getSC(rcAddr.toString(), PropertyType.getID(property), true);
+            Address scAddr = userService.getManaged(rcAddr.toString(), property);
             Map<String, String> result =  new HashMap<>();
             for (String id : data.getIds()) {
                 result.put(id, dataService.read(scAddr.toString(), userService.getCurrent(), id));

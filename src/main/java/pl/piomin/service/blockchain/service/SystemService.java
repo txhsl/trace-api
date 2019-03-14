@@ -8,6 +8,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.stereotype.Service;
 import org.web3j.abi.datatypes.Address;
+import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
@@ -56,9 +57,16 @@ public class SystemService {
         return system.getContractAddress();
     }
 
-    public TransactionReceipt setRC(String sysAddr, Address rcAddr, Credentials credentials) throws Exception {
+    public TransactionReceipt addRC(String sysAddr, String name, Address rcAddr, Credentials credentials) throws Exception {
         System_sol_System system = System_sol_System.load(sysAddr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
-        TransactionReceipt transactionReceipt = system.register(rcAddr).send();
+        TransactionReceipt transactionReceipt = system.setIndex(new Utf8String(name), rcAddr).send();
+
+        return transactionReceipt;
+    }
+
+    public TransactionReceipt setRC(String sysAddr, String userAddr, String roleName, Credentials credentials) throws Exception {
+        System_sol_System system = System_sol_System.load(sysAddr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+        TransactionReceipt transactionReceipt = system.register(new Address(userAddr), new Utf8String(roleName)).send();
 
         LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
         return transactionReceipt;

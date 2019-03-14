@@ -3,6 +3,7 @@ package pl.piomin.service.blockchain.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
@@ -34,9 +35,17 @@ public class DataService {
         return sc.getContractAddress();
     }
 
-    public TransactionReceipt write(String addr, Credentials credentials, String id, String data) throws Exception {
+    public TransactionReceipt AddPermission(String addr, Credentials credentials, String userAddr) throws Exception {
         Data_sol_Data sc = Data_sol_Data.load(addr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
-        TransactionReceipt transactionReceipt = sc.writeDB(new Utf8String(id), new Utf8String(data)).send();
+        TransactionReceipt transactionReceipt = sc.addPermitted(new Address(userAddr)).send();
+
+        LOGGER.info("AddPermission: " + transactionReceipt.toString());
+        return transactionReceipt;
+    }
+
+    public TransactionReceipt write(String addr, Credentials credentials, String fileNo, String hash) throws Exception {
+        Data_sol_Data sc = Data_sol_Data.load(addr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+        TransactionReceipt transactionReceipt = sc.writeDB(new Utf8String(fileNo), new Utf8String(hash)).send();
 
         LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
         return transactionReceipt;
@@ -44,9 +53,9 @@ public class DataService {
 
     public String read(String addr, Credentials credentials, String id) throws Exception {
         Data_sol_Data sc = Data_sol_Data.load(addr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
-        String content = sc.readDB(new Utf8String(id)).send().getValue();
+        String hash = sc.readDB(new Utf8String(id)).send().getValue();
 
-        LOGGER.info("Read succeed: " + content);
-        return content;
+        LOGGER.info("Read succeed: " + hash);
+        return hash;
     }
 }
