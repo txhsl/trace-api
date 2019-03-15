@@ -22,12 +22,14 @@ public class RecController {
     private final SystemService systemService;
     private final UserService userService;
     private final DataService dataService;
+    private final FileService fileService;
     private String sysAddress;
 
-    public RecController(SystemService systemService, UserService userService, DataService dataService) {
+    public RecController(SystemService systemService, UserService userService, DataService dataService, FileService fileService) {
         this.systemService = systemService;
         this.userService = userService;
         this.dataService = dataService;
+        this.fileService = fileService;
 
         this.sysAddress = systemService.recover();
     }
@@ -101,8 +103,10 @@ public class RecController {
     public DataSwapper readData(@RequestBody DataSwapper data) throws Exception {
         Address rcAddr = systemService.getRC(sysAddress, userService.getCurrent());
         Address scAddr = userService.getManaged(rcAddr.toString(), data.getPropertyName());
-        String content = dataService.read(scAddr.toString(), userService.getCurrent(), data.getId());
-        data.setData(content);
+        if (dataService.checkPermission(rcAddr, scAddr.toString(), userService.getCurrent())) {
+            String content = dataService.read(scAddr.toString(), userService.getCurrent(), data.getId());
+            data.setData(content);
+        }
         return data;
     }
 
@@ -114,9 +118,13 @@ public class RecController {
         for (String property : data.getPropertyNames()) {
             Address scAddr = userService.getManaged(rcAddr.toString(), property);
             Map<String, String> result =  new HashMap<>();
-            for (String id : data.getIds()) {
-                result.put(id, dataService.read(scAddr.toString(), userService.getCurrent(), id));
+
+            if (dataService.checkPermission(rcAddr, scAddr.toString(), userService.getCurrent())) {
+                for (String id : data.getIds()) {
+                    result.put(id, dataService.read(scAddr.toString(), userService.getCurrent(), id));
+                }
             }
+
             resultMulti.put(property, result);
         }
         data.setData(resultMulti);

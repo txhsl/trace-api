@@ -155,6 +155,10 @@ public class UserService {
         Role_sol_Role rc = Role_sol_Role.load(rcAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
         TransactionReceipt transactionReceipt = rc.setManaged(new Utf8String(name), scAddr).send();
 
+        //Add permission for the role
+        Data_sol_Data sc = Data_sol_Data.load(scAddr.toString(), web3j,current, GAS_PRICE, GAS_LIMIT);
+        TransactionReceipt tr = sc.addPermitted(new Address(rcAddr)).send();
+
         LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
         return transactionReceipt;
     }

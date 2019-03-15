@@ -43,6 +43,11 @@ public class DataService {
         return transactionReceipt;
     }
 
+    public boolean checkPermission(Address rcAddr, String addr, Credentials credentials) throws Exception {
+        Data_sol_Data sc = Data_sol_Data.load(addr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+        return sc.checkPermitted(rcAddr).send().getValue();
+    }
+
     public TransactionReceipt write(String addr, Credentials credentials, String fileNo, String hash) throws Exception {
         Data_sol_Data sc = Data_sol_Data.load(addr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
         TransactionReceipt transactionReceipt = sc.writeDB(new Utf8String(fileNo), new Utf8String(hash)).send();
@@ -54,7 +59,6 @@ public class DataService {
     public String read(String addr, Credentials credentials, String id) throws Exception {
         Data_sol_Data sc = Data_sol_Data.load(addr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
         String hash = sc.readDB(new Utf8String(id)).send().getValue();
-
         LOGGER.info("Read succeed: " + hash);
         return hash;
     }
