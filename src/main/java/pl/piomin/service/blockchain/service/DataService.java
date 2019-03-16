@@ -35,7 +35,14 @@ public class DataService {
         return sc.getContractAddress();
     }
 
-    public TransactionReceipt AddPermission(String addr, Credentials credentials, String userAddr) throws Exception {
+    public String getFileNum(String addr, String id, Credentials credentials) throws Exception {
+        Data_sol_Data sc = Data_sol_Data.load(addr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+        String result = sc.getFileNum(new Utf8String(id)).send().getValue();
+        LOGGER.info("File number calculated: " + ", data id: " + id);
+        return result;
+    }
+
+    public TransactionReceipt addPermission(String addr, Credentials credentials, String userAddr) throws Exception {
         Data_sol_Data sc = Data_sol_Data.load(addr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
         TransactionReceipt transactionReceipt = sc.addPermitted(new Address(userAddr)).send();
 
@@ -46,6 +53,11 @@ public class DataService {
     public boolean checkPermission(Address rcAddr, String addr, Credentials credentials) throws Exception {
         Data_sol_Data sc = Data_sol_Data.load(addr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
         return sc.checkPermitted(rcAddr).send().getValue();
+    }
+
+    public boolean checkOwner(String addr, Credentials credentials) throws Exception {
+        Data_sol_Data sc = Data_sol_Data.load(addr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+        return sc.checkOwner(new Address(credentials.getAddress())).send().getValue();
     }
 
     public TransactionReceipt write(String addr, Credentials credentials, String fileNo, String hash) throws Exception {

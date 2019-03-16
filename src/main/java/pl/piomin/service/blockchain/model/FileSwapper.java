@@ -28,4 +28,20 @@ public class FileSwapper {
     public void setFileName(String fileName) {
         this.fileName = fileName;
     }
+
+    public void addContent(String id, String data) {
+        content.put(id, data);
+    }
+
+    public String getContent(String id) {
+        return content.get(id);
+    }
+
+    public int count() {
+        return content.keySet().size();
+    }
+
+    public boolean contains(String id) {
+        return content.containsKey(id);
+    }
 }

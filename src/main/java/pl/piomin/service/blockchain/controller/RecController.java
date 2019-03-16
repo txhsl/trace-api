@@ -78,9 +78,22 @@ public class RecController {
 
     @PostMapping("/data/write")
     public TransactionReceipt writeData(@RequestBody DataSwapper data) throws Exception {
+        //Check permission
         Address rcAddr = systemService.getRC(sysAddress, userService.getCurrent());
         Address scAddr = userService.getOwned(rcAddr.toString(), data.getPropertyName());
-        return dataService.write(scAddr.toString() ,userService.getCurrent(), data.getId(), data.getData());
+        if (!dataService.checkOwner(scAddr.toString(), userService.getCurrent())) {
+            return null;
+        }
+
+        //Try cache
+        String result = fileService.record(data.getPropertyName(), data.getId(), data.getData());
+
+        //Record hash
+        if (result != null) {
+            String fileNo = dataService.getFileNum(scAddr.toString(), data.getId(), userService.getCurrent());
+            return dataService.write(scAddr.toString(), userService.getCurrent(), fileNo, result);
+        }
+        return null;
     }
 
     @PostMapping("/data/writeMultiple")
@@ -101,11 +114,25 @@ public class RecController {
 
     @GetMapping("/data/read")
     public DataSwapper readData(@RequestBody DataSwapper data) throws Exception {
+        //Check permission
         Address rcAddr = systemService.getRC(sysAddress, userService.getCurrent());
         Address scAddr = userService.getManaged(rcAddr.toString(), data.getPropertyName());
-        if (dataService.checkPermission(rcAddr, scAddr.toString(), userService.getCurrent())) {
-            String content = dataService.read(scAddr.toString(), userService.getCurrent(), data.getId());
-            data.setData(content);
+        if (!dataService.checkPermission(rcAddr, scAddr.toString(), userService.getCurrent())) {
+            return data;
+        }
+
+        //Try the cache
+        String result = fileService.query(data.getPropertyName(), data.getId());
+
+        //Try IPFS
+        if (result == null) {
+            String hash = dataService.read(scAddr.toString(), userService.getCurrent(), data.getId());
+
+            FileSwapper file = fileService.input(fileService.download(hash));
+            data.setData(file.getContent(data.getId()));
+        }
+        else {
+            data.setData(result);
         }
         return data;
     }
