@@ -32,6 +32,12 @@ public class FileService {
 
     public FileService() {
         ipfs = new IPFS(IPFS_URL);
+
+        try {
+            LOGGER.info("IPFS connected, version: " + ipfs.version());
+        } catch (IOException e){
+            LOGGER.error("Connection failed. " + e.getMessage());
+        }
     }
 
     public String record(String propertyName, String id, String value) throws IOException {
