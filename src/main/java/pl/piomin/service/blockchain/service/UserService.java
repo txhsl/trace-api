@@ -93,6 +93,265 @@ public class UserService {
         }
 
         //link RCs and SCs
+        //Producer-Producer
+        setManaged(roleAddrs[RoleType.getID("Producer")], "Producer_Operator", new Address(dataAddrs[PropertyType.getID("Producer_Operator")]));
+        setOwned(roleAddrs[RoleType.getID("Producer")], "Producer_Operator", new Address(dataAddrs[PropertyType.getID("Producer_Operator")]));
+
+        setManaged(roleAddrs[RoleType.getID("Producer")], "Producer_ProduceDate", new Address(dataAddrs[PropertyType.getID("Producer_ProduceDate")]));
+        setOwned(roleAddrs[RoleType.getID("Producer")], "Producer_ProduceDate", new Address(dataAddrs[PropertyType.getID("Producer_ProduceDate")]));
+
+        setManaged(roleAddrs[RoleType.getID("Producer")], "Producer_OutDate", new Address(dataAddrs[PropertyType.getID("Producer_OutDate")]));
+        setOwned(roleAddrs[RoleType.getID("Producer")], "Producer_OutDate", new Address(dataAddrs[PropertyType.getID("Producer_OutDate")]));
+
+        setManaged(roleAddrs[RoleType.getID("Producer")], "Producer_GuaranteeDate", new Address(dataAddrs[PropertyType.getID("Producer_GuaranteeDate")]));
+        setOwned(roleAddrs[RoleType.getID("Producer")], "Producer_GuaranteeDate", new Address(dataAddrs[PropertyType.getID("Producer_GuaranteeDate")]));
+
+        setManaged(roleAddrs[RoleType.getID("Producer")], "Producer_TestResult", new Address(dataAddrs[PropertyType.getID("Producer_TestResult")]));
+
+        setManaged(roleAddrs[RoleType.getID("Producer")],"Producer_BasePrice", new Address(dataAddrs[PropertyType.getID("Producer_BasePrice")]));
+        setOwned(roleAddrs[RoleType.getID("Producer")], "Producer_BasePrice", new Address(dataAddrs[PropertyType.getID("Producer_BasePrice")]));
+
+        setManaged(roleAddrs[RoleType.getID("Producer")], "Producer_SellPrice", new Address(dataAddrs[PropertyType.getID("Producer_SellPrice")]));
+        setOwned(roleAddrs[RoleType.getID("Producer")], "Producer_SellPrice", new Address(dataAddrs[PropertyType.getID("Producer_SellPrice")]));
+
+        setManaged(roleAddrs[RoleType.getID("Producer")], "Producer_Amount", new Address(dataAddrs[PropertyType.getID("Producer_Amount")]));
+        setOwned(roleAddrs[RoleType.getID("Producer")], "Producer_Amount", new Address(dataAddrs[PropertyType.getID("Producer_Amount")]));
+
+        //Storager-Producer
+        setManaged(roleAddrs[RoleType.getID("Storager")], "Producer_Operator", new Address(dataAddrs[PropertyType.getID("Producer_Operator")]));
+        setManaged(roleAddrs[RoleType.getID("Storager")], "Producer_ProduceDate", new Address(dataAddrs[PropertyType.getID("Producer_ProduceDate")]));
+        setManaged(roleAddrs[RoleType.getID("Storager")], "Producer_OutDate", new Address(dataAddrs[PropertyType.getID("Producer_OutDate")]));
+        setManaged(roleAddrs[RoleType.getID("Storager")], "Producer_GuaranteeDate", new Address(dataAddrs[PropertyType.getID("Producer_GuaranteeDate")]));
+        setManaged(roleAddrs[RoleType.getID("Storager")], "Producer_TestResult", new Address(dataAddrs[PropertyType.getID("Producer_TestResult")]));
+
+        //Transporter-Producer
+        setManaged(roleAddrs[RoleType.getID("Transporter")], "Producer_Operator", new Address(dataAddrs[PropertyType.getID("Producer_Operator")]));
+        setManaged(roleAddrs[RoleType.getID("Transporter")], "Producer_ProduceDate", new Address(dataAddrs[PropertyType.getID("Producer_ProduceDate")]));
+        setManaged(roleAddrs[RoleType.getID("Transporter")], "Producer_GuaranteeDate", new Address(dataAddrs[PropertyType.getID("Producer_GuaranteeDate")]));
+        setManaged(roleAddrs[RoleType.getID("Transporter")], "Producer_TestResult", new Address(dataAddrs[PropertyType.getID("Producer_TestResult")]));
+
+        //Seller-Producer
+        setManaged(roleAddrs[RoleType.getID("Seller")], "Producer_Operator", new Address(dataAddrs[PropertyType.getID("Producer_Operator")]));
+        setManaged(roleAddrs[RoleType.getID("Seller")], "Producer_ProduceDate", new Address(dataAddrs[PropertyType.getID("Producer_ProduceDate")]));
+        setManaged(roleAddrs[RoleType.getID("Seller")], "Producer_GuaranteeDate", new Address(dataAddrs[PropertyType.getID("Producer_GuaranteeDate")]));
+        setManaged(roleAddrs[RoleType.getID("Seller")], "Producer_TestResult", new Address(dataAddrs[PropertyType.getID("Producer_TestResult")]));
+        setManaged(roleAddrs[RoleType.getID("Seller")], "Producer_SellPrice", new Address(dataAddrs[PropertyType.getID("Producer_SellPrice")]));
+
+        //Buyer-Producer
+        setManaged(roleAddrs[RoleType.getID("Buyer")], "Producer_Operator", new Address(dataAddrs[PropertyType.getID("Producer_Operator")]));
+        setManaged(roleAddrs[RoleType.getID("Buyer")], "Producer_ProduceDate", new Address(dataAddrs[PropertyType.getID("Producer_ProduceDate")]));
+        setManaged(roleAddrs[RoleType.getID("Buyer")], "Producer_GuaranteeDate", new Address(dataAddrs[PropertyType.getID("Producer_GuaranteeDate")]));
+        setManaged(roleAddrs[RoleType.getID("Buyer")], "Producer_TestResult", new Address(dataAddrs[PropertyType.getID("Producer_TestResult")]));
+
+        //Government-Producer
+        setManaged(roleAddrs[RoleType.getID("Government")], "Producer_Operator", new Address(dataAddrs[PropertyType.getID("Producer_Operator")]));
+        setManaged(roleAddrs[RoleType.getID("Government")], "Producer_ProduceDate", new Address(dataAddrs[PropertyType.getID("Producer_ProduceDate")]));
+        setManaged(roleAddrs[RoleType.getID("Government")], "Producer_OutDate", new Address(dataAddrs[PropertyType.getID("Producer_OutDate")]));
+        setManaged(roleAddrs[RoleType.getID("Government")], "Producer_GuaranteeDate", new Address(dataAddrs[PropertyType.getID("Producer_GuaranteeDate")]));
+        setManaged(roleAddrs[RoleType.getID("Government")], "Producer_TestResult", new Address(dataAddrs[PropertyType.getID("Producer_TestResult")]));
+        setOwned(roleAddrs[RoleType.getID("Government")], "Producer_TestResult", new Address(dataAddrs[PropertyType.getID("Producer_TestResult")]));
+        setManaged(roleAddrs[RoleType.getID("Government")], "Producer_BasePrice", new Address(dataAddrs[PropertyType.getID("Producer_BasePrice")]));
+        setManaged(roleAddrs[RoleType.getID("Government")], "Producer_SellPrice", new Address(dataAddrs[PropertyType.getID("Producer_SellPrice")]));
+        setManaged(roleAddrs[RoleType.getID("Government")], "Producer_Amount", new Address(dataAddrs[PropertyType.getID("Producer_Amount")]));
+
+        //Producer-Storager
+        setManaged(roleAddrs[RoleType.getID("Producer")], "Storager_Operator", new Address(dataAddrs[PropertyType.getID("Storager_Operator")]));
+        setManaged(roleAddrs[RoleType.getID("Producer")], "Storager_InTime", new Address(dataAddrs[PropertyType.getID("Storager_InTime")]));
+        setManaged(roleAddrs[RoleType.getID("Producer")], "Storager_OutTime", new Address(dataAddrs[PropertyType.getID("Storager_OutTime")]));
+        setManaged(roleAddrs[RoleType.getID("Producer")], "Storager_Price", new Address(dataAddrs[PropertyType.getID("Storager_Price")]));
+        setManaged(roleAddrs[RoleType.getID("Producer")], "Storager_Duration", new Address(dataAddrs[PropertyType.getID("Storager_Duration")]));
+        setManaged(roleAddrs[RoleType.getID("Producer")], "Storager_Amount", new Address(dataAddrs[PropertyType.getID("Storager_Amount")]));
+        setManaged(roleAddrs[RoleType.getID("Producer")], "Storager_Company", new Address(dataAddrs[PropertyType.getID("Storager_Company")]));
+
+        //Storager-Storager
+        setManaged(roleAddrs[RoleType.getID("Storager")], "Storager_Operator", new Address(dataAddrs[PropertyType.getID("Storager_Operator")]));
+        setOwned(roleAddrs[RoleType.getID("Storager")], "Storager_Operator", new Address(dataAddrs[PropertyType.getID("Storager_Operator")]));
+
+        setManaged(roleAddrs[RoleType.getID("Storager")], "Storager_InTime", new Address(dataAddrs[PropertyType.getID("Storager_InTime")]));
+        setOwned(roleAddrs[RoleType.getID("Storager")], "Storager_InTime", new Address(dataAddrs[PropertyType.getID("Storager_InTime")]));
+
+        setManaged(roleAddrs[RoleType.getID("Storager")], "Storager_OutTime", new Address(dataAddrs[PropertyType.getID("Storager_OutTime")]));
+        setOwned(roleAddrs[RoleType.getID("Storager")], "Storager_OutTime", new Address(dataAddrs[PropertyType.getID("Storager_OutTime")]));
+
+        setManaged(roleAddrs[RoleType.getID("Storager")], "Storager_Price", new Address(dataAddrs[PropertyType.getID("Storager_Price")]));
+        setOwned(roleAddrs[RoleType.getID("Storager")], "Storager_Price", new Address(dataAddrs[PropertyType.getID("Storager_Price")]));
+
+        setManaged(roleAddrs[RoleType.getID("Storager")], "Storager_Duration", new Address(dataAddrs[PropertyType.getID("Storager_Duration")]));
+        setOwned(roleAddrs[RoleType.getID("Storager")], "Storager_Duration", new Address(dataAddrs[PropertyType.getID("Storager_Duration")]));
+
+        setManaged(roleAddrs[RoleType.getID("Storager")], "Storager_Amount", new Address(dataAddrs[PropertyType.getID("Storager_Amount")]));
+        setOwned(roleAddrs[RoleType.getID("Storager")], "Storager_Amount", new Address(dataAddrs[PropertyType.getID("Storager_Amount")]));
+
+        setManaged(roleAddrs[RoleType.getID("Storager")], "Storager_Company", new Address(dataAddrs[PropertyType.getID("Storager_Company")]));
+        setOwned(roleAddrs[RoleType.getID("Storager")], "Storager_Company", new Address(dataAddrs[PropertyType.getID("Storager_Company")]));
+
+        //Transporter-Storager
+        setManaged(roleAddrs[RoleType.getID("Transporter")], "Storager_Operator", new Address(dataAddrs[PropertyType.getID("Storager_Operator")]));
+        setManaged(roleAddrs[RoleType.getID("Transporter")], "Storager_OutTime", new Address(dataAddrs[PropertyType.getID("Storager_OutTime")]));
+        setManaged(roleAddrs[RoleType.getID("Transporter")], "Storager_Company", new Address(dataAddrs[PropertyType.getID("Storager_Company")]));
+
+        //Seller-Storager
+        setManaged(roleAddrs[RoleType.getID("Seller")], "Storager_Operator", new Address(dataAddrs[PropertyType.getID("Storager_Operator")]));
+        setManaged(roleAddrs[RoleType.getID("Seller")], "Storager_OutTime", new Address(dataAddrs[PropertyType.getID("Storager_OutTime")]));
+        setManaged(roleAddrs[RoleType.getID("Seller")], "Storager_Company", new Address(dataAddrs[PropertyType.getID("Storager_Company")]));
+
+        //Buyer-Storager
+        setManaged(roleAddrs[RoleType.getID("Buyer")], "Storager_Operator", new Address(dataAddrs[PropertyType.getID("Storager_Operator")]));
+        setManaged(roleAddrs[RoleType.getID("Buyer")], "Storager_Company", new Address(dataAddrs[PropertyType.getID("Storager_Company")]));
+
+        //Government-Storager
+        setManaged(roleAddrs[RoleType.getID("Government")], "Storager_Operator", new Address(dataAddrs[PropertyType.getID("Storager_Operator")]));
+        setManaged(roleAddrs[RoleType.getID("Government")], "Storager_InTime", new Address(dataAddrs[PropertyType.getID("Storager_InTime")]));
+        setManaged(roleAddrs[RoleType.getID("Government")], "Storager_OutTime", new Address(dataAddrs[PropertyType.getID("Storager_OutTime")]));
+        setManaged(roleAddrs[RoleType.getID("Government")], "Storager_Price", new Address(dataAddrs[PropertyType.getID("Storager_Price")]));
+        setManaged(roleAddrs[RoleType.getID("Government")], "Storager_Duration", new Address(dataAddrs[PropertyType.getID("Storager_Duration")]));
+        setManaged(roleAddrs[RoleType.getID("Government")], "Storager_Amount", new Address(dataAddrs[PropertyType.getID("Storager_Amount")]));
+        setManaged(roleAddrs[RoleType.getID("Government")], "Storager_Company", new Address(dataAddrs[PropertyType.getID("Storager_Company")]));
+
+        //Producer-Transporter
+        setManaged(roleAddrs[RoleType.getID("Producer")], "Transporter_Operator", new Address(dataAddrs[PropertyType.getID("Transporter_Operator")]));
+        setManaged(roleAddrs[RoleType.getID("Producer")], "Transporter_OutTime", new Address(dataAddrs[PropertyType.getID("Transporter_OutTime")]));
+        setManaged(roleAddrs[RoleType.getID("Producer")], "Transporter_Price", new Address(dataAddrs[PropertyType.getID("Transporter_Price")]));
+        setManaged(roleAddrs[RoleType.getID("Producer")], "Transporter_Amount", new Address(dataAddrs[PropertyType.getID("Transporter_Amount")]));
+        setManaged(roleAddrs[RoleType.getID("Producer")], "Transporter_Distance", new Address(dataAddrs[PropertyType.getID("Transporter_Distance")]));
+        setManaged(roleAddrs[RoleType.getID("Producer")], "Transporter_Company", new Address(dataAddrs[PropertyType.getID("Transporter_Company")]));
+        setManaged(roleAddrs[RoleType.getID("Producer")], "Transporter_From", new Address(dataAddrs[PropertyType.getID("Transporter_From")]));
+        setManaged(roleAddrs[RoleType.getID("Producer")], "Transporter_To", new Address(dataAddrs[PropertyType.getID("Transporter_To")]));
+
+        //Storager-Transporter
+        setManaged(roleAddrs[RoleType.getID("Storager")], "Transporter_Operator", new Address(dataAddrs[PropertyType.getID("Transporter_Operator")]));
+        setManaged(roleAddrs[RoleType.getID("Storager")], "Transporter_OutTime", new Address(dataAddrs[PropertyType.getID("Transporter_OutTime")]));
+        setManaged(roleAddrs[RoleType.getID("Storager")], "Transporter_Company", new Address(dataAddrs[PropertyType.getID("Transporter_Company")]));
+
+        //Transporter-Transporter
+        setManaged(roleAddrs[RoleType.getID("Transporter")], "Transporter_Operator", new Address(dataAddrs[PropertyType.getID("Transporter_Operator")]));
+        setOwned(roleAddrs[RoleType.getID("Transporter")], "Transporter_Operator", new Address(dataAddrs[PropertyType.getID("Transporter_Operator")]));
+
+        setManaged(roleAddrs[RoleType.getID("Transporter")], "Transporter_OutTime", new Address(dataAddrs[PropertyType.getID("Transporter_OutTime")]));
+        setOwned(roleAddrs[RoleType.getID("Transporter")], "Transporter_OutTime", new Address(dataAddrs[PropertyType.getID("Transporter_OutTime")]));
+
+        setManaged(roleAddrs[RoleType.getID("Transporter")], "Transporter_Price", new Address(dataAddrs[PropertyType.getID("Transporter_Price")]));
+        setOwned(roleAddrs[RoleType.getID("Transporter")], "Transporter_Price", new Address(dataAddrs[PropertyType.getID("Transporter_Price")]));
+
+        setManaged(roleAddrs[RoleType.getID("Transporter")], "Transporter_Amount", new Address(dataAddrs[PropertyType.getID("Transporter_Amount")]));
+        setOwned(roleAddrs[RoleType.getID("Transporter")], "Transporter_Amount", new Address(dataAddrs[PropertyType.getID("Transporter_Amount")]));
+
+        setManaged(roleAddrs[RoleType.getID("Transporter")], "Transporter_Distance", new Address(dataAddrs[PropertyType.getID("Transporter_Distance")]));
+        setOwned(roleAddrs[RoleType.getID("Transporter")], "Transporter_Distance", new Address(dataAddrs[PropertyType.getID("Transporter_Distance")]));
+
+        setManaged(roleAddrs[RoleType.getID("Transporter")], "Transporter_Company", new Address(dataAddrs[PropertyType.getID("Transporter_Company")]));
+        setOwned(roleAddrs[RoleType.getID("Transporter")], "Transporter_Company", new Address(dataAddrs[PropertyType.getID("Transporter_Company")]));
+
+        setManaged(roleAddrs[RoleType.getID("Transporter")], "Transporter_From", new Address(dataAddrs[PropertyType.getID("Transporter_From")]));
+        setOwned(roleAddrs[RoleType.getID("Transporter")], "Transporter_From", new Address(dataAddrs[PropertyType.getID("Transporter_From")]));
+
+        setManaged(roleAddrs[RoleType.getID("Transporter")], "Transporter_To", new Address(dataAddrs[PropertyType.getID("Transporter_To")]));
+        setOwned(roleAddrs[RoleType.getID("Transporter")], "Transporter_To", new Address(dataAddrs[PropertyType.getID("Transporter_To")]));
+
+        //Seller-Transporter
+        setManaged(roleAddrs[RoleType.getID("Seller")], "Transporter_Operator", new Address(dataAddrs[PropertyType.getID("Transporter_Operator")]));
+        setManaged(roleAddrs[RoleType.getID("Seller")], "Transporter_OutTime", new Address(dataAddrs[PropertyType.getID("Transporter_OutTime")]));
+        setManaged(roleAddrs[RoleType.getID("Seller")], "Transporter_Company", new Address(dataAddrs[PropertyType.getID("Transporter_Company")]));
+
+        //Buyer-Transporter
+        setManaged(roleAddrs[RoleType.getID("Buyer")], "Transporter_Operator", new Address(dataAddrs[PropertyType.getID("Transporter_Operator")]));
+        setManaged(roleAddrs[RoleType.getID("Buyer")], "Transporter_Company", new Address(dataAddrs[PropertyType.getID("Transporter_Company")]));
+
+        //Government-Transporter
+        setManaged(roleAddrs[RoleType.getID("Government")], "Transporter_Operator", new Address(dataAddrs[PropertyType.getID("Transporter_Operator")]));
+        setManaged(roleAddrs[RoleType.getID("Government")], "Transporter_OutTime", new Address(dataAddrs[PropertyType.getID("Transporter_OutTime")]));
+        setManaged(roleAddrs[RoleType.getID("Government")], "Transporter_Price", new Address(dataAddrs[PropertyType.getID("Transporter_Price")]));
+        setManaged(roleAddrs[RoleType.getID("Government")], "Transporter_Amount", new Address(dataAddrs[PropertyType.getID("Transporter_Amount")]));
+        setManaged(roleAddrs[RoleType.getID("Government")], "Transporter_Distance", new Address(dataAddrs[PropertyType.getID("Transporter_Distance")]));
+        setManaged(roleAddrs[RoleType.getID("Government")], "Transporter_Company", new Address(dataAddrs[PropertyType.getID("Transporter_Company")]));
+        setManaged(roleAddrs[RoleType.getID("Government")], "Transporter_From", new Address(dataAddrs[PropertyType.getID("Transporter_From")]));
+        setManaged(roleAddrs[RoleType.getID("Government")], "Transporter_To", new Address(dataAddrs[PropertyType.getID("Transporter_To")]));
+
+        //Producer-Seller
+        setManaged(roleAddrs[RoleType.getID("Producer")], "Seller_Operator", new Address(dataAddrs[PropertyType.getID("Seller_Operator")]));
+        setManaged(roleAddrs[RoleType.getID("Producer")], "Seller_InTime", new Address(dataAddrs[PropertyType.getID("Seller_InTime")]));
+        setManaged(roleAddrs[RoleType.getID("Producer")], "Seller_InPrice", new Address(dataAddrs[PropertyType.getID("Seller_InPrice")]));
+        setManaged(roleAddrs[RoleType.getID("Producer")], "Seller_Amount", new Address(dataAddrs[PropertyType.getID("Seller_Amount")]));
+        setManaged(roleAddrs[RoleType.getID("Producer")], "Seller_Company", new Address(dataAddrs[PropertyType.getID("Seller_Company")]));
+        setManaged(roleAddrs[RoleType.getID("Producer")], "Seller_OutPrice", new Address(dataAddrs[PropertyType.getID("Seller_OutPrice")]));
+
+        //Storager-Seller
+        setManaged(roleAddrs[RoleType.getID("Storager")], "Seller_Operator", new Address(dataAddrs[PropertyType.getID("Seller_Operator")]));
+        setManaged(roleAddrs[RoleType.getID("Storager")], "Seller_OutPrice", new Address(dataAddrs[PropertyType.getID("Seller_OutPrice")]));
+
+        //Transporter-Seller
+        setManaged(roleAddrs[RoleType.getID("Transporter")], "Seller_Operator", new Address(dataAddrs[PropertyType.getID("Seller_Operator")]));
+        setManaged(roleAddrs[RoleType.getID("Transporter")], "Seller_Company", new Address(dataAddrs[PropertyType.getID("Seller_Company")]));
+        setManaged(roleAddrs[RoleType.getID("Transporter")], "Seller_OutPrice", new Address(dataAddrs[PropertyType.getID("Seller_OutPrice")]));
+
+        //Seller-Seller
+        setManaged(roleAddrs[RoleType.getID("Seller")], "Seller_Operator", new Address(dataAddrs[PropertyType.getID("Seller_Operator")]));
+        setOwned(roleAddrs[RoleType.getID("Seller")], "Seller_Operator", new Address(dataAddrs[PropertyType.getID("Seller_Operator")]));
+
+        setManaged(roleAddrs[RoleType.getID("Seller")], "Seller_InTime", new Address(dataAddrs[PropertyType.getID("Seller_InTime")]));
+        setOwned(roleAddrs[RoleType.getID("Seller")], "Seller_InTime", new Address(dataAddrs[PropertyType.getID("Seller_InTime")]));
+
+        setManaged(roleAddrs[RoleType.getID("Seller")], "Seller_InPrice", new Address(dataAddrs[PropertyType.getID("Seller_InPrice")]));
+        setOwned(roleAddrs[RoleType.getID("Seller")], "Seller_InPrice", new Address(dataAddrs[PropertyType.getID("Seller_InPrice")]));
+
+        setManaged(roleAddrs[RoleType.getID("Seller")], "Seller_Amount", new Address(dataAddrs[PropertyType.getID("Seller_Amount")]));
+        setOwned(roleAddrs[RoleType.getID("Seller")], "Seller_Amount", new Address(dataAddrs[PropertyType.getID("Seller_Amount")]));
+
+        setManaged(roleAddrs[RoleType.getID("Seller")], "Seller_Company", new Address(dataAddrs[PropertyType.getID("Seller_Company")]));
+        setOwned(roleAddrs[RoleType.getID("Seller")], "Seller_Company", new Address(dataAddrs[PropertyType.getID("Seller_Company")]));
+
+        setManaged(roleAddrs[RoleType.getID("Seller")], "Seller_OutPrice", new Address(dataAddrs[PropertyType.getID("Seller_OutPrice")]));
+        setOwned(roleAddrs[RoleType.getID("Seller")], "Seller_OutPrice", new Address(dataAddrs[PropertyType.getID("Seller_OutPrice")]));
+
+        //Buyer-Seller
+        setManaged(roleAddrs[RoleType.getID("Buyer")], "Seller_Operator", new Address(dataAddrs[PropertyType.getID("Seller_Operator")]));
+        setManaged(roleAddrs[RoleType.getID("Buyer")], "Seller_Company", new Address(dataAddrs[PropertyType.getID("Seller_Company")]));
+        setManaged(roleAddrs[RoleType.getID("Buyer")], "Seller_OutPrice", new Address(dataAddrs[PropertyType.getID("Seller_OutPrice")]));
+
+        //Government-Seller
+        setManaged(roleAddrs[RoleType.getID("Government")], "Seller_Operator", new Address(dataAddrs[PropertyType.getID("Seller_Operator")]));
+        setManaged(roleAddrs[RoleType.getID("Government")], "Seller_InTime", new Address(dataAddrs[PropertyType.getID("Seller_InTime")]));
+        setManaged(roleAddrs[RoleType.getID("Government")], "Seller_InPrice", new Address(dataAddrs[PropertyType.getID("Seller_InPrice")]));
+        setManaged(roleAddrs[RoleType.getID("Government")], "Seller_Amount", new Address(dataAddrs[PropertyType.getID("Seller_Amount")]));
+        setManaged(roleAddrs[RoleType.getID("Government")], "Seller_Company", new Address(dataAddrs[PropertyType.getID("Seller_Company")]));
+        setManaged(roleAddrs[RoleType.getID("Government")], "Seller_OutPrice", new Address(dataAddrs[PropertyType.getID("Seller_OutPrice")]));
+
+        //Producer-Buyer
+        setManaged(roleAddrs[RoleType.getID("Producer")], "Buyer_Price", new Address(dataAddrs[PropertyType.getID("Buyer_Price")]));
+
+        //Storager-Buyer
+        setManaged(roleAddrs[RoleType.getID("Storager")], "Buyer_Price", new Address(dataAddrs[PropertyType.getID("Buyer_Price")]));
+
+        //Transporter-Buyer
+        setManaged(roleAddrs[RoleType.getID("Transporter")], "Buyer_Price", new Address(dataAddrs[PropertyType.getID("Buyer_Price")]));
+
+        //Seller-Buyer
+        setManaged(roleAddrs[RoleType.getID("Seller")], "Buyer_Time", new Address(dataAddrs[PropertyType.getID("Buyer_Time")]));
+        setManaged(roleAddrs[RoleType.getID("Seller")], "Buyer_Amount", new Address(dataAddrs[PropertyType.getID("Buyer_Amount")]));
+        setManaged(roleAddrs[RoleType.getID("Seller")], "Buyer_Price", new Address(dataAddrs[PropertyType.getID("Buyer_Price")]));
+
+        //Government-Buyer
+        setManaged(roleAddrs[RoleType.getID("Government")], "Buyer_Name", new Address(dataAddrs[PropertyType.getID("Buyer_Name")]));
+        setManaged(roleAddrs[RoleType.getID("Government")], "Buyer_Mobile", new Address(dataAddrs[PropertyType.getID("Buyer_Mobile")]));
+        setManaged(roleAddrs[RoleType.getID("Government")], "Buyer_Time", new Address(dataAddrs[PropertyType.getID("Buyer_Time")]));
+        setManaged(roleAddrs[RoleType.getID("Government")], "Buyer_Amount", new Address(dataAddrs[PropertyType.getID("Buyer_Amount")]));
+        setManaged(roleAddrs[RoleType.getID("Government")], "Buyer_Price", new Address(dataAddrs[PropertyType.getID("Buyer_Price")]));
+
+        //Buyer-Buyer
+        setManaged(roleAddrs[RoleType.getID("Buyer")], "Buyer_Name", new Address(dataAddrs[PropertyType.getID("Buyer_Name")]));
+        setOwned(roleAddrs[RoleType.getID("Buyer")], "Buyer_Name", new Address(dataAddrs[PropertyType.getID("Buyer_Name")]));
+
+        setManaged(roleAddrs[RoleType.getID("Buyer")], "Buyer_Mobile", new Address(dataAddrs[PropertyType.getID("Buyer_Mobile")]));
+        setOwned(roleAddrs[RoleType.getID("Buyer")], "Buyer_Mobile", new Address(dataAddrs[PropertyType.getID("Buyer_Mobile")]));
+
+        setManaged(roleAddrs[RoleType.getID("Buyer")], "Buyer_Time", new Address(dataAddrs[PropertyType.getID("Buyer_Time")]));
+        setOwned(roleAddrs[RoleType.getID("Buyer")], "Buyer_Time", new Address(dataAddrs[PropertyType.getID("Buyer_Time")]));
+
+        setManaged(roleAddrs[RoleType.getID("Buyer")], "Buyer_Amount", new Address(dataAddrs[PropertyType.getID("Buyer_Amount")]));
+        setOwned(roleAddrs[RoleType.getID("Buyer")], "Buyer_Amount", new Address(dataAddrs[PropertyType.getID("Buyer_Amount")]));
+
+        setManaged(roleAddrs[RoleType.getID("Buyer")], "Buyer_Price", new Address(dataAddrs[PropertyType.getID("Buyer_Price")]));
+        setOwned(roleAddrs[RoleType.getID("Buyer")], "Buyer_Price", new Address(dataAddrs[PropertyType.getID("Buyer_Price")]));
 
         return true;
     }
