@@ -35,6 +35,8 @@ import static org.web3j.tx.gas.DefaultGasProvider.GAS_PRICE;
 public class UserService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
+    public static final String[] accounts = new String[]{"0x6a2fb5e3bf37f0c3d90db4713f7ad4a3b2c24111", "0xdb2bbab1d9eca60c937aa9c995664f86b3da2934", "0xcdfea5a11062fab4cf4c2fda88e32fc6f7753145",
+            "0x329b81e0a2af215c7e41b32251ae4d6ff1a83e3e", "0x370287edd5a5e7c4b0f5e305b00fe95fc702ce47", "0x40b00de2e7b694b494022eef90e874f5e553f996", "0x49e2170e0b1188f2151ac35287c743ee60ea1f6a"};
 
     private final Web3j web3j;
     private Credentials current = null;
@@ -47,12 +49,10 @@ public class UserService {
         return current;
     }
 
-    public boolean reset(String sysAddr) throws Exception {
+    public String[] resetContract(String sysAddr) throws Exception {
 
         //recreate RCs
         String[] roleAddrs = new String[RoleType.Types.size()];
-        String[] accounts = new String[]{"0x6a2fb5e3bf37f0c3d90db4713f7ad4a3b2c24111", "0xdb2bbab1d9eca60c937aa9c995664f86b3da2934", "0xcdfea5a11062fab4cf4c2fda88e32fc6f7753145",
-                "0x329b81e0a2af215c7e41b32251ae4d6ff1a83e3e", "0x370287edd5a5e7c4b0f5e305b00fe95fc702ce47", "0x40b00de2e7b694b494022eef90e874f5e553f996", "0x49e2170e0b1188f2151ac35287c743ee60ea1f6a"};
         if (signIn(accounts[0], "Innov@teD@ily1")) {
             for (int i = 0; i < 6; i++) {
                 Role_sol_Role role = Role_sol_Role.deploy(web3j, current, GAS_PRICE, GAS_LIMIT).send();
@@ -69,33 +69,10 @@ public class UserService {
             }
         }
 
-        //recreate SCs
-        String[] dataAddrs = new String[PropertyType.Types.size()];
-        for (int j = 0; j < PropertyType.Types.size(); j++) {
-            if (j == 0) {
-                signIn(accounts[1], "Innov@teD@ily1");
-            }
-            if (j == 7) {
-                signIn(accounts[2], "Innov@teD@ily1");
-            }
-            if (j == 14) {
-                signIn(accounts[3], "Innov@teD@ily1");
-            }
-            if (j == 22) {
-                signIn(accounts[4], "Innov@teD@ily1");
-            }
-            if (j == 28) {
-                signIn(accounts[5], "Innov@teD@ily1");
-            }
-            if (j == 33) {
-                signIn(accounts[6], "Innov@teD@ily1");
-            }
+        return roleAddrs;
+    }
 
-            Data_sol_Data data = Data_sol_Data.deploy(web3j, current, GAS_PRICE, GAS_LIMIT).send();
-            dataAddrs[j] = data.getContractAddress();
-            LOGGER.info("Data Contract " + j + " deployed: " + data.getContractAddress() + ".Property Name: " + PropertyType.Types.get(j) + ".Owner: " + current.getAddress());
-        }
-
+    public boolean resetPermission(String[] roleAddrs, String[] dataAddrs) throws Exception {
         //link RCs and SCs
         //Producer-Producer
         if (signIn(accounts[1], "Innov@teD@ily1")) {
@@ -130,7 +107,6 @@ public class UserService {
             setManaged(roleAddrs[RoleType.getID("Storager")], "Producer_GuaranteeDate", new Address(dataAddrs[PropertyType.getID("Producer_GuaranteeDate")]));
             setManaged(roleAddrs[RoleType.getID("Storager")], "Producer_TestResult", new Address(dataAddrs[PropertyType.getID("Producer_TestResult")]));
         }
-
         //Transporter-Producer
         if (signIn(accounts[3], "Innov@teD@ily1")) {
             setManaged(roleAddrs[RoleType.getID("Transporter")], "Producer_Operator", new Address(dataAddrs[PropertyType.getID("Producer_Operator")]));
@@ -388,8 +364,6 @@ public class UserService {
             setManaged(roleAddrs[RoleType.getID("Buyer")], "Buyer_Price", new Address(dataAddrs[PropertyType.getID("Buyer_Price")]));
             setOwned(roleAddrs[RoleType.getID("Buyer")], "Buyer_Price", new Address(dataAddrs[PropertyType.getID("Buyer_Price")]));
         }
-
-        //add permissions
 
         return true;
     }

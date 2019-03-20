@@ -37,7 +37,11 @@ public class RecController {
     @PostMapping("/system/reset")
     public Result reset() throws Exception {
         sysAddress =  systemService.reset(userService.getCurrent());
-        return new Result(userService.reset(sysAddress));
+        String[] roleaAddrs = userService.resetContract(sysAddress);
+        String[] dataAddrs = dataService.resetContract(roleaAddrs);
+        boolean rr = userService.resetPermission(roleaAddrs, dataAddrs);
+        boolean rs = dataService.resetPermission(roleaAddrs, dataAddrs);
+        return new Result(rr && rs);
     }
 
     @PostMapping("/system/addRole")
@@ -68,12 +72,20 @@ public class RecController {
         return userService.setOwned(rcAddr.toString(), permission.getPropertyName(), new Address(scAddr));
     }
 
-    @PostMapping("/user/assign")
-    public TransactionReceipt assign(@RequestBody PermissionSwapper permission) throws Exception {
+    @PostMapping("/user/assignReader")
+    public TransactionReceipt assignReader(@RequestBody PermissionSwapper permission) throws Exception {
         Address rcAddr = systemService.getRC(sysAddress, userService.getCurrent());
         Address scAddr = userService.getOwned(rcAddr.toString(), permission.getPropertyName());
         Address targetRC = systemService.getRC(sysAddress, permission.getTarget(), userService.getCurrent());
         return userService.setManaged(targetRC.toString(), permission.getPropertyName(), scAddr);
+    }
+
+    @PostMapping("/user/assignWriter")
+    public TransactionReceipt assignWriter(@RequestBody PermissionSwapper permission) throws Exception {
+        Address rcAddr = systemService.getRC(sysAddress, userService.getCurrent());
+        Address scAddr = userService.getOwned(rcAddr.toString(), permission.getPropertyName());
+        Address targetRC = systemService.getRC(sysAddress, permission.getTarget(), userService.getCurrent());
+        return userService.setOwned(targetRC.toString(), permission.getPropertyName(), scAddr);
     }
 
     @PostMapping("/data/write")
