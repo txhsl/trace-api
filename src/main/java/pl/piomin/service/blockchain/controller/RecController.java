@@ -81,7 +81,7 @@ public class RecController {
         //Check permission
         Address rcAddr = systemService.getRC(sysAddress, userService.getCurrent());
         Address scAddr = userService.getOwned(rcAddr.toString(), data.getPropertyName());
-        if (!dataService.checkOwner(scAddr.toString(), userService.getCurrent())) {
+        if (!dataService.checkWriter(scAddr.toString(), userService.getCurrent())) {
             return null;
         }
 
@@ -104,9 +104,10 @@ public class RecController {
         for (String property: data.getData().keySet()) {
             Map<String, String> single = data.getData().get(property);
             Address scAddr = userService.getOwned(rcAddr.toString(), property);
-
-            for (String id : single.keySet()) {
-                result.add(dataService.write(scAddr.toString(), userService.getCurrent(), id, single.get(id)));
+            if (dataService.checkWriter(scAddr.toString(), userService.getCurrent())) {
+                for (String id : single.keySet()) {
+                    result.add(dataService.write(scAddr.toString(), userService.getCurrent(), id, single.get(id)));
+                }
             }
         }
         return result.toArray(new TransactionReceipt[result.size()]);
@@ -117,7 +118,7 @@ public class RecController {
         //Check permission
         Address rcAddr = systemService.getRC(sysAddress, userService.getCurrent());
         Address scAddr = userService.getManaged(rcAddr.toString(), data.getPropertyName());
-        if (!dataService.checkPermission(rcAddr, scAddr.toString(), userService.getCurrent())) {
+        if (!dataService.checkReader(rcAddr, scAddr.toString(), userService.getCurrent())) {
             return data;
         }
 
@@ -146,7 +147,7 @@ public class RecController {
             Address scAddr = userService.getManaged(rcAddr.toString(), property);
             Map<String, String> result =  new HashMap<>();
 
-            if (dataService.checkPermission(rcAddr, scAddr.toString(), userService.getCurrent())) {
+            if (dataService.checkReader(rcAddr, scAddr.toString(), userService.getCurrent())) {
                 for (String id : data.getIds()) {
                     result.put(id, dataService.read(scAddr.toString(), userService.getCurrent(), id));
                 }

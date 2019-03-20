@@ -42,22 +42,30 @@ public class DataService {
         return result;
     }
 
-    public TransactionReceipt addPermission(String addr, Credentials credentials, String userAddr) throws Exception {
+    public TransactionReceipt addReader(String addr, Credentials credentials, String userAddr) throws Exception {
         Data_sol_Data sc = Data_sol_Data.load(addr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
-        TransactionReceipt transactionReceipt = sc.addPermitted(new Address(userAddr)).send();
+        TransactionReceipt transactionReceipt = sc.addReader(new Address(userAddr)).send();
 
-        LOGGER.info("AddPermission: " + transactionReceipt.toString());
+        LOGGER.info("Reader added: " + transactionReceipt.toString());
         return transactionReceipt;
     }
 
-    public boolean checkPermission(Address rcAddr, String addr, Credentials credentials) throws Exception {
+    public boolean checkReader(Address rcAddr, String addr, Credentials credentials) throws Exception {
         Data_sol_Data sc = Data_sol_Data.load(addr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
-        return sc.checkPermitted(rcAddr).send().getValue();
+        return sc.checkReader(rcAddr).send().getValue();
     }
 
-    public boolean checkOwner(String addr, Credentials credentials) throws Exception {
+    public TransactionReceipt setWriter(String addr, Credentials credentials, String userAddr) throws Exception {
         Data_sol_Data sc = Data_sol_Data.load(addr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
-        return sc.checkOwner(new Address(credentials.getAddress())).send().getValue();
+        TransactionReceipt transactionReceipt = sc.setWriter(new Address(userAddr)).send();
+
+        LOGGER.info("Writer setted: " + transactionReceipt.toString());
+        return transactionReceipt;
+    }
+
+    public boolean checkWriter(String addr, Credentials credentials) throws Exception {
+        Data_sol_Data sc = Data_sol_Data.load(addr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+        return sc.checkWriter(new Address(credentials.getAddress())).send().getValue();
     }
 
     public TransactionReceipt write(String addr, Credentials credentials, String fileNo, String hash) throws Exception {

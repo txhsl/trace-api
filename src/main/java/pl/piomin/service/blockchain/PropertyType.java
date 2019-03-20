@@ -16,7 +16,6 @@ public class PropertyType {
         "Producer_ProduceDate",
         "Producer_OutDate",
         "Producer_GuaranteeDate",
-        "Producer_TestResult",
         "Producer_BasePrice",
         "Producer_SellPrice",
         "Producer_Amount",
@@ -45,7 +44,8 @@ public class PropertyType {
         "Buyer_Mobile",
         "Buyer_Time",
         "Buyer_Amount",
-        "Buyer_Price")
+        "Buyer_Price",
+        "Producer_TestResult")
     );
 
     public static int getID(String propertyName) {
