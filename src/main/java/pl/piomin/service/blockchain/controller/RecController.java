@@ -33,7 +33,7 @@ public class RecController {
 
         this.sysAddress = systemService.recover();
     }
-    //Admin
+    //System owner
     @PostMapping("/system/reset")
     public Result reset() throws Exception {
         sysAddress =  systemService.reset(userService.getCurrent());
@@ -50,7 +50,7 @@ public class RecController {
         role.setPermitted(false);
         return role;
     }
-    //Admin
+    //System owner
     @PostMapping("/system/permitRole")
     public TransactionReceipt permitRole(@RequestBody RoleSwapper role) throws Exception {
         RoleType.Types.add(role.getName());
@@ -68,7 +68,7 @@ public class RecController {
         user.setAddress(userService.signUp(user.getPassword()));
         return user;
     }
-    //Leader
+    //RC owner
     @PostMapping("/user/addProperty")
     public TransactionReceipt addProperty(@RequestBody PermissionSwapper permission) throws Exception {
         Address rcAddr = systemService.getRC(sysAddress, userService.getCurrent());
@@ -77,7 +77,7 @@ public class RecController {
 
         return userService.setOwned(rcAddr.toString(), permission.getPropertyName(), new Address(scAddr));
     }
-    //Normal
+    //RC owner
     @PostMapping("/user/requestReader")
     public TransactionReceipt requestReader(@RequestBody PermissionSwapper permission) throws Exception {
         Address rcAddr = systemService.getRC(sysAddress, userService.getCurrent());
@@ -85,7 +85,7 @@ public class RecController {
         Address targetRC = systemService.getRC(sysAddress, permission.getTarget(), userService.getCurrent());
         return userService.setManaged(targetRC.toString(), permission.getPropertyName(), scAddr);
     }
-    //Normal
+    //RC owner
     @PostMapping("/user/requestWriter")
     public TransactionReceipt requestWriter(@RequestBody PermissionSwapper permission) throws Exception {
         Address rcAddr = systemService.getRC(sysAddress, userService.getCurrent());
@@ -93,7 +93,7 @@ public class RecController {
         Address targetRC = systemService.getRC(sysAddress, permission.getTarget(), userService.getCurrent());
         return userService.setOwned(targetRC.toString(), permission.getPropertyName(), scAddr);
     }
-    //Leader
+    //SC owner
     @PostMapping("/user/permitReader")
     public TransactionReceipt permitReader(@RequestBody PermissionSwapper permission) throws Exception {
         Address rcAddr = systemService.getRC(sysAddress, userService.getCurrent());
@@ -101,7 +101,7 @@ public class RecController {
         Address targetRC = systemService.getRC(sysAddress, permission.getTarget(), userService.getCurrent());
         return dataService.addReader(scAddr.toString(), userService.getCurrent(), targetRC.toString());
     }
-    //Leader
+    //SC owner
     @PostMapping("/user/permitWriter")
     public TransactionReceipt permitWriter(@RequestBody PermissionSwapper permission) throws Exception {
         Address rcAddr = systemService.getRC(sysAddress, userService.getCurrent());
@@ -118,13 +118,13 @@ public class RecController {
         if (!dataService.checkWriter(scAddr.toString(), userService.getCurrent())) {
             return null;
         }
+        String fileNo = dataService.getFileNum(scAddr.toString(), data.getId(), userService.getCurrent());
 
         //Try cache
-        String result = fileService.record(data.getPropertyName(), data.getId(), data.getData());
+        String result = fileService.record(data.getPropertyName(), fileNo, data.getId(), data.getData());
 
         //Record hash
         if (result != null) {
-            String fileNo = dataService.getFileNum(scAddr.toString(), data.getId(), userService.getCurrent());
             return dataService.write(scAddr.toString(), userService.getCurrent(), fileNo, result);
         }
         return null;
@@ -164,7 +164,12 @@ public class RecController {
             String hash = dataService.read(scAddr.toString(), userService.getCurrent(), data.getId());
 
             FileSwapper file = fileService.input(fileService.download(hash));
-            data.setData(file.getContent(data.getId()));
+            if (fileService.checkFile(file.getFileName(), dataService.getFileNum(scAddr.toString(), data.getId(), userService.getCurrent()))) {
+                data.setData(file.getContent(data.getId()));
+            }
+            else {
+                throw new IOException();
+            }
         }
         else {
             data.setData(result);

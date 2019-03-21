@@ -24,7 +24,6 @@ public class FileService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileService.class);
     private static final String IPFS_URL = "/ip4/127.0.0.1/tcp/5001";
-    private static final int CACHE_SIZE = 100;
 
     private final IPFS ipfs;
 
@@ -40,22 +39,24 @@ public class FileService {
         }
     }
 
-    public String record(String propertyName, String id, String value) throws IOException {
+    public String record(String propertyName, String fileName, String id, String value) throws IOException {
         FileSwapper file;
+        String result = null;
         if (cache.containsKey(propertyName)) {
              file = cache.get(propertyName);
         }
         else {
             file = new FileSwapper();
-            file.setFileName(id);   //Name with the first record
+            file.setFileName(fileName);   //Name with the first record
+        }
+
+        if (file.getFileName() != fileName) {
+            cache.remove(propertyName);
+            result = upload(output(file));
         }
         file.addContent(id, value);
-        if (file.count() >= CACHE_SIZE) {
-            cache.remove(propertyName);
-            return upload(output(file));
-        }
         cache.put(propertyName, file);
-        return null;
+        return result;
     }
 
     public String query(String propertyName, String id) {
@@ -74,6 +75,10 @@ public class FileService {
 
     public String output(FileSwapper data) throws IOException {
         File target = new File(data.getFileName());
+        if(target.exists()){
+            LOGGER.info("File already existed, path: " + target.getPath());
+            return target.getPath();
+        }
         FileOutputStream outStream = new FileOutputStream(target);
 
         ObjectOutputStream objectOutputStream = new ObjectOutputStream(outStream);
@@ -99,16 +104,21 @@ public class FileService {
         String hash = addResult.hash.toString();
 
         //Rename the file
-        target.renameTo(new File(target.getParentFile().getAbsolutePath() + "/" + hash));
-        LOGGER.info("File uploaded, hash: " + hash);
-        return hash;
+        if(target.renameTo(new File(target.getParentFile().getAbsolutePath() + "/" + hash))) {
+            LOGGER.info("File uploaded, hash: " + hash);
+            return hash;
+        }
+        else {
+            LOGGER.error("File upload failed, path: " + path);
+            throw new IOException();
+        }
     }
 
     public File download(String hash) throws IOException {
         Multihash filePointer = Multihash.fromBase58(hash);
         byte[] data = ipfs.cat(filePointer);
         if(data != null){
-            File file = new File(hash);
+            File file = new File(hash); ////
             if(file.exists()){
                 LOGGER.info("File already existed, path: " + file.getPath());
                 return file;
@@ -123,6 +133,17 @@ public class FileService {
         else {
             LOGGER.error("File not exist, hash: " + hash);
             return null;
+        }
+    }
+
+    public boolean checkFile(String fileName, String expectedName) {
+        if (fileName.equals(expectedName)) {
+            LOGGER.info("File checked, name: " + fileName);
+            return true;
+        }
+        else {
+            LOGGER.error("File check failed, name: " + fileName + ", expected: " + expectedName);
+            return false;
         }
     }
 }
