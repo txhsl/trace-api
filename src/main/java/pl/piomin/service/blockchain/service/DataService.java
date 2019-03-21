@@ -66,7 +66,7 @@ public class DataService {
 
             Data_sol_Data data = Data_sol_Data.deploy(web3j, current, GAS_PRICE, GAS_LIMIT).send();
             dataAddrs[j] = data.getContractAddress();
-            LOGGER.info("Data Contract " + j + " deployed: " + data.getContractAddress() + ".Property Name: " + PropertyType.Types.get(j) + ".Owner: " + current.getAddress());
+            LOGGER.info("Data Contract " + j + " deployed: " + data.getContractAddress() + ". Property Name: " + PropertyType.Types.get(j) + ". Owner: " + current.getAddress());
         }
         return dataAddrs;
     }

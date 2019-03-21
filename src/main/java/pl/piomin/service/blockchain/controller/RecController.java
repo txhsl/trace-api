@@ -33,7 +33,7 @@ public class RecController {
 
         this.sysAddress = systemService.recover();
     }
-
+    //Admin
     @PostMapping("/system/reset")
     public Result reset() throws Exception {
         sysAddress =  systemService.reset(userService.getCurrent());
@@ -43,14 +43,20 @@ public class RecController {
         boolean rs = dataService.resetPermission(roleaAddrs, dataAddrs);
         return new Result(rr && rs);
     }
-
-    @PostMapping("/system/addRole")
-    public TransactionReceipt addRole(@RequestBody String roleName) throws Exception {
-        String rcAddr = userService.addRole();
-        RoleType.Types.add(roleName);
-        return systemService.addRC(sysAddress, roleName, new Address(rcAddr), userService.getCurrent());
+    //Normal
+    @PostMapping("/system/requestRole")
+    public RoleSwapper requestRole(@RequestBody RoleSwapper role) throws Exception {
+        role.setAddress(userService.addRole());
+        role.setPermitted(false);
+        return role;
     }
-
+    //Admin
+    @PostMapping("/system/permitRole")
+    public TransactionReceipt permitRole(@RequestBody RoleSwapper role) throws Exception {
+        RoleType.Types.add(role.getName());
+        return systemService.addRC(sysAddress, role.getName(), new Address(role.getAddress()), userService.getCurrent());
+    }
+    //Normal
     @PostMapping("/user/signIn")
     public Result signIn(@RequestBody UserSwapper user) throws IOException, CipherException {
         return new Result(userService.signIn(user.getAddress(), user.getPassword()));
@@ -62,7 +68,7 @@ public class RecController {
         user.setAddress(userService.signUp(user.getPassword()));
         return user;
     }
-
+    //Leader
     @PostMapping("/user/addProperty")
     public TransactionReceipt addProperty(@RequestBody PermissionSwapper permission) throws Exception {
         Address rcAddr = systemService.getRC(sysAddress, userService.getCurrent());
@@ -71,23 +77,39 @@ public class RecController {
 
         return userService.setOwned(rcAddr.toString(), permission.getPropertyName(), new Address(scAddr));
     }
-
-    @PostMapping("/user/assignReader")
-    public TransactionReceipt assignReader(@RequestBody PermissionSwapper permission) throws Exception {
+    //Normal
+    @PostMapping("/user/requestReader")
+    public TransactionReceipt requestReader(@RequestBody PermissionSwapper permission) throws Exception {
         Address rcAddr = systemService.getRC(sysAddress, userService.getCurrent());
         Address scAddr = userService.getOwned(rcAddr.toString(), permission.getPropertyName());
         Address targetRC = systemService.getRC(sysAddress, permission.getTarget(), userService.getCurrent());
         return userService.setManaged(targetRC.toString(), permission.getPropertyName(), scAddr);
     }
-
-    @PostMapping("/user/assignWriter")
-    public TransactionReceipt assignWriter(@RequestBody PermissionSwapper permission) throws Exception {
+    //Normal
+    @PostMapping("/user/requestWriter")
+    public TransactionReceipt requestWriter(@RequestBody PermissionSwapper permission) throws Exception {
         Address rcAddr = systemService.getRC(sysAddress, userService.getCurrent());
         Address scAddr = userService.getOwned(rcAddr.toString(), permission.getPropertyName());
         Address targetRC = systemService.getRC(sysAddress, permission.getTarget(), userService.getCurrent());
         return userService.setOwned(targetRC.toString(), permission.getPropertyName(), scAddr);
     }
-
+    //Leader
+    @PostMapping("/user/permitReader")
+    public TransactionReceipt permitReader(@RequestBody PermissionSwapper permission) throws Exception {
+        Address rcAddr = systemService.getRC(sysAddress, userService.getCurrent());
+        Address scAddr = userService.getOwned(rcAddr.toString(), permission.getPropertyName());
+        Address targetRC = systemService.getRC(sysAddress, permission.getTarget(), userService.getCurrent());
+        return dataService.addReader(scAddr.toString(), userService.getCurrent(), targetRC.toString());
+    }
+    //Leader
+    @PostMapping("/user/permitWriter")
+    public TransactionReceipt permitWriter(@RequestBody PermissionSwapper permission) throws Exception {
+        Address rcAddr = systemService.getRC(sysAddress, userService.getCurrent());
+        Address scAddr = userService.getOwned(rcAddr.toString(), permission.getPropertyName());
+        Address targetRC = systemService.getRC(sysAddress, permission.getTarget(), userService.getCurrent());
+        return dataService.setWriter(scAddr.toString(), userService.getCurrent(), targetRC.toString());
+    }
+    //Writer
     @PostMapping("/data/write")
     public TransactionReceipt writeData(@RequestBody DataSwapper data) throws Exception {
         //Check permission
@@ -124,7 +146,7 @@ public class RecController {
         }
         return result.toArray(new TransactionReceipt[result.size()]);
     }
-
+    //Reader
     @GetMapping("/data/read")
     public DataSwapper readData(@RequestBody DataSwapper data) throws Exception {
         //Check permission

@@ -53,19 +53,22 @@ public class UserService {
 
         //recreate RCs
         String[] roleAddrs = new String[RoleType.Types.size()];
-        if (signIn(accounts[0], "Innov@teD@ily1")) {
-            for (int i = 0; i < 6; i++) {
+
+        for (int i = 0; i < 6; i++) {
+            if (signIn(accounts[i + 1], "Innov@teD@ily1")) {
                 Role_sol_Role role = Role_sol_Role.deploy(web3j, current, GAS_PRICE, GAS_LIMIT).send();
                 LOGGER.info("Role Contract " + i + " deployed: " + role.getContractAddress() + ". Role Name: " + RoleType.Types.get(i));
                 roleAddrs[i] = role.getContractAddress();
 
-                System_sol_System system = System_sol_System.load(sysAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
-                TransactionReceipt transactionReceipt = system.setIndex(new Utf8String(RoleType.Types.get(i)), new Address(roleAddrs[i])).send();
-                LOGGER.info("Transaction succeed: " + transactionReceipt.getTransactionHash());
+                if (signIn(accounts[0],"Innov@teD@ily1" )) {
+                    System_sol_System system = System_sol_System.load(sysAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
+                    TransactionReceipt transactionReceipt = system.setIndex(new Utf8String(RoleType.Types.get(i)), new Address(roleAddrs[i])).send();
+                    LOGGER.info("Transaction succeed: " + transactionReceipt.getTransactionHash());
 
-                //register users
-                transactionReceipt = system.register(new Address(accounts[i + 1]), new Utf8String(RoleType.Types.get(i))).send();
-                LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
+                    //register users
+                    transactionReceipt = system.register(new Address(accounts[i + 1]), new Utf8String(RoleType.Types.get(i))).send();
+                    LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
+                }
             }
         }
 
@@ -386,7 +389,7 @@ public class UserService {
                 resource.getFile().getAbsolutePath());
         String newFile = resource.getFile().getParent() + "/" + current.getAddress();
         if (!resource.getFile().renameTo(new File(newFile))) {
-            LOGGER.error("Fail to rename the wallet file");
+            LOGGER.error("Fail to rename the wallet file.");
         }
 
         LOGGER.info("Initial ether sent. Transaction hash: " + initTransfer(current.getAddress(), 100000000));

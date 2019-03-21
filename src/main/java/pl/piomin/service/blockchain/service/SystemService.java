@@ -34,7 +34,7 @@ public class SystemService {
 
         try {
             LOGGER.info("Blockchain height: " + web3j.ethBlockNumber().send().getBlockNumber() + ". Connected!");
-        } catch (Exception e){
+        } catch (Exception e) {
             LOGGER.error("Connection failed. " + e.getMessage());
         }
     }
@@ -79,6 +79,14 @@ public class SystemService {
     public Address getRC(String sysAddr, String userAddr, Credentials credentials) throws Exception {
         System_sol_System system = System_sol_System.load(sysAddr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
         String rcAddr = system.getRC(new Address(userAddr)).send().getValue();
+
+        LOGGER.info("Read succeed: " + rcAddr);
+        return new Address(rcAddr);
+    }
+
+    public Address getIndex(String sysAddr, String roleName, Credentials credentials) throws Exception {
+        System_sol_System system = System_sol_System.load(sysAddr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+        String rcAddr = system.getIndex(new Utf8String(roleName)).send().getValue();
 
         LOGGER.info("Read succeed: " + rcAddr);
         return new Address(rcAddr);
