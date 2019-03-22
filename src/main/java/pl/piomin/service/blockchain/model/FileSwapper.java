@@ -1,5 +1,7 @@
 package pl.piomin.service.blockchain.model;
 
+import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -7,9 +9,9 @@ import java.util.Map;
  * @date: 2019/3/15
  * @description: none
  */
-public class FileSwapper {
+public class FileSwapper implements Serializable {
     private String fileName;
-    private Map<String, String> content;
+    private Map<String, String> content = new HashMap<>();
 
     public FileSwapper() {}
 

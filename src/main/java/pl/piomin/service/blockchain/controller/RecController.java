@@ -111,40 +111,49 @@ public class RecController {
     }
     //Writer
     @PostMapping("/data/write")
-    public TransactionReceipt writeData(@RequestBody DataSwapper data) throws Exception {
+    public String writeData(@RequestBody DataSwapper data) throws Exception {
         //Check permission
         Address rcAddr = systemService.getRC(sysAddress, userService.getCurrent());
         Address scAddr = userService.getOwned(rcAddr.toString(), data.getPropertyName());
-        if (!dataService.checkWriter(scAddr.toString(), userService.getCurrent())) {
+        if (!dataService.checkWriter(scAddr.toString(), rcAddr, userService.getCurrent())) {
             return null;
         }
         String fileNo = dataService.getFileNum(scAddr.toString(), data.getId(), userService.getCurrent());
 
         //Try cache
-        String result = fileService.record(data.getPropertyName(), fileNo, data.getId(), data.getData());
+        IPFSSwapper receipt = fileService.record(data.getPropertyName(), fileNo, data.getId(), data.getData());
 
         //Record hash
-        if (result != null) {
-            return dataService.write(scAddr.toString(), userService.getCurrent(), fileNo, result);
+        if (receipt != null) {
+            dataService.write(scAddr.toString(), userService.getCurrent(), receipt.getFileName(), receipt.getFileHash());
         }
-        return null;
+        return fileNo;
     }
 
     @PostMapping("/data/writeMultiple")
-    public TransactionReceipt[] writeMultipleData(@RequestBody DataMultipleSwapper data) throws Exception {
-        List<TransactionReceipt> result = new ArrayList<>();
+    public String[] writeMultipleData(@RequestBody DataMultipleSwapper data) throws Exception {
+        List<String> result = new ArrayList<>();
         Address rcAddr = systemService.getRC(sysAddress, userService.getCurrent());
 
         for (String property: data.getData().keySet()) {
             Map<String, String> single = data.getData().get(property);
             Address scAddr = userService.getOwned(rcAddr.toString(), property);
-            if (dataService.checkWriter(scAddr.toString(), userService.getCurrent())) {
+            if (dataService.checkWriter(scAddr.toString(), rcAddr, userService.getCurrent())) {
                 for (String id : single.keySet()) {
-                    result.add(dataService.write(scAddr.toString(), userService.getCurrent(), id, single.get(id)));
+                    String fileNo = dataService.getFileNum(scAddr.toString(), id, userService.getCurrent());
+
+                    //Try cache
+                    IPFSSwapper receipt = fileService.record(property, fileNo, id, single.get(id));
+
+                    //Record hash
+                    if (receipt != null) {
+                        dataService.write(scAddr.toString(), userService.getCurrent(), receipt.getFileName(), receipt.getFileHash());
+                    }
+                    result.add(fileNo);
                 }
             }
         }
-        return result.toArray(new TransactionReceipt[result.size()]);
+        return result.toArray(new String[0]);
     }
     //Reader
     @GetMapping("/data/read")
@@ -152,7 +161,7 @@ public class RecController {
         //Check permission
         Address rcAddr = systemService.getRC(sysAddress, userService.getCurrent());
         Address scAddr = userService.getManaged(rcAddr.toString(), data.getPropertyName());
-        if (!dataService.checkReader(rcAddr, scAddr.toString(), userService.getCurrent())) {
+        if (!dataService.checkReader(scAddr.toString(), rcAddr, userService.getCurrent())) {
             return data;
         }
 
@@ -186,7 +195,7 @@ public class RecController {
             Address scAddr = userService.getManaged(rcAddr.toString(), property);
             Map<String, String> result =  new HashMap<>();
 
-            if (dataService.checkReader(rcAddr, scAddr.toString(), userService.getCurrent())) {
+            if (dataService.checkReader(scAddr.toString(), rcAddr, userService.getCurrent())) {
                 for (String id : data.getIds()) {
                     result.put(id, dataService.read(scAddr.toString(), userService.getCurrent(), id));
                 }

@@ -36,7 +36,6 @@ sampleDB*
 # Mac
 .DS_Store
 
-
 # Local configuration
 **/user.conf
 **/test-user.conf
@@ -48,3 +47,4 @@ sampleDB*
 
 # test data
 testDB-*
+data/

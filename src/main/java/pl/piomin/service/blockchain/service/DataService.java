@@ -352,7 +352,7 @@ public class DataService {
     public String getFileNum(String addr, String id, Credentials credentials) throws Exception {
         Data_sol_Data sc = Data_sol_Data.load(addr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
         String result = sc.getFileNum(new Utf8String(id)).send().getValue();
-        LOGGER.info("File number calculated: " + ", data id: " + id);
+        LOGGER.info("File number calculated: " + result +", data id: " + id);
         return result;
     }
 
@@ -364,7 +364,7 @@ public class DataService {
         return transactionReceipt;
     }
 
-    public boolean checkReader(Address rcAddr, String addr, Credentials credentials) throws Exception {
+    public boolean checkReader(String addr, Address rcAddr, Credentials credentials) throws Exception {
         Data_sol_Data sc = Data_sol_Data.load(addr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
         return sc.checkReader(rcAddr).send().getValue();
     }
@@ -377,9 +377,9 @@ public class DataService {
         return transactionReceipt;
     }
 
-    public boolean checkWriter(String addr, Credentials credentials) throws Exception {
+    public boolean checkWriter(String addr, Address rcAddr, Credentials credentials) throws Exception {
         Data_sol_Data sc = Data_sol_Data.load(addr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
-        return sc.checkWriter(new Address(credentials.getAddress())).send().getValue();
+        return sc.checkWriter(rcAddr).send().getValue();
     }
 
     public TransactionReceipt write(String addr, Credentials credentials, String fileNo, String hash) throws Exception {
