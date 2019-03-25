@@ -1,9 +1,12 @@
 package pl.piomin.service.blockchain.controller;
 
 import org.springframework.web.bind.annotation.*;
+import org.web3j.protocol.core.methods.response.Transaction;
 import pl.piomin.service.blockchain.model.BlockchainTransaction;
+import pl.piomin.service.blockchain.model.ContractSwapper;
 import pl.piomin.service.blockchain.model.IPFSSwapper;
 import pl.piomin.service.blockchain.service.BlockchainService;
+import pl.piomin.service.blockchain.service.UserService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -13,23 +16,40 @@ import java.util.ArrayList;
 public class BlockchainController {
 
     private final BlockchainService blockchainService;
+    private final UserService userService;
 
-    public BlockchainController(BlockchainService blockchainService) {
+    public BlockchainController(BlockchainService blockchainService, UserService userService) {
         this.blockchainService = blockchainService;
+        this.userService = userService;
     }
 
-    @GetMapping("/getCompleted")
+    @GetMapping("/completed")
     public ArrayList<IPFSSwapper> getCompleted() {
         return blockchainService.getCompleted();
     }
 
-    @GetMapping("/getPending")
+    @GetMapping("/pending")
     public ArrayList<IPFSSwapper> getPending() {
         return blockchainService.getPending();
+    }
+
+    @GetMapping("/error")
+    public ArrayList<IPFSSwapper> getError() {
+        return blockchainService.getErrorTx();
     }
 
     @PostMapping("/execute")
     public BlockchainTransaction execute(@RequestBody BlockchainTransaction transaction) throws IOException {
         return blockchainService.process(transaction);
+    }
+
+    @GetMapping("/userHistory")
+    public ArrayList<Transaction> userHistory() throws InterruptedException {
+        return blockchainService.getUserHistory(userService.getCurrent().getAddress());
+    }
+
+    @GetMapping("/contractHistory")
+    public ArrayList<Transaction> contractHistory(@RequestBody ContractSwapper contract) throws InterruptedException {
+        return blockchainService.getContractHistory(contract.getAddress());
     }
 }

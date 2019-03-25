@@ -1,15 +1,15 @@
 package pl.piomin.service.blockchain.controller;
 
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import pl.piomin.service.blockchain.PropertyType;
 import pl.piomin.service.blockchain.RoleType;
 import pl.piomin.service.blockchain.model.Result;
 import pl.piomin.service.blockchain.model.RoleSwapper;
 import pl.piomin.service.blockchain.service.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/system")
@@ -47,5 +47,16 @@ public class SystemController {
     public TransactionReceipt permitRole(@RequestBody RoleSwapper role) throws Exception {
         RoleType.Types.add(role.getName());
         return systemService.addRC(role.getName(), new Address(role.getAddress()), userService.getCurrent());
+    }
+
+    //For query
+    @GetMapping("/getRoles")
+    public Map<String, String> getRoles() throws Exception {
+        return systemService.getRoleAll(userService.getCurrent());
+    }
+
+    @GetMapping("/getProperties")
+    public String[] getProperties() {
+        return PropertyType.Types.toArray(new String[0]);
     }
 }

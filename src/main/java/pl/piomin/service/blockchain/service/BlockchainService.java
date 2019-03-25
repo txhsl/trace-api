@@ -1,5 +1,6 @@
 package pl.piomin.service.blockchain.service;
 
+import io.reactivex.disposables.Disposable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -57,6 +58,34 @@ public class BlockchainService {
 
         return trx;
 
+    }
+
+    public ArrayList<org.web3j.protocol.core.methods.response.Transaction> getUserHistory(String address) throws InterruptedException {
+        ArrayList<org.web3j.protocol.core.methods.response.Transaction> result = new ArrayList<>();
+        Disposable sub = web3j.replayPastTransactionsFlowable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST)
+            .subscribe(tx -> {
+                if (tx.getFrom().equals(address) && tx.getTo() != null) {
+                    result.add(tx);
+                }
+            });
+        while(!sub.isDisposed()){
+            Thread.sleep(1000);
+        }
+        return result;
+    }
+
+    public ArrayList<org.web3j.protocol.core.methods.response.Transaction> getContractHistory(String address) throws InterruptedException {
+        ArrayList<org.web3j.protocol.core.methods.response.Transaction> result = new ArrayList<>();
+        Disposable sub = web3j.replayPastTransactionsFlowable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST)
+                .subscribe(tx -> {
+                    if (tx.getTo() != null && tx.getTo().equals(address)) {
+                        result.add(tx);
+                    }
+                });
+        while(!sub.isDisposed()){
+            Thread.sleep(1000);
+        }
+        return result;
     }
 
     public void addPending(IPFSSwapper future) {

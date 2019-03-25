@@ -22,6 +22,8 @@ import pl.piomin.service.blockchain.contract.System_sol_System;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.web3j.tx.gas.DefaultGasProvider.GAS_LIMIT;
 import static org.web3j.tx.gas.DefaultGasProvider.GAS_PRICE;
@@ -449,11 +451,39 @@ public class UserService {
         return new Address(scAddr);
     }
 
+    public Map<String, String> getOwnedAll(String rcAddr) throws Exception {
+        Map<String, String> result = new HashMap<>();
+        Role_sol_Role rc = Role_sol_Role.load(rcAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
+
+        for (String property : PropertyType.Types) {
+            String scAddr = rc.getOwned(new Utf8String(property)).send().getValue();
+            if (!scAddr.equals("0x0000000000000000000000000000000000000000")) {
+                result.putIfAbsent(property, scAddr);
+            }
+        }
+
+        return result;
+    }
+
     public Address getManaged(String rcAddr, String name) throws Exception {
         Role_sol_Role rc = Role_sol_Role.load(rcAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
         String scAddr = rc.getManaged(new Utf8String(name)).send().getValue();
 
         LOGGER.info("Read succeed: " + scAddr);
         return new Address(scAddr);
+    }
+
+    public Map<String, String> getManagedAll(String rcAddr) throws Exception {
+        Map<String, String> result = new HashMap<>();
+        Role_sol_Role rc = Role_sol_Role.load(rcAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
+
+        for (String property : PropertyType.Types) {
+            String scAddr = rc.getManaged(new Utf8String(property)).send().getValue();
+            if (!scAddr.equals("0x0000000000000000000000000000000000000000")) {
+                result.putIfAbsent(property, scAddr);
+            }
+        }
+
+        return result;
     }
 }

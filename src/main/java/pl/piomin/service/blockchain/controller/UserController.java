@@ -1,9 +1,6 @@
 package pl.piomin.service.blockchain.controller;
 
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.crypto.CipherException;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
@@ -16,6 +13,7 @@ import pl.piomin.service.blockchain.service.SystemService;
 import pl.piomin.service.blockchain.service.UserService;
 
 import java.io.IOException;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/user")
@@ -83,5 +81,18 @@ public class UserController {
         Address scAddr = userService.getOwned(rcAddr.toString(), permission.getPropertyName());
         Address targetRC = systemService.getRC(permission.getTarget(), userService.getCurrent());
         return dataService.setWriter(scAddr.toString(), userService.getCurrent(), targetRC.toString());
+    }
+
+    //For query
+    @GetMapping("/getManaged")
+    public Map<String, String> getManaged() throws Exception {
+        Address rcAddr = systemService.getRC(userService.getCurrent());
+        return userService.getManagedAll(rcAddr.toString());
+    }
+
+    @GetMapping("/getOwned")
+    public Map<String, String> getOwned() throws Exception {
+        Address rcAddr = systemService.getRC(userService.getCurrent());
+        return userService.getOwnedAll(rcAddr.toString());
     }
 }

@@ -12,7 +12,11 @@ import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import pl.piomin.service.blockchain.RoleType;
 import pl.piomin.service.blockchain.contract.System_sol_System;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.web3j.tx.gas.DefaultGasProvider.GAS_LIMIT;
 import static org.web3j.tx.gas.DefaultGasProvider.GAS_PRICE;
@@ -42,7 +46,7 @@ public class SystemService {
         sysAddress = recover();
     }
 
-    public String recover() {
+    private String recover() {
         try {
             Resource resource = new ClassPathResource("system.json");
             JSONObject json = new JSONObject(new String(FileCopyUtils.copyToByteArray(resource.getFile())));
@@ -64,6 +68,7 @@ public class SystemService {
         System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
         TransactionReceipt transactionReceipt = system.setIndex(new Utf8String(name), rcAddr).send();
 
+        LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
         return transactionReceipt;
     }
 
@@ -93,6 +98,20 @@ public class SystemService {
 
         LOGGER.info("Read succeed: " + rcAddr);
         return new Address(rcAddr);
+    }
+
+    public Map<String, String> getRoleAll(Credentials credentials) throws Exception {
+        Map<String, String> result = new HashMap<>();
+        System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+
+        for (String role : RoleType.Types) {
+            String rcAddr = system.getIndex(new Utf8String(role)).send().getValue();
+            if (!rcAddr.equals("")) {
+                result.putIfAbsent(role, rcAddr);
+            }
+        }
+
+        return result;
     }
 
     public String getSysAddress() {
