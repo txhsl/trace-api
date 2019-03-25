@@ -6,14 +6,13 @@ import org.springframework.stereotype.Service;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.request.Transaction;
-import org.web3j.protocol.core.methods.response.EthAccounts;
-import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
-import org.web3j.protocol.core.methods.response.EthGetTransactionReceipt;
-import org.web3j.protocol.core.methods.response.EthSendTransaction;
+import org.web3j.protocol.core.methods.response.*;
 import pl.piomin.service.blockchain.model.BlockchainTransaction;
+import pl.piomin.service.blockchain.model.IPFSSwapper;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.ArrayList;
 
 @Service
 public class BlockchainService {
@@ -21,6 +20,10 @@ public class BlockchainService {
     private static final Logger LOGGER = LoggerFactory.getLogger(BlockchainService.class);
 
     private final Web3j web3j;
+
+    private ArrayList<IPFSSwapper> pendingTx;
+    private ArrayList<IPFSSwapper> completedTx;
+    private ArrayList<IPFSSwapper> errorTx;
 
     public BlockchainService(Web3j web3j) {
         this.web3j = web3j;
@@ -56,4 +59,36 @@ public class BlockchainService {
 
     }
 
+    public void addPending(IPFSSwapper future) {
+        pendingTx.add(future);
+    }
+
+    public ArrayList<IPFSSwapper> getCompleted() {
+        checkCompleted();
+        return completedTx;
+    }
+
+    public ArrayList<IPFSSwapper> getPending() {
+        checkCompleted();
+        return pendingTx;
+    }
+
+    public ArrayList<IPFSSwapper> getErrorTx() {
+        return errorTx;
+    }
+
+    private void checkCompleted() {
+        for (IPFSSwapper pending : pendingTx) {
+            if (pending.getFuture().isDone()) {
+                pendingTx.remove(pending);
+                try {
+                    pending.setReceipt(pending.getFuture().get());
+                } catch (Exception e) {
+                    LOGGER.error(e.getMessage());
+                    errorTx.add(pending);
+                }
+                completedTx.add(pending);
+            }
+        }
+    }
 }

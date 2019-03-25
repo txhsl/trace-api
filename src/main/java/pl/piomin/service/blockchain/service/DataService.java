@@ -18,6 +18,7 @@ import pl.piomin.service.blockchain.contract.Data_sol_Data;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 import static org.web3j.tx.gas.DefaultGasProvider.GAS_LIMIT;
 import static org.web3j.tx.gas.DefaultGasProvider.GAS_PRICE;
@@ -388,6 +389,14 @@ public class DataService {
 
         LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
         return transactionReceipt;
+    }
+
+    public CompletableFuture<TransactionReceipt> writeAsync(String addr, Credentials credentials, String fileNo, String hash) throws Exception {
+        Data_sol_Data sc = Data_sol_Data.load(addr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+        CompletableFuture<TransactionReceipt> future = sc.writeDB(new Utf8String(fileNo), new Utf8String(hash)).sendAsync();
+
+        LOGGER.info("Transaction sent: " + future.toString());
+        return future;
     }
 
     public String read(String addr, Credentials credentials, String id) throws Exception {

@@ -26,6 +26,7 @@ import static org.web3j.tx.gas.DefaultGasProvider.GAS_PRICE;
 public class SystemService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SystemService.class);
+    private String sysAddress;
 
     private final Web3j web3j;
 
@@ -37,6 +38,8 @@ public class SystemService {
         } catch (Exception e) {
             LOGGER.error("Connection failed. " + e.getMessage());
         }
+
+        sysAddress = recover();
     }
 
     public String recover() {
@@ -50,45 +53,49 @@ public class SystemService {
         return null;
     }
 
-    public String reset(Credentials credentials) throws Exception {
+    public void reset(Credentials credentials) throws Exception {
         System_sol_System system = System_sol_System.deploy(web3j, credentials, GAS_PRICE, GAS_LIMIT).send();
         LOGGER.info("System Contract deployed: " + system.getContractAddress());
 
-        return system.getContractAddress();
+        this.sysAddress = system.getContractAddress();
     }
 
-    public TransactionReceipt addRC(String sysAddr, String name, Address rcAddr, Credentials credentials) throws Exception {
-        System_sol_System system = System_sol_System.load(sysAddr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+    public TransactionReceipt addRC(String name, Address rcAddr, Credentials credentials) throws Exception {
+        System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
         TransactionReceipt transactionReceipt = system.setIndex(new Utf8String(name), rcAddr).send();
 
         return transactionReceipt;
     }
 
-    public TransactionReceipt setRC(String sysAddr, String userAddr, String roleName, Credentials credentials) throws Exception {
-        System_sol_System system = System_sol_System.load(sysAddr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+    public TransactionReceipt setRC(String userAddr, String roleName, Credentials credentials) throws Exception {
+        System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
         TransactionReceipt transactionReceipt = system.register(new Address(userAddr), new Utf8String(roleName)).send();
 
         LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
         return transactionReceipt;
     }
 
-    public Address getRC(String sysAddr, Credentials credentials) throws Exception {
-        return getRC(sysAddr, credentials.getAddress(), credentials);
+    public Address getRC(Credentials credentials) throws Exception {
+        return getRC(credentials.getAddress(), credentials);
     }
 
-    public Address getRC(String sysAddr, String userAddr, Credentials credentials) throws Exception {
-        System_sol_System system = System_sol_System.load(sysAddr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+    public Address getRC(String userAddr, Credentials credentials) throws Exception {
+        System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
         String rcAddr = system.getRC(new Address(userAddr)).send().getValue();
 
         LOGGER.info("Read succeed: " + rcAddr);
         return new Address(rcAddr);
     }
 
-    public Address getIndex(String sysAddr, String roleName, Credentials credentials) throws Exception {
-        System_sol_System system = System_sol_System.load(sysAddr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+    public Address getIndex(String roleName, Credentials credentials) throws Exception {
+        System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
         String rcAddr = system.getIndex(new Utf8String(roleName)).send().getValue();
 
         LOGGER.info("Read succeed: " + rcAddr);
         return new Address(rcAddr);
+    }
+
+    public String getSysAddress() {
+        return sysAddress;
     }
 }
