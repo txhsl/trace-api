@@ -118,13 +118,13 @@ public class FileService {
         String hash = addResult.hash.toString();
 
         //Rename the file
-        if(target.renameTo(new File(folder.getPath() + '\\' +hash))) {
+        if(target.renameTo(new File(folder.getPath() + '\\' + hash))) {
             LOGGER.info("File uploaded, hash: " + hash);
             return hash;
         }
         else {
-            LOGGER.error("File upload failed, path: " + path);
-            throw new IOException();
+            LOGGER.error("File upload failed, already existed, path: " + path);
+            return hash;
         }
     }
 

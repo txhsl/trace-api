@@ -21,9 +21,9 @@ public class BlockchainService {
 
     private final Web3j web3j;
 
-    private ArrayList<IPFSSwapper> pendingTx;
-    private ArrayList<IPFSSwapper> completedTx;
-    private ArrayList<IPFSSwapper> errorTx;
+    private ArrayList<IPFSSwapper> pendingTx = new ArrayList<>();
+    private ArrayList<IPFSSwapper> completedTx = new ArrayList<>();
+    private ArrayList<IPFSSwapper> errorTx = new ArrayList<>();
 
     public BlockchainService(Web3j web3j) {
         this.web3j = web3j;
@@ -78,9 +78,11 @@ public class BlockchainService {
     }
 
     private void checkCompleted() {
+        ArrayList<IPFSSwapper> cached = new ArrayList<>();
+
         for (IPFSSwapper pending : pendingTx) {
             if (pending.getFuture().isDone()) {
-                pendingTx.remove(pending);
+                cached.add(pending);
                 try {
                     pending.setReceipt(pending.getFuture().get());
                 } catch (Exception e) {
@@ -89,6 +91,10 @@ public class BlockchainService {
                 }
                 completedTx.add(pending);
             }
+        }
+
+        for (IPFSSwapper completed : cached) {
+            pendingTx.remove(completed);
         }
     }
 }
