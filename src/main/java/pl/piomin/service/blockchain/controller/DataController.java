@@ -96,7 +96,19 @@ public class DataController {
 
         //Try IPFS
         if (result == null) {
-            String hash = dataService.read(scAddr.toString(), userService.getCurrent(), data.getId());
+            //Try cache
+            String hash = null;
+            ArrayList<IPFSSwapper> pending = blockchainService.getPending();
+            for (IPFSSwapper tx : pending) {
+                if (tx.getFileName().equals(dataService.getFileNum(scAddr.toString(), data.getId(), userService.getCurrent()))) {
+                    hash = tx.getFileHash();
+                }
+            }
+
+            //Try Eth
+            if (hash == null) {
+                hash = dataService.read(scAddr.toString(), userService.getCurrent(), data.getId());
+            }
 
             FileSwapper file = fileService.input(fileService.download(hash));
             if (fileService.checkFile(file.getFileName(), dataService.getFileNum(scAddr.toString(), data.getId(), userService.getCurrent()))) {
@@ -120,10 +132,38 @@ public class DataController {
         for (String property : data.getPropertyNames()) {
             Address scAddr = userService.getManaged(rcAddr.toString(), property);
             Map<String, String> result =  new HashMap<>();
-
             if (dataService.checkReader(scAddr.toString(), rcAddr, userService.getCurrent())) {
                 for (String id : data.getIds()) {
-                    result.put(id, dataService.read(scAddr.toString(), userService.getCurrent(), id));
+                    //Try the cache
+                    String temp = fileService.query(property, id);
+
+                    //Try IPFS
+                    if (temp == null) {
+                        //Try cache
+                        String hash = null;
+                        ArrayList<IPFSSwapper> pending = blockchainService.getPending();
+                        for (IPFSSwapper tx : pending) {
+                            if (tx.getFileName().equals(dataService.getFileNum(scAddr.toString(), id, userService.getCurrent()))) {
+                                hash = tx.getFileHash();
+                            }
+                        }
+
+                        //Try Eth
+                        if (hash == null) {
+                            hash = dataService.read(scAddr.toString(), userService.getCurrent(), id);
+                        }
+
+                        FileSwapper file = fileService.input(fileService.download(hash));
+                        if (fileService.checkFile(file.getFileName(), dataService.getFileNum(scAddr.toString(), id, userService.getCurrent()))) {
+                            result.put(id, file.getContent(id));
+                        }
+                        else {
+                            throw new IOException();
+                        }
+                    }
+                    else {
+                        result.put(id, temp);
+                    }
                 }
             }
 
