@@ -5,6 +5,7 @@ import org.web3j.abi.datatypes.Address;
 import org.web3j.crypto.CipherException;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import pl.piomin.service.blockchain.PropertyType;
+import pl.piomin.service.blockchain.model.Contract;
 import pl.piomin.service.blockchain.model.PermissionSwapper;
 import pl.piomin.service.blockchain.model.Result;
 import pl.piomin.service.blockchain.model.UserSwapper;
@@ -85,13 +86,13 @@ public class UserController {
 
     //For query
     @GetMapping("/getManaged")
-    public Map<String, String> getManaged() throws Exception {
+    public Map<String, Contract> getManaged() throws Exception {
         Address rcAddr = systemService.getRC(userService.getCurrent());
         return userService.getManagedAll(rcAddr.toString());
     }
 
     @GetMapping("/getOwned")
-    public Map<String, String> getOwned() throws Exception {
+    public Map<String, Contract> getOwned() throws Exception {
         Address rcAddr = systemService.getRC(userService.getCurrent());
         return userService.getOwnedAll(rcAddr.toString());
     }

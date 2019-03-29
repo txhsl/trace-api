@@ -13,7 +13,9 @@ import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import pl.piomin.service.blockchain.RoleType;
+import pl.piomin.service.blockchain.contract.Role_sol_Role;
 import pl.piomin.service.blockchain.contract.System_sol_System;
+import pl.piomin.service.blockchain.model.Contract;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -100,14 +102,25 @@ public class SystemService {
         return new Address(rcAddr);
     }
 
-    public Map<String, String> getRoleAll(Credentials credentials) throws Exception {
-        Map<String, String> result = new HashMap<>();
+    public Map<String, Contract> getRoleAll(Credentials credentials) throws Exception {
+        Map<String, Contract> result = new HashMap<>();
         System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
 
         for (String role : RoleType.Types) {
             String rcAddr = system.getIndex(new Utf8String(role)).send().getValue();
             if (!rcAddr.equals("")) {
-                result.putIfAbsent(role, rcAddr);
+                Contract swapper = new Contract();
+
+                Role_sol_Role rc = Role_sol_Role.load(rcAddr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+
+                swapper.setAddress(rcAddr);
+                if (rc.getTransactionReceipt().isPresent()) {
+                    TransactionReceipt receipt = rc.getTransactionReceipt().get();
+                    swapper.setTxHash(receipt.getTransactionHash());
+                    swapper.setBlockHash(receipt.getBlockHash());
+                    swapper.setBlockNumber(receipt.getBlockNumberRaw());
+                }
+                result.putIfAbsent(role, swapper);
             }
         }
 

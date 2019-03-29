@@ -5,6 +5,7 @@ import org.web3j.abi.datatypes.Address;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import pl.piomin.service.blockchain.PropertyType;
 import pl.piomin.service.blockchain.RoleType;
+import pl.piomin.service.blockchain.model.Contract;
 import pl.piomin.service.blockchain.model.Result;
 import pl.piomin.service.blockchain.model.RoleSwapper;
 import pl.piomin.service.blockchain.service.*;
@@ -51,12 +52,17 @@ public class SystemController {
 
     //For query
     @GetMapping("/getRoles")
-    public Map<String, String> getRoles() throws Exception {
+    public Map<String, Contract> getRoles() throws Exception {
         return systemService.getRoleAll(userService.getCurrent());
     }
 
-    @GetMapping("/getProperties")
-    public String[] getProperties() {
+    @GetMapping("/getRoleNames")
+    public String[] getRoleNames() {
+        return RoleType.Types.toArray(new String[0]);
+    }
+
+    @GetMapping("/getPropertyNames")
+    public String[] getPropertyNames() {
         return PropertyType.Types.toArray(new String[0]);
     }
 }

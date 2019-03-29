@@ -18,6 +18,7 @@ import pl.piomin.service.blockchain.RoleType;
 import pl.piomin.service.blockchain.contract.Data_sol_Data;
 import pl.piomin.service.blockchain.contract.Role_sol_Role;
 import pl.piomin.service.blockchain.contract.System_sol_System;
+import pl.piomin.service.blockchain.model.Contract;
 
 import java.io.File;
 import java.io.IOException;
@@ -451,14 +452,25 @@ public class UserService {
         return new Address(scAddr);
     }
 
-    public Map<String, String> getOwnedAll(String rcAddr) throws Exception {
-        Map<String, String> result = new HashMap<>();
+    public Map<String, Contract> getOwnedAll(String rcAddr) throws Exception {
+        Map<String, Contract> result = new HashMap<>();
         Role_sol_Role rc = Role_sol_Role.load(rcAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
 
         for (String property : PropertyType.Types) {
             String scAddr = rc.getOwned(new Utf8String(property)).send().getValue();
             if (!scAddr.equals("0x0000000000000000000000000000000000000000")) {
-                result.putIfAbsent(property, scAddr);
+                Contract swapper = new Contract();
+
+                Data_sol_Data sc = Data_sol_Data.load(scAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
+
+                swapper.setAddress(scAddr);
+                if (sc.getTransactionReceipt().isPresent()) {
+                    TransactionReceipt receipt = sc.getTransactionReceipt().get();
+                    swapper.setTxHash(receipt.getTransactionHash());
+                    swapper.setBlockHash(receipt.getBlockHash());
+                    swapper.setBlockNumber(receipt.getBlockNumberRaw());
+                }
+                result.putIfAbsent(property, swapper);
             }
         }
 
@@ -473,14 +485,25 @@ public class UserService {
         return new Address(scAddr);
     }
 
-    public Map<String, String> getManagedAll(String rcAddr) throws Exception {
-        Map<String, String> result = new HashMap<>();
+    public Map<String, Contract> getManagedAll(String rcAddr) throws Exception {
+        Map<String, Contract> result = new HashMap<>();
         Role_sol_Role rc = Role_sol_Role.load(rcAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
 
         for (String property : PropertyType.Types) {
             String scAddr = rc.getManaged(new Utf8String(property)).send().getValue();
             if (!scAddr.equals("0x0000000000000000000000000000000000000000")) {
-                result.putIfAbsent(property, scAddr);
+                Contract swapper = new Contract();
+
+                Data_sol_Data sc = Data_sol_Data.load(scAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
+
+                swapper.setAddress(scAddr);
+                if (sc.getTransactionReceipt().isPresent()) {
+                    TransactionReceipt receipt = sc.getTransactionReceipt().get();
+                    swapper.setTxHash(receipt.getTransactionHash());
+                    swapper.setBlockHash(receipt.getBlockHash());
+                    swapper.setBlockNumber(receipt.getBlockNumberRaw());
+                }
+                result.putIfAbsent(property, swapper);
             }
         }
 
