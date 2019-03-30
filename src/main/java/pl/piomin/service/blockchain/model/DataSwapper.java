@@ -10,6 +10,7 @@ public class DataSwapper {
     private String id;
     private String propertyName;
     private String data;
+    private String status;
 
     public DataSwapper() {
 
@@ -47,5 +48,13 @@ public class DataSwapper {
 
     public void setPropertyName(String propertyName) {
         this.propertyName = propertyName;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

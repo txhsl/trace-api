@@ -13,13 +13,13 @@ public class DataMultipleSwapper {
 
     private String[] propertyNames;
 
-    private Map<String, Map<String, String>> data;
+    private Map<String, Map<String, DataSwapper>> data;
 
     public DataMultipleSwapper() {
 
     }
 
-    public Map<String, Map<String, String>>getData() {
+    public Map<String, Map<String, DataSwapper>>getData() {
         return data;
     }
 
@@ -31,7 +31,7 @@ public class DataMultipleSwapper {
         return propertyNames;
     }
 
-    public void setData(Map<String, Map<String, String>> data) {
+    public void setData(Map<String, Map<String, DataSwapper>> data) {
         this.data = data;
     }
 
