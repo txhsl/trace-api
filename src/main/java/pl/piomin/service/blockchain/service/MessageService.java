@@ -44,14 +44,14 @@ public class MessageService {
         }
     }
 
-    public boolean markAccepted(String address, int index) {
+    public Message markAccepted(String address, int index) {
         Message msg = mailbox.get(address).get(index);
         if (msg.isAccepted()) {
-            return false;
+            return null;
         }
         else {
             msg.setAccepted(true);
-            return true;
+            return msg;
         }
     }
 }

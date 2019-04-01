@@ -8,7 +8,7 @@ package pl.piomin.service.blockchain.model;
 public class PermissionSwapper {
 
     private String propertyName;
-
+    private boolean isRead;
     private String target;
 
     public PermissionSwapper() {
@@ -29,5 +29,13 @@ public class PermissionSwapper {
 
     public void setTarget(String target) {
         this.target = target;
+    }
+
+    public boolean getIsRead() {
+        return isRead;
+    }
+
+    public void setIsRead(boolean read) {
+        isRead = read;
     }
 }

@@ -1,5 +1,8 @@
 package pl.piomin.service.blockchain.model;
 
+import org.web3j.protocol.core.RemoteCall;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
+
 /**
  * @author: HuShili
  * @date: 2019/3/29
@@ -9,11 +12,13 @@ package pl.piomin.service.blockchain.model;
 public class Message {
     private PermissionSwapper permission;
     private String to;
+    private RemoteCall<TransactionReceipt> request;
+    private TransactionReceipt receipt;
     private boolean isAccepted;
     private boolean isRead;
 
-    public Message() {
-
+    public Message(PermissionSwapper permissionSwapper) {
+        this.permission = permissionSwapper;
     }
 
     public void setRead(boolean read) {
@@ -42,5 +47,21 @@ public class Message {
 
     public void setTo(String to) {
         this.to = to;
+    }
+
+    public RemoteCall<TransactionReceipt> getRequest() {
+        return request;
+    }
+
+    public void setRequest(RemoteCall<TransactionReceipt> request) {
+        this.request = request;
+    }
+
+    public void setReceipt(TransactionReceipt receipt) {
+        this.receipt = receipt;
+    }
+
+    public TransactionReceipt getReceipt() {
+        return receipt;
     }
 }

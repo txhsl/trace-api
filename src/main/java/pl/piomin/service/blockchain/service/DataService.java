@@ -383,6 +383,11 @@ public class DataService {
         return sc.checkWriter(rcAddr).send().getValue();
     }
 
+    public String getOwner(String addr, Credentials credentials) throws Exception {
+        Data_sol_Data sc = Data_sol_Data.load(addr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+        return sc.getOwner().send().getValue();
+    }
+
     public TransactionReceipt write(String addr, Credentials credentials, String fileNo, String hash) throws Exception {
         Data_sol_Data sc = Data_sol_Data.load(addr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
         TransactionReceipt transactionReceipt = sc.writeDB(new Utf8String(fileNo), new Utf8String(hash)).send();

@@ -10,15 +10,14 @@ import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.crypto.*;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.RemoteCall;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.utils.Numeric;
 import pl.piomin.service.blockchain.PropertyType;
 import pl.piomin.service.blockchain.RoleType;
-import pl.piomin.service.blockchain.contract.Data_sol_Data;
 import pl.piomin.service.blockchain.contract.Role_sol_Role;
 import pl.piomin.service.blockchain.contract.System_sol_System;
-import pl.piomin.service.blockchain.model.Contract;
 
 import java.io.File;
 import java.io.IOException;
@@ -424,24 +423,26 @@ public class UserService {
         Role_sol_Role rc = Role_sol_Role.load(rcAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
         TransactionReceipt transactionReceipt = rc.setOwned(new Utf8String(name), scAddr).send();
 
-        //Add permission for the role
-        Data_sol_Data sc = Data_sol_Data.load(scAddr.toString(), web3j,current, GAS_PRICE, GAS_LIMIT);
-        TransactionReceipt tr = sc.setWriter(new Address(rcAddr)).send();
+        LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
+        return transactionReceipt;
+    }
+
+    public RemoteCall<TransactionReceipt> setOwnedAsync(String rcAddr, String name, Address scAddr) throws Exception {
+        Role_sol_Role rc = Role_sol_Role.load(rcAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
+        return rc.setOwned(new Utf8String(name), scAddr);
+    }
+
+    private TransactionReceipt setManaged(String rcAddr, String name, Address scAddr) throws Exception {
+        Role_sol_Role rc = Role_sol_Role.load(rcAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
+        TransactionReceipt transactionReceipt = rc.setManaged(new Utf8String(name), scAddr).send();
 
         LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
         return transactionReceipt;
     }
 
-    public TransactionReceipt setManaged(String rcAddr, String name, Address scAddr) throws Exception {
+    public RemoteCall<TransactionReceipt> setManagedAsync(String rcAddr, String name, Address scAddr) throws Exception {
         Role_sol_Role rc = Role_sol_Role.load(rcAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
-        TransactionReceipt transactionReceipt = rc.setManaged(new Utf8String(name), scAddr).send();
-
-        //Add permission for the role
-        Data_sol_Data sc = Data_sol_Data.load(scAddr.toString(), web3j,current, GAS_PRICE, GAS_LIMIT);
-        TransactionReceipt tr = sc.addReader(new Address(rcAddr)).send();
-
-        LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
-        return transactionReceipt;
+        return rc.setManaged(new Utf8String(name), scAddr);
     }
 
     public Address getOwned(String rcAddr, String name) throws Exception {
@@ -452,25 +453,14 @@ public class UserService {
         return new Address(scAddr);
     }
 
-    public Map<String, Contract> getOwnedAll(String rcAddr) throws Exception {
-        Map<String, Contract> result = new HashMap<>();
+    public Map<String, String> getOwnedAll(String rcAddr) throws Exception {
+        Map<String, String> result = new HashMap<>();
         Role_sol_Role rc = Role_sol_Role.load(rcAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
 
         for (String property : PropertyType.Types) {
             String scAddr = rc.getOwned(new Utf8String(property)).send().getValue();
             if (!scAddr.equals("0x0000000000000000000000000000000000000000")) {
-                Contract swapper = new Contract();
-
-                Data_sol_Data sc = Data_sol_Data.load(scAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
-
-                swapper.setAddress(scAddr);
-                if (sc.getTransactionReceipt().isPresent()) {
-                    TransactionReceipt receipt = sc.getTransactionReceipt().get();
-                    swapper.setTxHash(receipt.getTransactionHash());
-                    swapper.setBlockHash(receipt.getBlockHash());
-                    swapper.setBlockNumber(receipt.getBlockNumberRaw());
-                }
-                result.putIfAbsent(property, swapper);
+                result.putIfAbsent(property, scAddr);
             }
         }
 
@@ -485,25 +475,14 @@ public class UserService {
         return new Address(scAddr);
     }
 
-    public Map<String, Contract> getManagedAll(String rcAddr) throws Exception {
-        Map<String, Contract> result = new HashMap<>();
+    public Map<String, String> getManagedAll(String rcAddr) throws Exception {
+        Map<String, String> result = new HashMap<>();
         Role_sol_Role rc = Role_sol_Role.load(rcAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
 
         for (String property : PropertyType.Types) {
             String scAddr = rc.getManaged(new Utf8String(property)).send().getValue();
             if (!scAddr.equals("0x0000000000000000000000000000000000000000")) {
-                Contract swapper = new Contract();
-
-                Data_sol_Data sc = Data_sol_Data.load(scAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
-
-                swapper.setAddress(scAddr);
-                if (sc.getTransactionReceipt().isPresent()) {
-                    TransactionReceipt receipt = sc.getTransactionReceipt().get();
-                    swapper.setTxHash(receipt.getTransactionHash());
-                    swapper.setBlockHash(receipt.getBlockHash());
-                    swapper.setBlockNumber(receipt.getBlockNumberRaw());
-                }
-                result.putIfAbsent(property, swapper);
+                result.putIfAbsent(property, scAddr);
             }
         }
 

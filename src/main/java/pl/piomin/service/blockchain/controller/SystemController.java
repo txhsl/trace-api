@@ -5,9 +5,9 @@ import org.web3j.abi.datatypes.Address;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import pl.piomin.service.blockchain.PropertyType;
 import pl.piomin.service.blockchain.RoleType;
-import pl.piomin.service.blockchain.model.Contract;
 import pl.piomin.service.blockchain.model.Result;
 import pl.piomin.service.blockchain.model.RoleSwapper;
+import pl.piomin.service.blockchain.model.UserSwapper;
 import pl.piomin.service.blockchain.service.*;
 
 import java.util.Map;
@@ -36,6 +36,10 @@ public class SystemController {
         boolean rs = dataService.resetPermission(roleaAddrs, dataAddrs);
         return new Result(rr && rs);
     }
+    @PostMapping("/register")
+    public TransactionReceipt register(@RequestBody UserSwapper user) throws Exception {
+        return systemService.setRC(user.getAddress(), user.getAddress(), userService.getCurrent());
+    }
     //Normal
     @PostMapping("/requestRole")
     public RoleSwapper requestRole(@RequestBody RoleSwapper role) throws Exception {
@@ -52,7 +56,7 @@ public class SystemController {
 
     //For query
     @GetMapping("/getRoles")
-    public Map<String, Contract> getRoles() throws Exception {
+    public Map<String, String> getRoles() throws Exception {
         return systemService.getRoleAll(userService.getCurrent());
     }
 
