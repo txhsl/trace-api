@@ -9,7 +9,7 @@ import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.*;
 import pl.piomin.service.blockchain.model.BlockchainTransaction;
-import pl.piomin.service.blockchain.model.IPFSSwapper;
+import pl.piomin.service.blockchain.model.TaskSwapper;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -22,9 +22,9 @@ public class BlockchainService {
 
     private final Web3j web3j;
 
-    private ArrayList<IPFSSwapper> pendingTx = new ArrayList<>();
-    private ArrayList<IPFSSwapper> completedTx = new ArrayList<>();
-    private ArrayList<IPFSSwapper> errorTx = new ArrayList<>();
+    private ArrayList<TaskSwapper> pendingTx = new ArrayList<>();
+    private ArrayList<TaskSwapper> completedTx = new ArrayList<>();
+    private ArrayList<TaskSwapper> errorTx = new ArrayList<>();
 
     public BlockchainService(Web3j web3j) {
         this.web3j = web3j;
@@ -88,28 +88,28 @@ public class BlockchainService {
         return result;
     }
 
-    public void addPending(IPFSSwapper future) {
+    public void addPending(TaskSwapper future) {
         pendingTx.add(future);
     }
 
-    public ArrayList<IPFSSwapper> getCompleted() {
+    public ArrayList<TaskSwapper> getCompleted() {
         checkCompleted();
         return completedTx;
     }
 
-    public ArrayList<IPFSSwapper> getPending() {
+    public ArrayList<TaskSwapper> getPending() {
         checkCompleted();
         return pendingTx;
     }
 
-    public ArrayList<IPFSSwapper> getErrorTx() {
+    public ArrayList<TaskSwapper> getErrorTx() {
         return errorTx;
     }
 
     private void checkCompleted() {
-        ArrayList<IPFSSwapper> cached = new ArrayList<>();
+        ArrayList<TaskSwapper> cached = new ArrayList<>();
 
-        for (IPFSSwapper pending : pendingTx) {
+        for (TaskSwapper pending : pendingTx) {
             if (pending.getFuture().isDone()) {
                 cached.add(pending);
                 try {
@@ -122,8 +122,12 @@ public class BlockchainService {
             }
         }
 
-        for (IPFSSwapper completed : cached) {
+        for (TaskSwapper completed : cached) {
             pendingTx.remove(completed);
         }
+    }
+
+    public int getHight() throws IOException {
+        return web3j.ethBlockNumber().send().getBlockNumber().intValue();
     }
 }

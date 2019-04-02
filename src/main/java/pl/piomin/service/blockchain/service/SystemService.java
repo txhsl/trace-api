@@ -12,6 +12,7 @@ import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import pl.piomin.service.blockchain.PropertyType;
 import pl.piomin.service.blockchain.RoleType;
 import pl.piomin.service.blockchain.contract.System_sol_System;
 
@@ -66,7 +67,15 @@ public class SystemService {
 
     public TransactionReceipt addRC(String name, Address rcAddr, Credentials credentials) throws Exception {
         System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
-        TransactionReceipt transactionReceipt = system.setIndex(new Utf8String(name), rcAddr).send();
+        TransactionReceipt transactionReceipt = system.setRcIndex(new Utf8String(name), rcAddr).send();
+
+        LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
+        return transactionReceipt;
+    }
+
+    public TransactionReceipt addSC(String name, Address scAddr, Credentials credentials) throws Exception {
+        System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+        TransactionReceipt transactionReceipt = system.setScIndex(new Utf8String(name), scAddr).send();
 
         LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
         return transactionReceipt;
@@ -80,24 +89,32 @@ public class SystemService {
         return transactionReceipt;
     }
 
-    public Address getRC(Credentials credentials) throws Exception {
+    public String getRC(Credentials credentials) throws Exception {
         return getRC(credentials.getAddress(), credentials);
     }
 
-    public Address getRC(String userAddr, Credentials credentials) throws Exception {
+    public String getRC(String userAddr, Credentials credentials) throws Exception {
         System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
         String rcAddr = system.getRC(new Address(userAddr)).send().getValue();
 
         LOGGER.info("Read succeed: " + rcAddr);
-        return new Address(rcAddr);
+        return rcAddr;
     }
 
-    public Address getIndex(String roleName, Credentials credentials) throws Exception {
+    public String getSC(String propertyName, Credentials credentials) throws Exception {
         System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
-        String rcAddr = system.getIndex(new Utf8String(roleName)).send().getValue();
+        String scAddr = system.getScIndex(new Utf8String(propertyName)).send().getValue();
+
+        LOGGER.info("Read succeed: " + scAddr);
+        return scAddr;
+    }
+
+    public String getIndex(String roleName, Credentials credentials) throws Exception {
+        System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+        String rcAddr = system.getRcIndex(new Utf8String(roleName)).send().getValue();
 
         LOGGER.info("Read succeed: " + rcAddr);
-        return new Address(rcAddr);
+        return rcAddr;
     }
 
     public Map<String, String> getRoleAll(Credentials credentials) throws Exception {
@@ -105,9 +122,23 @@ public class SystemService {
         System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
 
         for (String role : RoleType.Types) {
-            String rcAddr = system.getIndex(new Utf8String(role)).send().getValue();
+            String rcAddr = system.getRcIndex(new Utf8String(role)).send().getValue();
             if (!rcAddr.equals("")) {
                 result.putIfAbsent(role, rcAddr);
+            }
+        }
+
+        return result;
+    }
+
+    public Map<String, String> getPropertyAll(Credentials credentials) throws Exception {
+        Map<String, String> result = new HashMap<>();
+        System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+
+        for (String property : PropertyType.Types) {
+            String scAddr = system.getScIndex(new Utf8String(property)).send().getValue();
+            if (!scAddr.equals("")) {
+                result.putIfAbsent(property, scAddr);
             }
         }
 

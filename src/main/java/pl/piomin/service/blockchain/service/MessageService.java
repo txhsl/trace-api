@@ -21,11 +21,16 @@ public class MessageService {
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageService.class);
 
     private Map<String, ArrayList<Message>> mailbox = new HashMap<>();
+    private Map<String, ArrayList<Message>> receipts = new HashMap<>();
 
     public MessageService() {}
 
     public boolean add(Message msg) {
+        if (!mailbox.keySet().contains(msg.getTo())) {
+            mailbox.put(msg.getTo(), new ArrayList<>());
+        }
         mailbox.get(msg.getTo()).add(msg);
+        LOGGER.info("Message added, to: " + msg.getTo());
         return true;
     }
 
@@ -40,6 +45,7 @@ public class MessageService {
         }
         else {
             msg.setRead(true);
+            mailbox.get(address).set(index, msg);
             return true;
         }
     }
@@ -53,5 +59,18 @@ public class MessageService {
             msg.setAccepted(true);
             return msg;
         }
+    }
+
+    public boolean addReceipt(Message msg) {
+        if (!receipts.keySet().contains(msg.getTo())) {
+            receipts.put(msg.getTo(), new ArrayList<>());
+        }
+        receipts.get(msg.getTo()).add(msg);
+        LOGGER.info("Receipt added, to: " + msg.getTo());
+        return true;
+    }
+
+    public ArrayList<Message> getReceipt(String address) {
+        return receipts.get(address);
     }
 }

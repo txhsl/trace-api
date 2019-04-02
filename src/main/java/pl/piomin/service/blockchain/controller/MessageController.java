@@ -1,16 +1,16 @@
 package pl.piomin.service.blockchain.controller;
 
 import org.springframework.web.bind.annotation.*;
-import org.web3j.abi.datatypes.Address;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import pl.piomin.service.blockchain.model.Message;
 import pl.piomin.service.blockchain.model.Result;
-import pl.piomin.service.blockchain.service.DataService;
-import pl.piomin.service.blockchain.service.MessageService;
-import pl.piomin.service.blockchain.service.SystemService;
-import pl.piomin.service.blockchain.service.UserService;
+import pl.piomin.service.blockchain.model.TaskSwapper;
+import pl.piomin.service.blockchain.service.*;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/message")
@@ -20,25 +20,36 @@ public class MessageController {
     private final SystemService systemService;
     private final UserService userService;
     private final DataService dataService;
+    private final BlockchainService blockchainService;
 
     public MessageController(MessageService messageService, SystemService systemService,
-                             UserService userService, DataService dataService) {
+                             UserService userService, DataService dataService,
+                             BlockchainService blockchainService) {
         this.messageService = messageService;
         this.systemService = systemService;
         this.userService = userService;
         this.dataService = dataService;
+        this.blockchainService = blockchainService;
     }
 
     @Deprecated
     @PostMapping("/send")
     public Result send(@RequestBody Message msg) {
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        msg.setTime(df.format(new Date()));
         return new Result(messageService.add(msg));
     }
 
     @GetMapping("/receive")
     public Message[] receive() {
         ArrayList<Message> result = messageService.get(userService.getCurrent().getAddress());
-        return result.toArray(new Message[0]);
+        return result == null ? new Message[0] : result.toArray(new Message[0]);
+    }
+
+    @GetMapping("/receipt")
+    public Message[] getReceipt() {
+        ArrayList<Message> result = messageService.getReceipt(userService.getCurrent().getAddress());
+        return result == null ? new Message[0] : result.toArray(new Message[0]);
     }
 
     @PutMapping("/read/{index}")
@@ -47,24 +58,38 @@ public class MessageController {
     }
 
     @PutMapping("/accept/{index}")
-    public TransactionReceipt accept(@PathVariable int index) throws Exception {
+    public boolean accept(@PathVariable int index) throws Exception {
         Message msg = messageService.markAccepted(userService.getCurrent().getAddress(), index);
-        TransactionReceipt receipt;
 
-        Address rcAddr = systemService.getRC(userService.getCurrent());
-        Address toAddr = systemService.getRC(msg.getPermission().getTarget(), userService.getCurrent());
-        Address scAddr = userService.getOwned(rcAddr.toString(), msg.getPermission().getPropertyName());
+        String rcAddr = systemService.getRC(userService.getCurrent());
+        String toAddr = systemService.getRC(msg.getPermission().getTarget(), userService.getCurrent());
+        String scAddr = userService.getOwned(rcAddr, msg.getPermission().getPropertyName());
+
+        //Handle permit
+        TaskSwapper permissionTask = new TaskSwapper(msg.getTo());
         if (msg.getPermission().getIsRead()) {
-            receipt = dataService.addReader(scAddr.toString(), userService.getCurrent(), toAddr.toString());
+            permissionTask.setTaskContent(msg.getPermission().getPropertyName() + " Read Permission");
+            permissionTask.setFuture(dataService.addReaderAsync(scAddr, userService.getCurrent(), toAddr));
         }
         else {
-            receipt = dataService.setWriter(scAddr.toString(), userService.getCurrent(), toAddr.toString());
+            permissionTask.setTaskContent(msg.getPermission().getPropertyName() + " Write Permission");
+            permissionTask.setFuture(dataService.setWriterAsync(scAddr, userService.getCurrent(), toAddr));
         }
+        blockchainService.addPending(permissionTask);
 
-        msg.setReceipt(msg.getRequest().send());
+        //Handle request
+        TaskSwapper requestTask = new TaskSwapper(msg.getTo());
+        CompletableFuture<TransactionReceipt> future = msg.getRequest().sendAsync();
+        requestTask.setTaskContent(msg.getPermission().getPropertyName() + " Permission Request");
+        requestTask.setFuture(future);
+        blockchainService.addPending(requestTask);
+
+        //Send receipt
+        msg.setReceipt(future);
         msg.setRead(false);
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        msg.setTime(df.format(new Date()));
         msg.setTo(msg.getPermission().getTarget());
-        messageService.add(msg);
-        return receipt;
+        return messageService.addReceipt(msg);
     }
 }

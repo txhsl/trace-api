@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import pl.piomin.service.blockchain.model.FileSwapper;
-import pl.piomin.service.blockchain.model.IPFSSwapper;
+import pl.piomin.service.blockchain.model.TaskSwapper;
 
 import java.io.*;
 import java.util.HashMap;
@@ -47,9 +47,9 @@ public class FileService {
         }
     }
 
-    public IPFSSwapper record(String propertyName, String fileName, String id, String value) throws IOException {
+    public TaskSwapper record(String propertyName, String fileName, String id, String value) throws IOException {
         FileSwapper file;
-        IPFSSwapper receipt = null;
+        TaskSwapper receipt = null;
         if (cache.containsKey(propertyName)) {
              file = cache.get(propertyName);
         }
@@ -60,7 +60,7 @@ public class FileService {
 
         if (!file.getFileName().equals(fileName)) {
             cache.remove(propertyName);
-            receipt = new IPFSSwapper(file.getFileName(), upload(output(file)));
+            receipt = new TaskSwapper(file.getFileName(), upload(output(file)));
             file = new FileSwapper();
             file.setFileName(fileName);
         }

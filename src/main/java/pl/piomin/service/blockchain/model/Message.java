@@ -1,7 +1,12 @@
 package pl.piomin.service.blockchain.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.web3j.protocol.core.RemoteCall;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
+
+import java.io.Serializable;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author: HuShili
@@ -12,13 +17,20 @@ import org.web3j.protocol.core.methods.response.TransactionReceipt;
 public class Message {
     private PermissionSwapper permission;
     private String to;
+    private String time;
+    @JsonIgnore
     private RemoteCall<TransactionReceipt> request;
-    private TransactionReceipt receipt;
+    @JsonIgnore
+    private CompletableFuture<TransactionReceipt> receipt;
     private boolean isAccepted;
     private boolean isRead;
 
-    public Message(PermissionSwapper permissionSwapper) {
+    public Message(PermissionSwapper permissionSwapper, RemoteCall<TransactionReceipt> request,
+                   String to, String time) {
         this.permission = permissionSwapper;
+        this.request = request;
+        this.to = to;
+        this.time = time;
     }
 
     public void setRead(boolean read) {
@@ -41,12 +53,24 @@ public class Message {
         return permission;
     }
 
+    public void setPermission(PermissionSwapper permission) {
+        this.permission = permission;
+    }
+
     public String getTo() {
         return to;
     }
 
     public void setTo(String to) {
         this.to = to;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
     }
 
     public RemoteCall<TransactionReceipt> getRequest() {
@@ -57,11 +81,12 @@ public class Message {
         this.request = request;
     }
 
-    public void setReceipt(TransactionReceipt receipt) {
+    public void setReceipt(CompletableFuture<TransactionReceipt> receipt) {
         this.receipt = receipt;
     }
 
-    public TransactionReceipt getReceipt() {
+    public CompletableFuture<TransactionReceipt> getReceipt() {
         return receipt;
     }
+
 }

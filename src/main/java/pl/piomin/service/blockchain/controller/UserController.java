@@ -9,12 +9,11 @@ import pl.piomin.service.blockchain.model.Message;
 import pl.piomin.service.blockchain.model.PermissionSwapper;
 import pl.piomin.service.blockchain.model.Result;
 import pl.piomin.service.blockchain.model.UserSwapper;
-import pl.piomin.service.blockchain.service.DataService;
-import pl.piomin.service.blockchain.service.MessageService;
-import pl.piomin.service.blockchain.service.SystemService;
-import pl.piomin.service.blockchain.service.UserService;
+import pl.piomin.service.blockchain.service.*;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 
 @RestController
@@ -25,13 +24,16 @@ public class UserController {
     private final UserService userService;
     private final DataService dataService;
     private final MessageService messageService;
+    private final BlockchainService blockchainService;
 
     public UserController(SystemService systemService, UserService userService,
-                          DataService dataService, MessageService messageService) {
+                          DataService dataService, MessageService messageService,
+                          BlockchainService blockchainService) {
         this.systemService = systemService;
         this.userService = userService;
         this.dataService = dataService;
         this.messageService = messageService;
+        this.blockchainService = blockchainService;
     }
 
     //Normal
@@ -49,70 +51,50 @@ public class UserController {
     //RC owner
     @PostMapping("/addProperty")
     public TransactionReceipt addProperty(@RequestBody PermissionSwapper permission) throws Exception {
-        Address rcAddr = systemService.getRC(userService.getCurrent());
+        String rcAddr = systemService.getRC(userService.getCurrent());
         String scAddr = dataService.addProperty(userService.getCurrent());
         PropertyType.Types.add(permission.getPropertyName());
+        TransactionReceipt receipt = systemService.addSC(permission.getPropertyName(), new Address(scAddr), userService.getCurrent());
 
-        return userService.setOwned(rcAddr.toString(), permission.getPropertyName(), new Address(scAddr));
+        return userService.setOwned(rcAddr, permission.getPropertyName(), new Address(scAddr));
     }
 
     @PostMapping("/requestReader")
     public Result requestReader(@RequestBody PermissionSwapper permission) throws Exception {
-        Address rcAddr = systemService.getRC(userService.getCurrent());
-        Address scAddr = userService.getOwned(rcAddr.toString(), permission.getPropertyName());
-        Address targetRC = systemService.getRC(permission.getTarget(), userService.getCurrent());
+        String scAddr = systemService.getSC(permission.getPropertyName(), userService.getCurrent());
+        String targetRC = systemService.getRC(permission.getTarget(), userService.getCurrent());
 
         permission.setIsRead(true);
-        Message msg = new Message(permission);
-        msg.setRequest(userService.setManagedAsync(targetRC.toString(), permission.getPropertyName(), scAddr));
-        msg.setTo(dataService.getOwner(scAddr.toString(), userService.getCurrent()));
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Message msg = new Message(permission, userService.setManagedAsync(targetRC, permission.getPropertyName(), new Address(scAddr)),
+                dataService.getOwner(scAddr, userService.getCurrent()), df.format(new Date()));
         messageService.add(msg);
         return new Result(true);
     }
 
     @PostMapping("/requestWriter")
     public Result requestWriter(@RequestBody PermissionSwapper permission) throws Exception {
-        Address rcAddr = systemService.getRC(userService.getCurrent());
-        Address scAddr = userService.getOwned(rcAddr.toString(), permission.getPropertyName());
-        Address targetRC = systemService.getRC(permission.getTarget(), userService.getCurrent());
+        String scAddr = systemService.getSC(permission.getPropertyName(), userService.getCurrent());
+        String targetRC = systemService.getRC(permission.getTarget(), userService.getCurrent());
 
         permission.setIsRead(false);
-        Message msg = new Message(permission);
-        msg.setRequest(userService.setOwnedAsync(targetRC.toString(), permission.getPropertyName(), scAddr));
-        msg.setTo(dataService.getOwner(scAddr.toString(), userService.getCurrent()));
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Message msg = new Message(permission, userService.setOwnedAsync(targetRC, permission.getPropertyName(),
+                new Address(scAddr)),dataService.getOwner(scAddr, userService.getCurrent()), df.format(new Date()));
         messageService.add(msg);
         return new Result(true);
-    }
-
-    //SC owner
-    @Deprecated
-    @PostMapping("/permitReader")
-    public TransactionReceipt permitReader(@RequestBody PermissionSwapper permission) throws Exception {
-        Address rcAddr = systemService.getRC(userService.getCurrent());
-        Address scAddr = userService.getOwned(rcAddr.toString(), permission.getPropertyName());
-        Address targetRC = systemService.getRC(permission.getTarget(), userService.getCurrent());
-        return dataService.addReader(scAddr.toString(), userService.getCurrent(), targetRC.toString());
-    }
-    //SC owner
-    @Deprecated
-    @PostMapping("/permitWriter")
-    public TransactionReceipt permitWriter(@RequestBody PermissionSwapper permission) throws Exception {
-        Address rcAddr = systemService.getRC(userService.getCurrent());
-        Address scAddr = userService.getOwned(rcAddr.toString(), permission.getPropertyName());
-        Address targetRC = systemService.getRC(permission.getTarget(), userService.getCurrent());
-        return dataService.setWriter(scAddr.toString(), userService.getCurrent(), targetRC.toString());
     }
 
     //For query
     @GetMapping("/getManaged")
     public Map<String, String> getManaged() throws Exception {
-        Address rcAddr = systemService.getRC(userService.getCurrent());
+        String rcAddr = systemService.getRC(userService.getCurrent());
         return userService.getManagedAll(rcAddr.toString());
     }
 
     @GetMapping("/getOwned")
     public Map<String, String> getOwned() throws Exception {
-        Address rcAddr = systemService.getRC(userService.getCurrent());
+        String rcAddr = systemService.getRC(userService.getCurrent());
         return userService.getOwnedAll(rcAddr.toString());
     }
 }

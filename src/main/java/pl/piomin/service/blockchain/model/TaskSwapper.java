@@ -9,33 +9,37 @@ import java.util.concurrent.CompletableFuture;
  * @date: 2019/3/22
  * @description: none
  */
-public class IPFSSwapper {
-    private String fileName;
-    private String fileHash;
+public class TaskSwapper {
+    private String taskName;
+    private String taskContent;
     private CompletableFuture<TransactionReceipt> future;
     private TransactionReceipt receipt;
 
-    public IPFSSwapper(String fileName, String fileHash) {
-        this.fileHash = fileHash;
-        this.fileName = fileName;
+    public TaskSwapper(String taskName) {
+        this.taskName = taskName;
     }
 
-    public IPFSSwapper() {}
-
-    public String getFileName() {
-        return fileName;
+    public TaskSwapper(String taskName, String taskContent) {
+        this.taskName = taskName;
+        this.taskContent = taskContent;
     }
 
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
+    public TaskSwapper() {}
+
+    public String getTaskName() {
+        return taskName;
     }
 
-    public String getFileHash() {
-        return fileHash;
+    public void setTaskName(String taskName) {
+        this.taskName = taskName;
     }
 
-    public void setFileHash(String fileHash) {
-        this.fileHash = fileHash;
+    public String getTaskContent() {
+        return taskContent;
+    }
+
+    public void setTaskContent(String taskContent) {
+        this.taskContent = taskContent;
     }
 
     public CompletableFuture<TransactionReceipt> getFuture() {

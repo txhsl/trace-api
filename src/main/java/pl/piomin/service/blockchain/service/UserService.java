@@ -64,7 +64,7 @@ public class UserService {
 
                 if (signIn(accounts[0],"Innov@teD@ily1" )) {
                     System_sol_System system = System_sol_System.load(sysAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
-                    TransactionReceipt transactionReceipt = system.setIndex(new Utf8String(RoleType.Types.get(i)), new Address(roleAddrs[i])).send();
+                    TransactionReceipt transactionReceipt = system.setRcIndex(new Utf8String(RoleType.Types.get(i)), new Address(roleAddrs[i])).send();
                     LOGGER.info("Transaction succeed: " + transactionReceipt.getTransactionHash());
 
                     //register users
@@ -445,12 +445,12 @@ public class UserService {
         return rc.setManaged(new Utf8String(name), scAddr);
     }
 
-    public Address getOwned(String rcAddr, String name) throws Exception {
+    public String getOwned(String rcAddr, String name) throws Exception {
         Role_sol_Role rc = Role_sol_Role.load(rcAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
         String scAddr = rc.getOwned(new Utf8String(name)).send().getValue();
 
         LOGGER.info("Read succeed: " + scAddr);
-        return new Address(scAddr);
+        return scAddr;
     }
 
     public Map<String, String> getOwnedAll(String rcAddr) throws Exception {
@@ -467,12 +467,12 @@ public class UserService {
         return result;
     }
 
-    public Address getManaged(String rcAddr, String name) throws Exception {
+    public String getManaged(String rcAddr, String name) throws Exception {
         Role_sol_Role rc = Role_sol_Role.load(rcAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
         String scAddr = rc.getManaged(new Utf8String(name)).send().getValue();
 
         LOGGER.info("Read succeed: " + scAddr);
-        return new Address(scAddr);
+        return scAddr;
     }
 
     public Map<String, String> getManagedAll(String rcAddr) throws Exception {

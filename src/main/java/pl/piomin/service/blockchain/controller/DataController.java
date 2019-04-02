@@ -5,7 +5,7 @@ import org.web3j.abi.datatypes.Address;
 import pl.piomin.service.blockchain.model.DataMultipleSwapper;
 import pl.piomin.service.blockchain.model.DataSwapper;
 import pl.piomin.service.blockchain.model.FileSwapper;
-import pl.piomin.service.blockchain.model.IPFSSwapper;
+import pl.piomin.service.blockchain.model.TaskSwapper;
 import pl.piomin.service.blockchain.service.*;
 
 import java.io.IOException;
@@ -37,19 +37,19 @@ public class DataController {
     @PostMapping("/write")
     public String writeData(@RequestBody DataSwapper data) throws Exception {
         //Check permission
-        Address rcAddr = systemService.getRC(userService.getCurrent());
-        Address scAddr = userService.getOwned(rcAddr.toString(), data.getPropertyName());
-        if (!dataService.checkWriter(scAddr.toString(), rcAddr, userService.getCurrent())) {
+        String rcAddr = systemService.getRC(userService.getCurrent());
+        String scAddr = userService.getOwned(rcAddr, data.getPropertyName());
+        if (!dataService.checkWriter(scAddr, new Address(rcAddr), userService.getCurrent())) {
             return null;
         }
-        String fileNo = dataService.getFileNum(scAddr.toString(), data.getId(), userService.getCurrent());
+        String fileNo = dataService.getFileNum(scAddr, data.getId(), userService.getCurrent());
 
         //Try cache
-        IPFSSwapper receipt = fileService.record(data.getPropertyName(), fileNo, data.getId(), data.getData());
+        TaskSwapper receipt = fileService.record(data.getPropertyName(), fileNo, data.getId(), data.getData());
 
         //Record hash
         if (receipt != null) {
-            receipt.setFuture(dataService.writeAsync(scAddr.toString(), userService.getCurrent(), receipt.getFileName(), receipt.getFileHash()));
+            receipt.setFuture(dataService.writeAsync(scAddr, userService.getCurrent(), receipt.getTaskName(), receipt.getTaskContent()));
             blockchainService.addPending(receipt);
         }
         return fileNo;
@@ -58,21 +58,21 @@ public class DataController {
     @PostMapping("/writeMultiple")
     public String[] writeMultipleData(@RequestBody DataMultipleSwapper data) throws Exception {
         List<String> result = new ArrayList<>();
-        Address rcAddr = systemService.getRC(userService.getCurrent());
+        String rcAddr = systemService.getRC(userService.getCurrent());
 
         for (String property: data.getData().keySet()) {
             Map<String, DataSwapper> single = data.getData().get(property);
-            Address scAddr = userService.getOwned(rcAddr.toString(), property);
-            if (dataService.checkWriter(scAddr.toString(), rcAddr, userService.getCurrent())) {
+            String scAddr = userService.getOwned(rcAddr, property);
+            if (dataService.checkWriter(scAddr, new Address(rcAddr), userService.getCurrent())) {
                 for (String id : single.keySet()) {
-                    String fileNo = dataService.getFileNum(scAddr.toString(), id, userService.getCurrent());
+                    String fileNo = dataService.getFileNum(scAddr, id, userService.getCurrent());
 
                     //Try cache
-                    IPFSSwapper receipt = fileService.record(property, fileNo, id, single.get(id).getData());
+                    TaskSwapper receipt = fileService.record(property, fileNo, id, single.get(id).getData());
 
                     //Record hash
                     if (receipt != null) {
-                        receipt.setFuture(dataService.writeAsync(scAddr.toString(), userService.getCurrent(), receipt.getFileName(), receipt.getFileHash()));
+                        receipt.setFuture(dataService.writeAsync(scAddr, userService.getCurrent(), receipt.getTaskName(), receipt.getTaskContent()));
                         blockchainService.addPending(receipt);
                     }
                     result.add(fileNo);
@@ -85,9 +85,9 @@ public class DataController {
     @PostMapping("/read")
     public DataSwapper readData(@RequestBody DataSwapper data) throws Exception {
         //Check permission
-        Address rcAddr = systemService.getRC(userService.getCurrent());
-        Address scAddr = userService.getManaged(rcAddr.toString(), data.getPropertyName());
-        if (!dataService.checkReader(scAddr.toString(), rcAddr, userService.getCurrent())) {
+        String rcAddr = systemService.getRC(userService.getCurrent());
+        String scAddr = userService.getManaged(rcAddr, data.getPropertyName());
+        if (!dataService.checkReader(scAddr, new Address(rcAddr), userService.getCurrent())) {
             return data;
         }
 
@@ -98,22 +98,22 @@ public class DataController {
         if (result == null) {
             //Try cache
             String hash = null;
-            ArrayList<IPFSSwapper> pending = blockchainService.getPending();
-            for (IPFSSwapper tx : pending) {
-                if (tx.getFileName().equals(dataService.getFileNum(scAddr.toString(), data.getId(), userService.getCurrent()))) {
-                    hash = tx.getFileHash();
+            ArrayList<TaskSwapper> pending = blockchainService.getPending();
+            for (TaskSwapper tx : pending) {
+                if (tx.getTaskName().equals(dataService.getFileNum(scAddr, data.getId(), userService.getCurrent()))) {
+                    hash = tx.getTaskContent();
                     data.setStatus("pending");
                 }
             }
 
             //Try Eth
             if (hash == null) {
-                hash = dataService.read(scAddr.toString(), userService.getCurrent(), data.getId());
+                hash = dataService.read(scAddr, userService.getCurrent(), data.getId());
                 data.setStatus("confirmed");
             }
 
             FileSwapper file = fileService.input(fileService.download(hash));
-            if (fileService.checkFile(file.getFileName(), dataService.getFileNum(scAddr.toString(), data.getId(), userService.getCurrent()))) {
+            if (fileService.checkFile(file.getFileName(), dataService.getFileNum(scAddr, data.getId(), userService.getCurrent()))) {
                 data.setData(file.getContent(data.getId()));
             }
             else {
@@ -130,12 +130,12 @@ public class DataController {
     @PostMapping("/readMultiple")
     public DataMultipleSwapper readMultipleData(@RequestBody DataMultipleSwapper data) throws Exception {
         Map<String, Map<String, DataSwapper>> resultMulti = new HashMap<>();
-        Address rcAddr = systemService.getRC(userService.getCurrent());
+        String rcAddr = systemService.getRC(userService.getCurrent());
 
         for (String property : data.getPropertyNames()) {
-            Address scAddr = userService.getManaged(rcAddr.toString(), property);
+            String scAddr = userService.getManaged(rcAddr, property);
             Map<String, DataSwapper> result =  new HashMap<>();
-            if (dataService.checkReader(scAddr.toString(), rcAddr, userService.getCurrent())) {
+            if (dataService.checkReader(scAddr, new Address(rcAddr), userService.getCurrent())) {
                 for (String id : data.getIds()) {
                     //Try the cache
                     String temp = fileService.query(property, id);
@@ -145,10 +145,10 @@ public class DataController {
                         //Try cache
                         String hash = null;
                         String status = null;
-                        ArrayList<IPFSSwapper> pending = blockchainService.getPending();
-                        for (IPFSSwapper tx : pending) {
-                            if (tx.getFileName().equals(dataService.getFileNum(scAddr.toString(), id, userService.getCurrent()))) {
-                                hash = tx.getFileHash();
+                        ArrayList<TaskSwapper> pending = blockchainService.getPending();
+                        for (TaskSwapper tx : pending) {
+                            if (tx.getTaskName().equals(dataService.getFileNum(scAddr, id, userService.getCurrent()))) {
+                                hash = tx.getTaskContent();
                                 status = "pending";
                             }
                         }
@@ -160,7 +160,7 @@ public class DataController {
                         }
 
                         FileSwapper file = fileService.input(fileService.download(hash));
-                        if (fileService.checkFile(file.getFileName(), dataService.getFileNum(scAddr.toString(), id, userService.getCurrent()))) {
+                        if (fileService.checkFile(file.getFileName(), dataService.getFileNum(scAddr, id, userService.getCurrent()))) {
                             DataSwapper swapper = new DataSwapper(id, property, file.getContent(id));
                             swapper.setStatus(status);
                             result.put(id, swapper);

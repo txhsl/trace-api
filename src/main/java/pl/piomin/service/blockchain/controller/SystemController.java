@@ -31,7 +31,7 @@ public class SystemController {
     public Result reset() throws Exception {
         systemService.reset(userService.getCurrent());
         String[] roleaAddrs = userService.resetContract(systemService.getSysAddress());
-        String[] dataAddrs = dataService.resetContract(roleaAddrs);
+        String[] dataAddrs = dataService.resetContract(roleaAddrs, systemService.getSysAddress());
         boolean rr = userService.resetPermission(roleaAddrs, dataAddrs);
         boolean rs = dataService.resetPermission(roleaAddrs, dataAddrs);
         return new Result(rr && rs);
@@ -58,6 +58,11 @@ public class SystemController {
     @GetMapping("/getRoles")
     public Map<String, String> getRoles() throws Exception {
         return systemService.getRoleAll(userService.getCurrent());
+    }
+
+    @GetMapping("/getProperties")
+    public Map<String, String> getProperties() throws Exception {
+        return systemService.getPropertyAll(userService.getCurrent());
     }
 
     @GetMapping("/getRoleNames")

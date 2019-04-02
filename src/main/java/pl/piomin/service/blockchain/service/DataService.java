@@ -15,6 +15,7 @@ import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import pl.piomin.service.blockchain.PropertyType;
 import pl.piomin.service.blockchain.RoleType;
 import pl.piomin.service.blockchain.contract.Data_sol_Data;
+import pl.piomin.service.blockchain.contract.System_sol_System;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,7 +40,7 @@ public class DataService {
         this.web3j = web3j;
     }
 
-    public String[] resetContract(String[] roleAddrs) throws Exception {
+    public String[] resetContract(String[] roleAddrs, String sysAddr) throws Exception {
         //recreate SCs
         Credentials current = null;
         String[] accounts = UserService.accounts;
@@ -68,6 +69,13 @@ public class DataService {
             Data_sol_Data data = Data_sol_Data.deploy(web3j, current, GAS_PRICE, GAS_LIMIT).send();
             dataAddrs[j] = data.getContractAddress();
             LOGGER.info("Data Contract " + j + " deployed: " + data.getContractAddress() + ". Property Name: " + PropertyType.Types.get(j) + ". Owner: " + current.getAddress());
+        }
+
+        current = signIn(accounts[0],"Innov@teD@ily1");
+        for (int i = 0; i < PropertyType.Types.size(); i++) {
+            System_sol_System system = System_sol_System.load(sysAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
+            TransactionReceipt transactionReceipt = system.setScIndex(new Utf8String(PropertyType.Types.get(i)), new Address(dataAddrs[i])).send();
+            LOGGER.info("Transaction succeed: " + transactionReceipt.getTransactionHash());
         }
         return dataAddrs;
     }
@@ -357,12 +365,21 @@ public class DataService {
         return result;
     }
 
+
     public TransactionReceipt addReader(String addr, Credentials credentials, String roleAddr) throws Exception {
         Data_sol_Data sc = Data_sol_Data.load(addr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
         TransactionReceipt transactionReceipt = sc.addReader(new Address(roleAddr)).send();
 
         LOGGER.info("Reader added: " + transactionReceipt.toString());
         return transactionReceipt;
+    }
+
+    public CompletableFuture<TransactionReceipt> addReaderAsync(String addr, Credentials credentials, String roleAddr) throws Exception {
+        Data_sol_Data sc = Data_sol_Data.load(addr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+        CompletableFuture<TransactionReceipt> futrue = sc.addReader(new Address(roleAddr)).sendAsync();
+
+        LOGGER.info("Reader added: " + futrue.toString());
+        return futrue;
     }
 
     public boolean checkReader(String addr, Address rcAddr, Credentials credentials) throws Exception {
@@ -376,6 +393,14 @@ public class DataService {
 
         LOGGER.info("Writer setted: " + transactionReceipt.toString());
         return transactionReceipt;
+    }
+
+    public CompletableFuture<TransactionReceipt> setWriterAsync(String addr, Credentials credentials, String roleAddr) throws Exception {
+        Data_sol_Data sc = Data_sol_Data.load(addr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+        CompletableFuture<TransactionReceipt> futrue = sc.setWriter(new Address(roleAddr)).sendAsync();
+
+        LOGGER.info("Reader added: " + futrue.toString());
+        return futrue;
     }
 
     public boolean checkWriter(String addr, Address rcAddr, Credentials credentials) throws Exception {

@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.*;
 import org.web3j.protocol.core.methods.response.Transaction;
 import pl.piomin.service.blockchain.model.BlockchainTransaction;
 import pl.piomin.service.blockchain.model.ContractSwapper;
-import pl.piomin.service.blockchain.model.IPFSSwapper;
+import pl.piomin.service.blockchain.model.TaskSwapper;
 import pl.piomin.service.blockchain.service.BlockchainService;
 import pl.piomin.service.blockchain.service.UserService;
 
@@ -24,17 +24,17 @@ public class BlockchainController {
     }
 
     @GetMapping("/completed")
-    public ArrayList<IPFSSwapper> getCompleted() {
+    public ArrayList<TaskSwapper> getCompleted() {
         return blockchainService.getCompleted();
     }
 
     @GetMapping("/pending")
-    public ArrayList<IPFSSwapper> getPending() {
+    public ArrayList<TaskSwapper> getPending() {
         return blockchainService.getPending();
     }
 
     @GetMapping("/error")
-    public ArrayList<IPFSSwapper> getError() {
+    public ArrayList<TaskSwapper> getError() {
         return blockchainService.getErrorTx();
     }
 
