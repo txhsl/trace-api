@@ -458,9 +458,13 @@ public class UserService {
         Role_sol_Role rc = Role_sol_Role.load(rcAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
 
         for (String property : PropertyType.Types) {
-            String scAddr = rc.getOwned(new Utf8String(property)).send().getValue();
-            if (!scAddr.equals("0x0000000000000000000000000000000000000000")) {
-                result.putIfAbsent(property, scAddr);
+            try {
+                String scAddr = rc.getOwned(new Utf8String(property)).send().getValue();
+                if (!scAddr.equals("0x0000000000000000000000000000000000000000")) {
+                    result.putIfAbsent(property, scAddr);
+                }
+            } catch (NullPointerException e) {
+                LOGGER.error(e.getMessage());
             }
         }
 
@@ -480,9 +484,13 @@ public class UserService {
         Role_sol_Role rc = Role_sol_Role.load(rcAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
 
         for (String property : PropertyType.Types) {
-            String scAddr = rc.getManaged(new Utf8String(property)).send().getValue();
-            if (!scAddr.equals("0x0000000000000000000000000000000000000000")) {
-                result.putIfAbsent(property, scAddr);
+            try {
+                String scAddr = rc.getManaged(new Utf8String(property)).send().getValue();
+                if (!scAddr.equals("0x0000000000000000000000000000000000000000")) {
+                    result.putIfAbsent(property, scAddr);
+                }
+            } catch (NullPointerException e) {
+                LOGGER.error(e.getMessage());
             }
         }
 

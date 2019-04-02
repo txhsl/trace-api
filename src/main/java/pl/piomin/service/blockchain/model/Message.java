@@ -1,11 +1,9 @@
 package pl.piomin.service.blockchain.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.web3j.protocol.core.RemoteCall;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
-import java.io.Serializable;
 import java.util.concurrent.CompletableFuture;
 
 /**

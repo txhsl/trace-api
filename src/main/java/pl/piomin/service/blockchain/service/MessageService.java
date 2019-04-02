@@ -45,7 +45,6 @@ public class MessageService {
         }
         else {
             msg.setRead(true);
-            mailbox.get(address).set(index, msg);
             return true;
         }
     }

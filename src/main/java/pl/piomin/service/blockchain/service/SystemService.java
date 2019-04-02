@@ -122,9 +122,13 @@ public class SystemService {
         System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
 
         for (String role : RoleType.Types) {
-            String rcAddr = system.getRcIndex(new Utf8String(role)).send().getValue();
-            if (!rcAddr.equals("")) {
-                result.putIfAbsent(role, rcAddr);
+            try {
+                String rcAddr = system.getRcIndex(new Utf8String(role)).send().getValue();
+                if (!rcAddr.equals("")) {
+                    result.putIfAbsent(role, rcAddr);
+                }
+            } catch (NullPointerException e) {
+                LOGGER.error(e.getMessage());
             }
         }
 
@@ -136,9 +140,13 @@ public class SystemService {
         System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
 
         for (String property : PropertyType.Types) {
-            String scAddr = system.getScIndex(new Utf8String(property)).send().getValue();
-            if (!scAddr.equals("")) {
-                result.putIfAbsent(property, scAddr);
+            try {
+                String scAddr = system.getScIndex(new Utf8String(property)).send().getValue();
+                if (!scAddr.equals("")) {
+                    result.putIfAbsent(property, scAddr);
+                }
+            } catch (NullPointerException e) {
+                LOGGER.error(e.getMessage());
             }
         }
 
