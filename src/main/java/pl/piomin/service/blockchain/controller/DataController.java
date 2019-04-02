@@ -42,15 +42,16 @@ public class DataController {
         if (!dataService.checkWriter(scAddr, new Address(rcAddr), userService.getCurrent())) {
             return null;
         }
-        String fileNo = dataService.getFileNum(scAddr, data.getId(), userService.getCurrent());
+        String fileNo = dataService.getFileNum(data.getPropertyName(), scAddr, data.getId(), userService.getCurrent());
 
         //Try cache
-        TaskSwapper receipt = fileService.record(data.getPropertyName(), fileNo, data.getId(), data.getData());
+        TaskSwapper task = fileService.record(data.getPropertyName(), fileNo, data.getId(), data.getData());
+        task.setTaskSender(userService.getCurrent().getAddress());
 
         //Record hash
-        if (receipt != null) {
-            receipt.setFuture(dataService.writeAsync(scAddr, userService.getCurrent(), receipt.getTaskName(), receipt.getTaskContent()));
-            blockchainService.addPending(receipt);
+        if (task != null) {
+            task.setFuture(dataService.writeAsync(scAddr, userService.getCurrent(), task.getTaskName(), task.getTaskContent()));
+            blockchainService.addPending(task);
         }
         return fileNo;
     }
@@ -65,15 +66,16 @@ public class DataController {
             String scAddr = userService.getOwned(rcAddr, property);
             if (dataService.checkWriter(scAddr, new Address(rcAddr), userService.getCurrent())) {
                 for (String id : single.keySet()) {
-                    String fileNo = dataService.getFileNum(scAddr, id, userService.getCurrent());
+                    String fileNo = dataService.getFileNum(property, scAddr, id, userService.getCurrent());
 
                     //Try cache
-                    TaskSwapper receipt = fileService.record(property, fileNo, id, single.get(id).getData());
+                    TaskSwapper task = fileService.record(property, fileNo, id, single.get(id).getData());
+                    task.setTaskSender(userService.getCurrent().getAddress());
 
                     //Record hash
-                    if (receipt != null) {
-                        receipt.setFuture(dataService.writeAsync(scAddr, userService.getCurrent(), receipt.getTaskName(), receipt.getTaskContent()));
-                        blockchainService.addPending(receipt);
+                    if (task != null) {
+                        task.setFuture(dataService.writeAsync(scAddr, userService.getCurrent(), task.getTaskName(), task.getTaskContent()));
+                        blockchainService.addPending(task);
                     }
                     result.add(fileNo);
                 }
@@ -100,7 +102,7 @@ public class DataController {
             String hash = null;
             ArrayList<TaskSwapper> pending = blockchainService.getPending();
             for (TaskSwapper tx : pending) {
-                if (tx.getTaskName().equals(dataService.getFileNum(scAddr, data.getId(), userService.getCurrent()))) {
+                if (tx.getTaskName().equals(dataService.getFileNum(data.getPropertyName(), scAddr, data.getId(), userService.getCurrent()))) {
                     hash = tx.getTaskContent();
                     data.setStatus("pending");
                 }
@@ -113,7 +115,7 @@ public class DataController {
             }
 
             FileSwapper file = fileService.input(fileService.download(hash));
-            if (fileService.checkFile(file.getFileName(), dataService.getFileNum(scAddr, data.getId(), userService.getCurrent()))) {
+            if (fileService.checkFile(file.getFileName(), dataService.getFileNum(data.getPropertyName(), scAddr, data.getId(), userService.getCurrent()))) {
                 data.setData(file.getContent(data.getId()));
             }
             else {
@@ -147,7 +149,7 @@ public class DataController {
                         String status = null;
                         ArrayList<TaskSwapper> pending = blockchainService.getPending();
                         for (TaskSwapper tx : pending) {
-                            if (tx.getTaskName().equals(dataService.getFileNum(scAddr, id, userService.getCurrent()))) {
+                            if (tx.getTaskName().equals(dataService.getFileNum(property, scAddr, id, userService.getCurrent()))) {
                                 hash = tx.getTaskContent();
                                 status = "pending";
                             }
@@ -160,7 +162,7 @@ public class DataController {
                         }
 
                         FileSwapper file = fileService.input(fileService.download(hash));
-                        if (fileService.checkFile(file.getFileName(), dataService.getFileNum(scAddr, id, userService.getCurrent()))) {
+                        if (fileService.checkFile(file.getFileName(), dataService.getFileNum(property, scAddr, id, userService.getCurrent()))) {
                             DataSwapper swapper = new DataSwapper(id, property, file.getContent(id));
                             swapper.setStatus(status);
                             result.put(id, swapper);

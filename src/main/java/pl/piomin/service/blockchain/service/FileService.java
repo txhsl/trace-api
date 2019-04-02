@@ -49,7 +49,7 @@ public class FileService {
 
     public TaskSwapper record(String propertyName, String fileName, String id, String value) throws IOException {
         FileSwapper file;
-        TaskSwapper receipt = null;
+        TaskSwapper task = null;
         if (cache.containsKey(propertyName)) {
              file = cache.get(propertyName);
         }
@@ -60,14 +60,14 @@ public class FileService {
 
         if (!file.getFileName().equals(fileName)) {
             cache.remove(propertyName);
-            receipt = new TaskSwapper(file.getFileName(), upload(output(file)));
+            task = new TaskSwapper(file.getFileName(), upload(output(file)));
             file = new FileSwapper();
             file.setFileName(fileName);
         }
         file.addContent(id, value);
         cache.put(propertyName, file);
 
-        return receipt;
+        return task;
     }
 
     public String query(String propertyName, String id) {

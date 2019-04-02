@@ -12,6 +12,7 @@ import java.util.concurrent.CompletableFuture;
 public class TaskSwapper {
     private String taskName;
     private String taskContent;
+    private String taskSender;
     private CompletableFuture<TransactionReceipt> future;
     private TransactionReceipt receipt;
 
@@ -22,6 +23,12 @@ public class TaskSwapper {
     public TaskSwapper(String taskName, String taskContent) {
         this.taskName = taskName;
         this.taskContent = taskContent;
+    }
+
+    public TaskSwapper(String taskName, String taskContent ,String taskSender) {
+        this.taskName = taskName;
+        this.taskContent = taskContent;
+        this.taskSender = taskSender;
     }
 
     public TaskSwapper() {}
@@ -40,6 +47,14 @@ public class TaskSwapper {
 
     public void setTaskContent(String taskContent) {
         this.taskContent = taskContent;
+    }
+
+    public String getTaskSender() {
+        return taskSender;
+    }
+
+    public void setTaskSender(String taskSender) {
+        this.taskSender = taskSender;
     }
 
     public CompletableFuture<TransactionReceipt> getFuture() {

@@ -66,21 +66,18 @@ public class MessageController {
         String scAddr = userService.getOwned(rcAddr, msg.getPermission().getPropertyName());
 
         //Handle permit
-        TaskSwapper permissionTask = new TaskSwapper(msg.getTo());
+        TaskSwapper permissionTask = new TaskSwapper(msg.getPermission().getPropertyName(), "Permission Permit", userService.getCurrent().getAddress());
         if (msg.getPermission().getIsRead()) {
-            permissionTask.setTaskContent(msg.getPermission().getPropertyName() + " Read Permission");
             permissionTask.setFuture(dataService.addReaderAsync(scAddr, userService.getCurrent(), toAddr));
         }
         else {
-            permissionTask.setTaskContent(msg.getPermission().getPropertyName() + " Write Permission");
             permissionTask.setFuture(dataService.setWriterAsync(scAddr, userService.getCurrent(), toAddr));
         }
         blockchainService.addPending(permissionTask);
 
         //Handle request
-        TaskSwapper requestTask = new TaskSwapper(msg.getTo());
+        TaskSwapper requestTask = new TaskSwapper(msg.getPermission().getPropertyName(), "Permission Request", msg.getPermission().getTarget());
         CompletableFuture<TransactionReceipt> future = msg.getRequest().sendAsync();
-        requestTask.setTaskContent(msg.getPermission().getPropertyName() + " Permission Request");
         requestTask.setFuture(future);
         blockchainService.addPending(requestTask);
 
