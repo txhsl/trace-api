@@ -13,9 +13,14 @@ import java.util.concurrent.CompletableFuture;
  */
 
 public class Message {
+    public enum Type {
+        Property, Role, Permission
+    }
+
     private PermissionSwapper permission;
     private String to;
     private String time;
+    private Type type;
     @JsonIgnore
     private RemoteCall<TransactionReceipt> request;
     @JsonIgnore
@@ -23,12 +28,13 @@ public class Message {
     private boolean isAccepted;
     private boolean isRead;
 
-    public Message(PermissionSwapper permissionSwapper, RemoteCall<TransactionReceipt> request,
-                   String to, String time) {
+    public Message(PermissionSwapper permissionSwapper, Type type,
+                   RemoteCall<TransactionReceipt> request, String to, String time) {
         this.permission = permissionSwapper;
         this.request = request;
         this.to = to;
         this.time = time;
+        this.type = type;
     }
 
     public void setRead(boolean read) {
@@ -61,6 +67,14 @@ public class Message {
 
     public void setTo(String to) {
         this.to = to;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
     }
 
     public String getTime() {

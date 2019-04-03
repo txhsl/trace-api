@@ -1,7 +1,9 @@
 package pl.piomin.service.blockchain.controller;
 
 import org.springframework.web.bind.annotation.*;
+import org.web3j.abi.datatypes.Address;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import pl.piomin.service.blockchain.PropertyType;
 import pl.piomin.service.blockchain.model.Message;
 import pl.piomin.service.blockchain.model.Result;
 import pl.piomin.service.blockchain.model.TaskSwapper;
@@ -66,17 +68,29 @@ public class MessageController {
         String scAddr = userService.getOwned(rcAddr, msg.getPermission().getPropertyName());
 
         //Handle permit
-        TaskSwapper permissionTask = new TaskSwapper(msg.getPermission().getPropertyName(), "Permission Permit", userService.getCurrent().getAddress());
-        if (msg.getPermission().getIsRead()) {
-            permissionTask.setFuture(dataService.addReaderAsync(scAddr, userService.getCurrent(), toAddr));
-        }
-        else {
-            permissionTask.setFuture(dataService.setWriterAsync(scAddr, userService.getCurrent(), toAddr));
+        TaskSwapper permissionTask = new TaskSwapper(msg.getPermission().getPropertyName(), msg.getType().name() + " Permit", userService.getCurrent().getAddress());
+        switch (msg.getType()) {
+            case Role:
+                break;
+            case Property:
+                permissionTask.setFuture(systemService.addSCAsync(msg.getPermission().getPropertyName(), new Address(msg.getPermission().getTarget()), userService.getCurrent()));
+                PropertyType.Types.add(msg.getPermission().getPropertyName());
+                break;
+            case Permission:
+                if (msg.getPermission().getIsRead()) {
+                    permissionTask.setFuture(dataService.addReaderAsync(scAddr, userService.getCurrent(), toAddr));
+                }
+                else {
+                    permissionTask.setFuture(dataService.setWriterAsync(scAddr, userService.getCurrent(), toAddr));
+                }
+                break;
+            default:
+                return false;
         }
         blockchainService.addPending(permissionTask);
 
         //Handle request
-        TaskSwapper requestTask = new TaskSwapper(msg.getPermission().getPropertyName(), "Permission Request", msg.getPermission().getTarget());
+        TaskSwapper requestTask = new TaskSwapper(msg.getPermission().getPropertyName(), msg.getType().name() + "Permission Request", msg.getPermission().getTarget());
         CompletableFuture<TransactionReceipt> future = msg.getRequest().sendAsync();
         requestTask.setFuture(future);
         blockchainService.addPending(requestTask);

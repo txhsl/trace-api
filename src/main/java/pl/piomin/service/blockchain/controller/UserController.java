@@ -3,12 +3,7 @@ package pl.piomin.service.blockchain.controller;
 import org.springframework.web.bind.annotation.*;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.crypto.CipherException;
-import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import pl.piomin.service.blockchain.PropertyType;
-import pl.piomin.service.blockchain.model.Message;
-import pl.piomin.service.blockchain.model.PermissionSwapper;
-import pl.piomin.service.blockchain.model.Result;
-import pl.piomin.service.blockchain.model.UserSwapper;
+import pl.piomin.service.blockchain.model.*;
 import pl.piomin.service.blockchain.service.*;
 
 import java.io.IOException;
@@ -48,15 +43,28 @@ public class UserController {
         user.setAddress(userService.signUp(user.getPassword()));
         return user;
     }
+
     //RC owner
-    @PostMapping("/addProperty")
-    public TransactionReceipt addProperty(@RequestBody PermissionSwapper permission) throws Exception {
+    @PostMapping("/requestRole")
+    public Result requestRole(@RequestBody PermissionSwapper permission) throws Exception {
+        String rcAddr = userService.addRole();
+
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Message msg = new Message(permission, Message.Type.Role, null, UserService.accounts[0], df.format(new Date()));
+        messageService.add(msg);
+        return new Result(true);
+    }
+
+    @PostMapping("/requestProperty")
+    public Result requestProperty(@RequestBody PermissionSwapper permission) throws Exception {
         String rcAddr = systemService.getRC(userService.getCurrent());
         String scAddr = dataService.addProperty(userService.getCurrent());
-        PropertyType.Types.add(permission.getPropertyName());
-        TransactionReceipt receipt = systemService.addSC(permission.getPropertyName(), new Address(scAddr), userService.getCurrent());
 
-        return userService.setOwned(rcAddr, permission.getPropertyName(), new Address(scAddr));
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Message msg = new Message(permission, Message.Type.Property, userService.setOwnedAsync(rcAddr, permission.getPropertyName(), new Address(scAddr)),
+                UserService.accounts[0], df.format(new Date()));
+        messageService.add(msg);
+        return new Result(true);
     }
 
     @PostMapping("/requestReader")
@@ -66,7 +74,7 @@ public class UserController {
 
         permission.setIsRead(true);
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Message msg = new Message(permission, userService.setManagedAsync(targetRC, permission.getPropertyName(), new Address(scAddr)),
+        Message msg = new Message(permission, Message.Type.Permission, userService.setManagedAsync(targetRC, permission.getPropertyName(), new Address(scAddr)),
                 dataService.getOwner(scAddr, userService.getCurrent()), df.format(new Date()));
         messageService.add(msg);
         return new Result(true);
@@ -79,9 +87,32 @@ public class UserController {
 
         permission.setIsRead(false);
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Message msg = new Message(permission, userService.setOwnedAsync(targetRC, permission.getPropertyName(),
+        Message msg = new Message(permission, Message.Type.Permission, userService.setOwnedAsync(targetRC, permission.getPropertyName(),
                 new Address(scAddr)),dataService.getOwner(scAddr, userService.getCurrent()), df.format(new Date()));
         messageService.add(msg);
+        return new Result(true);
+    }
+
+    //SC owner
+    @PostMapping("/permitReader")
+    public Result permitReader(@RequestBody PermissionSwapper permission) throws Exception {
+        String rcAddr = systemService.getRC(userService.getCurrent());
+        String scAddr = userService.getOwned(rcAddr, permission.getPropertyName());
+
+        TaskSwapper task = new TaskSwapper(permission.getPropertyName(), "Permission Permit", userService.getCurrent().getAddress());
+        task.setFuture(dataService.addReaderAsync(scAddr, userService.getCurrent(), permission.getTarget()));
+        blockchainService.addPending(task);
+        return new Result(true);
+    }
+    //SC owner
+    @PostMapping("/permitWriter")
+    public Result permitWriter(@RequestBody PermissionSwapper permission) throws Exception {
+        String rcAddr = systemService.getRC(userService.getCurrent());
+        String scAddr = userService.getOwned(rcAddr, permission.getPropertyName());
+
+        TaskSwapper task = new TaskSwapper(permission.getPropertyName(), "Permission Permit", userService.getCurrent().getAddress());
+        task.setFuture(dataService.setWriterAsync(scAddr, userService.getCurrent(), permission.getTarget()));
+        blockchainService.addPending(task);
         return new Result(true);
     }
 

@@ -18,6 +18,7 @@ import pl.piomin.service.blockchain.contract.System_sol_System;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import static org.web3j.tx.gas.DefaultGasProvider.GAS_LIMIT;
 import static org.web3j.tx.gas.DefaultGasProvider.GAS_PRICE;
@@ -79,6 +80,12 @@ public class SystemService {
 
         LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
         return transactionReceipt;
+    }
+
+    public CompletableFuture<TransactionReceipt> addSCAsync(String name, Address scAddr, Credentials credentials) throws Exception {
+        System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+
+        return system.setScIndex(new Utf8String(name), scAddr).sendAsync();
     }
 
     public TransactionReceipt setRC(String userAddr, String roleName, Credentials credentials) throws Exception {
