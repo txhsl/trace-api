@@ -5,11 +5,11 @@ import org.web3j.abi.datatypes.Address;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import pl.piomin.service.blockchain.PropertyType;
 import pl.piomin.service.blockchain.RoleType;
-import pl.piomin.service.blockchain.model.Result;
-import pl.piomin.service.blockchain.model.RoleSwapper;
-import pl.piomin.service.blockchain.model.UserSwapper;
+import pl.piomin.service.blockchain.model.*;
 import pl.piomin.service.blockchain.service.*;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 
 @RestController
@@ -19,11 +19,14 @@ public class SystemController {
     private final SystemService systemService;
     private final UserService userService;
     private final DataService dataService;
+    private final MessageService messageService;
 
-    public SystemController(SystemService systemService, UserService userService, DataService dataService) {
+    public SystemController(SystemService systemService, UserService userService,
+                            DataService dataService, MessageService messageService) {
         this.systemService = systemService;
         this.userService = userService;
         this.dataService = dataService;
+        this.messageService = messageService;
     }
 
     //System owner
@@ -42,10 +45,12 @@ public class SystemController {
     }
     //Normal
     @PostMapping("/requestRole")
-    public RoleSwapper requestRole(@RequestBody RoleSwapper role) throws Exception {
-        role.setAddress(userService.addRole());
-        role.setPermitted(false);
-        return role;
+    public Result requestRole(@RequestBody RoleSwapper role) throws Exception {
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Message msg = new Message(new PermissionSwapper(role.getName(), userService.addRole()), Message.Type.Role, null,
+                UserService.accounts[0], df.format(new Date()));
+        messageService.add(msg);
+        return new Result(true);
     }
     //System owner
     @PostMapping("/permitRole")

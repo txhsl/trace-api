@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.*;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import pl.piomin.service.blockchain.PropertyType;
+import pl.piomin.service.blockchain.RoleType;
 import pl.piomin.service.blockchain.model.Message;
 import pl.piomin.service.blockchain.model.Result;
 import pl.piomin.service.blockchain.model.TaskSwapper;
@@ -71,6 +72,8 @@ public class MessageController {
         TaskSwapper permissionTask = new TaskSwapper(msg.getPermission().getPropertyName(), msg.getType().name() + " Permit", userService.getCurrent().getAddress());
         switch (msg.getType()) {
             case Role:
+                permissionTask.setFuture(systemService.addRCAsync(msg.getPermission().getPropertyName(), new Address(msg.getPermission().getTarget()), userService.getCurrent()));
+                RoleType.Types.add(msg.getPermission().getPropertyName());
                 break;
             case Property:
                 permissionTask.setFuture(systemService.addSCAsync(msg.getPermission().getPropertyName(), new Address(msg.getPermission().getTarget()), userService.getCurrent()));
@@ -90,13 +93,15 @@ public class MessageController {
         blockchainService.addPending(permissionTask);
 
         //Handle request
-        TaskSwapper requestTask = new TaskSwapper(msg.getPermission().getPropertyName(), msg.getType().name() + "Permission Request", msg.getPermission().getTarget());
-        CompletableFuture<TransactionReceipt> future = msg.getRequest().sendAsync();
-        requestTask.setFuture(future);
-        blockchainService.addPending(requestTask);
+        if(msg.getRequest() != null) {
+            TaskSwapper requestTask = new TaskSwapper(msg.getPermission().getPropertyName(), msg.getType().name() + "Permission Request", msg.getPermission().getTarget());
+            CompletableFuture<TransactionReceipt> future = msg.getRequest().sendAsync();
+            requestTask.setFuture(future);
+            blockchainService.addPending(requestTask);
+            msg.setReceipt(future);
+        }
 
         //Send receipt
-        msg.setReceipt(future);
         msg.setRead(false);
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         msg.setTime(df.format(new Date()));

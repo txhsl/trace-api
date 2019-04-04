@@ -11,8 +11,9 @@ public class PermissionSwapper {
     private boolean isRead;
     private String target;
 
-    public PermissionSwapper() {
-
+    public PermissionSwapper(String propertyName, String target) {
+        this.propertyName = propertyName;
+        this.target = target;
     }
 
     public String getPropertyName() {

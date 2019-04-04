@@ -74,6 +74,11 @@ public class SystemService {
         return transactionReceipt;
     }
 
+    public CompletableFuture<TransactionReceipt> addRCAsync(String name, Address rcAddr, Credentials credentials) throws Exception {
+        System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+        return system.setRcIndex(new Utf8String(name), rcAddr).sendAsync();
+    }
+
     public TransactionReceipt addSC(String name, Address scAddr, Credentials credentials) throws Exception {
         System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
         TransactionReceipt transactionReceipt = system.setScIndex(new Utf8String(name), scAddr).send();
@@ -84,7 +89,6 @@ public class SystemService {
 
     public CompletableFuture<TransactionReceipt> addSCAsync(String name, Address scAddr, Credentials credentials) throws Exception {
         System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
-
         return system.setScIndex(new Utf8String(name), scAddr).sendAsync();
     }
 
