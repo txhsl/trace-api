@@ -58,7 +58,7 @@ public class UserController {
     @PostMapping("/requestProperty")
     public Result requestProperty(@RequestBody PermissionSwapper permission) throws Exception {
         String rcAddr = systemService.getRC(userService.getCurrent());
-        String scAddr = dataService.addProperty(userService.getCurrent());
+        String scAddr = permission.hasAddress() ? permission.getAddress() : dataService.addProperty(userService.getCurrent());
 
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Message msg = new Message(permission, Message.Type.Property, userService.setOwnedAsync(rcAddr, permission.getPropertyName(), new Address(scAddr)),

@@ -47,7 +47,7 @@ public class SystemController {
     @PostMapping("/requestRole")
     public Result requestRole(@RequestBody RoleSwapper role) throws Exception {
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Message msg = new Message(new PermissionSwapper(role.getName(), userService.addRole()), Message.Type.Role, null,
+        Message msg = new Message(new PermissionSwapper(role.getName(), role.hasAddress() ? role.getAddress() : userService.addRole()), Message.Type.Role, null,
                 UserService.accounts[0], df.format(new Date()));
         messageService.add(msg);
         return new Result(true);

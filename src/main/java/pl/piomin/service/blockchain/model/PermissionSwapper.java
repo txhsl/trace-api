@@ -10,6 +10,7 @@ public class PermissionSwapper {
     private String propertyName;
     private boolean isRead;
     private String target;
+    private String address;
 
     public PermissionSwapper(String propertyName, String target) {
         this.propertyName = propertyName;
@@ -38,5 +39,17 @@ public class PermissionSwapper {
 
     public void setIsRead(boolean read) {
         isRead = read;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public boolean hasAddress() {
+        return address != null;
     }
 }

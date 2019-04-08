@@ -24,4 +24,8 @@ public class RoleSwapper {
     public void setAddress(String address) {
         this.address = address;
     }
+
+    public boolean hasAddress() {
+        return address != null;
+    }
 }
