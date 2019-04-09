@@ -62,7 +62,7 @@ public class MessageController {
 
     @PutMapping("/accept/{index}")
     public boolean accept(@PathVariable int index) throws Exception {
-        Message msg = messageService.markAccepted(userService.getCurrent().getAddress(), index);
+        Message msg = messageService.get(userService.getCurrent().getAddress(), index);
 
         String rcAddr = systemService.getRC(userService.getCurrent());
         String toAddr = systemService.getRC(msg.getPermission().getTarget(), userService.getCurrent());
@@ -101,11 +101,14 @@ public class MessageController {
             msg.setReceipt(future);
         }
 
-        //Send receipt
-        msg.setRead(false);
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        msg.setTime(df.format(new Date()));
-        msg.setTo(msg.getPermission().getTarget());
-        return messageService.addReceipt(msg);
+        if(messageService.markAccepted(userService.getCurrent().getAddress(), index)) {
+            //Send receipt
+            msg.setRead(false);
+            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            msg.setTime(df.format(new Date()));
+            msg.setTo(msg.getPermission().getTarget());
+            return messageService.addReceipt(msg);
+        }
+        return false;
     }
 }

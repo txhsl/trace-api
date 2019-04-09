@@ -41,7 +41,7 @@ public class SystemController {
     }
     @PostMapping("/register")
     public TransactionReceipt register(@RequestBody UserSwapper user) throws Exception {
-        return systemService.setRC(user.getAddress(), user.getAddress(), userService.getCurrent());
+        return systemService.setRC(user.getAddress(), user.getRole(), userService.getCurrent());
     }
     //Normal
     @PostMapping("/requestRole")

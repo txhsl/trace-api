@@ -38,6 +38,10 @@ public class MessageService {
         return mailbox.get(address);
     }
 
+    public Message get(String address, int index) {
+        return mailbox.get(address).get(index);
+    }
+
     public boolean markRead(String address, int index) {
         Message msg = mailbox.get(address).get(index);
         if (msg.isRead()) {
@@ -49,14 +53,14 @@ public class MessageService {
         }
     }
 
-    public Message markAccepted(String address, int index) {
+    public boolean markAccepted(String address, int index) {
         Message msg = mailbox.get(address).get(index);
         if (msg.isAccepted()) {
-            return null;
+            return false;
         }
         else {
             msg.setAccepted(true);
-            return msg;
+            return true;
         }
     }
 

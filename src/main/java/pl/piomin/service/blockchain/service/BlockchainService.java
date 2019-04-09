@@ -5,9 +5,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.*;
+import org.web3j.utils.Convert;
 import pl.piomin.service.blockchain.model.BlockchainTransaction;
 import pl.piomin.service.blockchain.model.TaskSwapper;
 
@@ -21,6 +23,7 @@ public class BlockchainService {
     private static final Logger LOGGER = LoggerFactory.getLogger(BlockchainService.class);
 
     private final Web3j web3j;
+    private final int RECEIENT = 7;
 
     private ArrayList<TaskSwapper> pendingTx = new ArrayList<>();
     private ArrayList<TaskSwapper> completedTx = new ArrayList<>();
@@ -60,6 +63,11 @@ public class BlockchainService {
 
     }
 
+    public double getBalance(String address) throws IOException {
+        BigInteger wei =  web3j.ethGetBalance(address, DefaultBlockParameter.valueOf("latest")).send().getBalance();
+        return Convert.fromWei(wei.toString(), Convert.Unit.ETHER).doubleValue();
+    }
+
     public ArrayList<org.web3j.protocol.core.methods.response.Transaction> getUserHistory(String address) throws InterruptedException {
         ArrayList<org.web3j.protocol.core.methods.response.Transaction> result = new ArrayList<>();
         Disposable sub = web3j.replayPastTransactionsFlowable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST)
@@ -95,6 +103,27 @@ public class BlockchainService {
     public ArrayList<TaskSwapper> getCompleted() {
         checkCompleted();
         return completedTx;
+    }
+    public int[] getCompleted(String[] addresses) {
+        int[] result = new int[addresses.length];
+        int i = 0;
+        for (String address : addresses) {
+            result[i++] = completedTx.stream().filter(tx -> tx.getTaskSender().equals(address)).toArray(TaskSwapper[]::new).length;
+        }
+        return result;
+    }
+    public int[] getCompleted(int height) {
+        int[] result = new int[RECEIENT];
+        int[] heights = new int[RECEIENT];
+        for(int j = 0; j < RECEIENT; j++) {
+            heights[j] = height - RECEIENT + j + 1;
+        }
+
+        int i = 0;
+        for (int blockNum : heights){
+            result[i++] = completedTx.stream().filter(tx -> tx.getReceipt().getBlockNumber().intValue() == blockNum).toArray(TaskSwapper[]::new).length;
+        }
+        return result;
     }
 
     public ArrayList<TaskSwapper> getPending() {
