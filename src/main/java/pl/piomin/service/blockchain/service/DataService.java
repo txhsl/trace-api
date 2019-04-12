@@ -35,6 +35,7 @@ public class DataService {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataService.class);
 
     private final Web3j web3j;
+    private final int REQUEST_LIMIT = 10;
 
     public DataService(Web3j web3j) {
         this.web3j = web3j;
@@ -359,10 +360,20 @@ public class DataService {
     }
 
     public String getFileNum(String propertyName, String addr, String id, Credentials credentials) throws Exception {
-        Data_sol_Data sc = Data_sol_Data.load(addr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
-        String result = sc.getFileNum(new Utf8String(id)).send().getValue();
-        LOGGER.info("File number calculated: " + result +", data id: " + id);
-        return propertyName + '_' + result;
+        int count = 0;
+
+        while(count < REQUEST_LIMIT) {
+            try {
+                Data_sol_Data sc = Data_sol_Data.load(addr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+                String result = sc.getFileNum(new Utf8String(id)).send().getValue();
+                LOGGER.info("File number calculated: " + result + ", data id: " + id);
+                return propertyName + '_' + result;
+            } catch (NullPointerException e) {
+                LOGGER.error(e.toString());
+                count++;
+            }
+        }
+        throw new NullPointerException();
     }
 
 
@@ -383,8 +394,18 @@ public class DataService {
     }
 
     public boolean checkReader(String addr, Address rcAddr, Credentials credentials) throws Exception {
-        Data_sol_Data sc = Data_sol_Data.load(addr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
-        return sc.checkReader(rcAddr).send().getValue();
+        int count = 0;
+
+        while(count < REQUEST_LIMIT) {
+            try {
+                Data_sol_Data sc = Data_sol_Data.load(addr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+                return sc.checkReader(rcAddr).send().getValue();
+            } catch (NullPointerException e) {
+                LOGGER.error(e.toString());
+                count++;
+            }
+        }
+        throw new NullPointerException();
     }
 
     public TransactionReceipt setWriter(String addr, Credentials credentials, String roleAddr) throws Exception {
@@ -404,13 +425,33 @@ public class DataService {
     }
 
     public boolean checkWriter(String addr, Address rcAddr, Credentials credentials) throws Exception {
-        Data_sol_Data sc = Data_sol_Data.load(addr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
-        return sc.checkWriter(rcAddr).send().getValue();
+        int count = 0;
+
+        while(count < REQUEST_LIMIT) {
+            try {
+                Data_sol_Data sc = Data_sol_Data.load(addr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+                return sc.checkWriter(rcAddr).send().getValue();
+            } catch (NullPointerException e) {
+                LOGGER.error(e.toString());
+                count++;
+            }
+        }
+        throw new NullPointerException();
     }
 
     public String getOwner(String addr, Credentials credentials) throws Exception {
-        Data_sol_Data sc = Data_sol_Data.load(addr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
-        return sc.getOwner().send().getValue();
+        int count = 0;
+
+        while(count < REQUEST_LIMIT) {
+            try {
+                Data_sol_Data sc = Data_sol_Data.load(addr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+                return sc.getOwner().send().getValue();
+            } catch (NullPointerException e) {
+                LOGGER.error(e.toString());
+                count++;
+            }
+        }
+        throw new NullPointerException();
     }
 
     public TransactionReceipt write(String addr, Credentials credentials, String fileNo, String hash) throws Exception {
@@ -430,10 +471,20 @@ public class DataService {
     }
 
     public String read(String addr, Credentials credentials, String id) throws Exception {
-        Data_sol_Data sc = Data_sol_Data.load(addr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
-        String hash = sc.readDB(new Utf8String(id)).send().getValue();
-        LOGGER.info("Read succeed: " + hash);
-        return hash;
+        int count = 0;
+
+        while(count < REQUEST_LIMIT) {
+            try {
+                Data_sol_Data sc = Data_sol_Data.load(addr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+                String hash = sc.readDB(new Utf8String(id)).send().getValue();
+                LOGGER.info("Read succeed: " + hash);
+                return hash;
+            } catch (NullPointerException e) {
+                LOGGER.error(e.toString());
+                count++;
+            }
+        }
+        throw new NullPointerException();
     }
 
     private Credentials signIn(String address, String password) throws IOException, CipherException {

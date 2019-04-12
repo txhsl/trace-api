@@ -34,6 +34,7 @@ public class SystemService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SystemService.class);
     private String sysAddress;
 
+    private final int REQUEST_LIMIT = 10;
     private final Web3j web3j;
 
     public SystemService(Web3j web3j) {
@@ -105,27 +106,57 @@ public class SystemService {
     }
 
     public String getRC(String userAddr, Credentials credentials) throws Exception {
-        System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
-        String rcAddr = system.getRC(new Address(userAddr)).send().getValue();
+        int count = 0;
 
-        LOGGER.info("Read succeed: " + rcAddr);
-        return rcAddr;
+        while(count < REQUEST_LIMIT) {
+            try {
+                System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+                String rcAddr = system.getRC(new Address(userAddr)).send().getValue();
+
+                LOGGER.info("Read succeed: " + rcAddr);
+                return rcAddr;
+            } catch (NullPointerException e) {
+                LOGGER.error(e.toString());
+                count++;
+            }
+        }
+        throw new NullPointerException();
     }
 
     public String getSC(String propertyName, Credentials credentials) throws Exception {
-        System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
-        String scAddr = system.getScIndex(new Utf8String(propertyName)).send().getValue();
+        int count = 0;
 
-        LOGGER.info("Read succeed: " + scAddr);
-        return scAddr;
+        while(count < REQUEST_LIMIT) {
+            try {
+                System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+                String scAddr = system.getScIndex(new Utf8String(propertyName)).send().getValue();
+
+                LOGGER.info("Read succeed: " + scAddr);
+                return scAddr;
+            } catch (NullPointerException e) {
+                LOGGER.error(e.toString());
+                count++;
+            }
+        }
+        throw new NullPointerException();
     }
 
     public String getIndex(String roleName, Credentials credentials) throws Exception {
-        System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
-        String rcAddr = system.getRcIndex(new Utf8String(roleName)).send().getValue();
+        int count = 0;
 
-        LOGGER.info("Read succeed: " + rcAddr);
-        return rcAddr;
+        while(count < REQUEST_LIMIT) {
+            try {
+                System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+                String rcAddr = system.getRcIndex(new Utf8String(roleName)).send().getValue();
+
+                LOGGER.info("Read succeed: " + rcAddr);
+                return rcAddr;
+            } catch (NullPointerException e) {
+                LOGGER.error(e.toString());
+                count++;
+            }
+        }
+        throw new NullPointerException();
     }
 
     public Map<String, String> getRoleAll(Credentials credentials) throws Exception {
@@ -133,31 +164,45 @@ public class SystemService {
         System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
 
         for (String role : RoleType.Types) {
-            try {
-                String rcAddr = system.getRcIndex(new Utf8String(role)).send().getValue();
-                if (!rcAddr.equals("")) {
-                    result.putIfAbsent(role, rcAddr);
+            boolean flag = false;
+            int count = 0;
+
+            while(!flag && count < REQUEST_LIMIT) {
+                try {
+                    String rcAddr = system.getRcIndex(new Utf8String(role)).send().getValue();
+                    if (!rcAddr.equals("")) {
+                        result.putIfAbsent(role, rcAddr);
+                    }
+                    flag = true;
+                } catch (NullPointerException e) {
+                    LOGGER.error(e.toString());
+                    count++;
                 }
-            } catch (NullPointerException e) {
-                LOGGER.error(e.getMessage());
             }
         }
 
         return result;
-    }
+}
 
     public Map<String, String> getPropertyAll(Credentials credentials) throws Exception {
         Map<String, String> result = new HashMap<>();
         System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
 
         for (String property : PropertyType.Types) {
-            try {
-                String scAddr = system.getScIndex(new Utf8String(property)).send().getValue();
-                if (!scAddr.equals("")) {
-                    result.putIfAbsent(property, scAddr);
+            boolean flag = false;
+            int count = 0;
+
+            while(!flag && count < REQUEST_LIMIT) {
+                try {
+                    String scAddr = system.getScIndex(new Utf8String(property)).send().getValue();
+                    if (!scAddr.equals("")) {
+                        result.putIfAbsent(property, scAddr);
+                    }
+                    flag = true;
+                } catch (NullPointerException e) {
+                    LOGGER.error(e.toString());
+                    count++;
                 }
-            } catch (NullPointerException e) {
-                LOGGER.error(e.getMessage());
             }
         }
 

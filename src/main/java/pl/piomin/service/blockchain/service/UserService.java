@@ -41,6 +41,7 @@ public class UserService {
             "0x329b81e0a2af215c7e41b32251ae4d6ff1a83e3e", "0x370287edd5a5e7c4b0f5e305b00fe95fc702ce47", "0x40b00de2e7b694b494022eef90e874f5e553f996", "0x49e2170e0b1188f2151ac35287c743ee60ea1f6a"};
 
     private final Web3j web3j;
+    private final int REQUEST_LIMIT = 10;
     private Credentials current = null;
 
     public UserService(Web3j web3j) {
@@ -446,11 +447,21 @@ public class UserService {
     }
 
     public String getOwned(String rcAddr, String name) throws Exception {
-        Role_sol_Role rc = Role_sol_Role.load(rcAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
-        String scAddr = rc.getOwned(new Utf8String(name)).send().getValue();
+        int count = 0;
 
-        LOGGER.info("Read succeed: " + scAddr);
-        return scAddr;
+        while(count < REQUEST_LIMIT) {
+            try {
+                Role_sol_Role rc = Role_sol_Role.load(rcAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
+                String scAddr = rc.getOwned(new Utf8String(name)).send().getValue();
+
+                LOGGER.info("Read succeed: " + scAddr);
+                return scAddr;
+            } catch (NullPointerException e) {
+                LOGGER.error(e.toString());
+                count++;
+            }
+        }
+        throw new NullPointerException();
     }
 
     public Map<String, String> getOwnedAll(String rcAddr) throws Exception {
@@ -458,16 +469,22 @@ public class UserService {
         Role_sol_Role rc = Role_sol_Role.load(rcAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
 
         for (String property : PropertyType.Types) {
-            try {
-                String scAddr = rc.getOwned(new Utf8String(property)).send().getValue();
-                if (!scAddr.equals("0x0000000000000000000000000000000000000000")) {
-                    result.putIfAbsent(property, scAddr);
+            boolean flag = false;
+            int count = 0;
+
+            while(!flag && count < REQUEST_LIMIT) {
+                try {
+                    String scAddr = rc.getOwned(new Utf8String(property)).send().getValue();
+                    if (!scAddr.equals("0x0000000000000000000000000000000000000000")) {
+                        result.putIfAbsent(property, scAddr);
+                    }
+                    flag = true;
+                } catch (NullPointerException e) {
+                    LOGGER.error(e.toString());
+                    count++;
                 }
-            } catch (NullPointerException e) {
-                LOGGER.error(e.getMessage());
             }
         }
-
         return result;
     }
 
@@ -484,13 +501,20 @@ public class UserService {
         Role_sol_Role rc = Role_sol_Role.load(rcAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
 
         for (String property : PropertyType.Types) {
-            try {
-                String scAddr = rc.getManaged(new Utf8String(property)).send().getValue();
-                if (!scAddr.equals("0x0000000000000000000000000000000000000000")) {
-                    result.putIfAbsent(property, scAddr);
+            boolean flag = false;
+            int count = 0;
+
+            while(!flag && count < REQUEST_LIMIT) {
+                try {
+                    String scAddr = rc.getManaged(new Utf8String(property)).send().getValue();
+                    if (!scAddr.equals("0x0000000000000000000000000000000000000000")) {
+                        result.putIfAbsent(property, scAddr);
+                    }
+                    flag = true;
+                } catch (NullPointerException e) {
+                    LOGGER.error(e.toString());
+                    count++;
                 }
-            } catch (NullPointerException e) {
-                LOGGER.error(e.getMessage());
             }
         }
 
