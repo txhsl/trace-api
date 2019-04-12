@@ -2,15 +2,13 @@ package pl.piomin.service.blockchain.controller;
 
 import org.springframework.web.bind.annotation.*;
 import org.web3j.protocol.core.methods.response.Transaction;
-import pl.piomin.service.blockchain.model.BlockchainTransaction;
-import pl.piomin.service.blockchain.model.ContractSwapper;
-import pl.piomin.service.blockchain.model.HeightStatusSwapper;
-import pl.piomin.service.blockchain.model.TaskSwapper;
+import pl.piomin.service.blockchain.model.*;
 import pl.piomin.service.blockchain.service.BlockchainService;
 import pl.piomin.service.blockchain.service.UserService;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/transaction")
@@ -65,13 +63,28 @@ public class BlockchainController {
         return blockchainService.getHight();
     }
 
-    @GetMapping("/userHistory")
-    public ArrayList<Transaction> userHistory() throws InterruptedException {
-        return blockchainService.getUserHistory(userService.getCurrent().getAddress());
+    @GetMapping("/userHistory/{address}")
+    public ArrayList<Transaction> userHistory(@PathVariable String address) throws InterruptedException {
+        return blockchainService.getFromHistory(address);
     }
 
-    @GetMapping("/contractHistory")
-    public ArrayList<Transaction> contractHistory(@RequestBody ContractSwapper contract) throws InterruptedException {
-        return blockchainService.getContractHistory(contract.getAddress());
+    @GetMapping("/contractHistory/{address}")
+    public ArrayList<Transaction> contractHistory(@PathVariable String address) throws InterruptedException {
+        return blockchainService.getToHistory(address);
+    }
+
+    @PostMapping("/subscribe")
+    public Result subscribe(@RequestBody ContractSwapper contract) throws InterruptedException {
+        return new Result(blockchainService.subscribeContract(contract.getAddress()));
+    }
+
+    @PostMapping("/unsubscribe")
+    public Result unsubscribe(@RequestBody ContractSwapper contract) throws InterruptedException {
+        return new Result(blockchainService.unsubscribeContract(contract.getAddress()));
+    }
+
+    @GetMapping("/subscribe")
+    public Map<String, ArrayList<Transaction>> subscribe(){
+        return blockchainService.getSubscribe();
     }
 }

@@ -16,6 +16,8 @@ import pl.piomin.service.blockchain.model.TaskSwapper;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class BlockchainService {
@@ -23,11 +25,13 @@ public class BlockchainService {
     private static final Logger LOGGER = LoggerFactory.getLogger(BlockchainService.class);
 
     private final Web3j web3j;
-    private final int RECEIENT = 7;
+    private static final int RECEIENT = 7;
 
     private ArrayList<TaskSwapper> pendingTx = new ArrayList<>();
     private ArrayList<TaskSwapper> completedTx = new ArrayList<>();
     private ArrayList<TaskSwapper> errorTx = new ArrayList<>();
+
+    private Map<String, ArrayList<org.web3j.protocol.core.methods.response.Transaction>> cache = new HashMap<>();
 
     public BlockchainService(Web3j web3j) {
         this.web3j = web3j;
@@ -68,7 +72,28 @@ public class BlockchainService {
         return Convert.fromWei(wei.toString(), Convert.Unit.ETHER).doubleValue();
     }
 
-    public ArrayList<org.web3j.protocol.core.methods.response.Transaction> getUserHistory(String address) throws InterruptedException {
+    public boolean subscribeContract(String address) throws InterruptedException {
+        cache.put(address, new ArrayList<>());
+
+        Disposable sub = web3j.replayPastAndFutureTransactionsFlowable(DefaultBlockParameterName.EARLIEST)
+                .subscribe(tx -> {
+                    if (tx.getTo() != null && tx.getTo().equals(address)) {
+                        cache.get(address).add(tx);
+                    }
+                });
+        return true;
+    }
+
+    public Map<String, ArrayList<org.web3j.protocol.core.methods.response.Transaction>> getSubscribe() {
+        return cache;
+    }
+
+    public boolean unsubscribeContract(String address) {
+        cache.remove(address);
+        return true;
+    }
+
+    public ArrayList<org.web3j.protocol.core.methods.response.Transaction> getFromHistory(String address) throws InterruptedException {
         ArrayList<org.web3j.protocol.core.methods.response.Transaction> result = new ArrayList<>();
         Disposable sub = web3j.replayPastTransactionsFlowable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST)
             .subscribe(tx -> {
@@ -82,7 +107,7 @@ public class BlockchainService {
         return result;
     }
 
-    public ArrayList<org.web3j.protocol.core.methods.response.Transaction> getContractHistory(String address) throws InterruptedException {
+    public ArrayList<org.web3j.protocol.core.methods.response.Transaction> getToHistory(String address) throws InterruptedException {
         ArrayList<org.web3j.protocol.core.methods.response.Transaction> result = new ArrayList<>();
         Disposable sub = web3j.replayPastTransactionsFlowable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST)
                 .subscribe(tx -> {
