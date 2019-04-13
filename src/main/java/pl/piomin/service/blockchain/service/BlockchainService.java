@@ -32,6 +32,7 @@ public class BlockchainService {
     private ArrayList<TaskSwapper> errorTx = new ArrayList<>();
 
     private Map<String, ArrayList<org.web3j.protocol.core.methods.response.Transaction>> cache = new HashMap<>();
+    private Map<String, Disposable> listener = new HashMap<>();
 
     public BlockchainService(Web3j web3j) {
         this.web3j = web3j;
@@ -81,6 +82,8 @@ public class BlockchainService {
                         cache.get(address).add(tx);
                     }
                 });
+
+        listener.putIfAbsent(address, sub);
         return true;
     }
 
@@ -89,8 +92,15 @@ public class BlockchainService {
     }
 
     public boolean unsubscribeContract(String address) {
-        cache.remove(address);
-        return true;
+        try {
+            listener.get(address).dispose();
+            listener.remove(address);
+            cache.remove(address);
+            return true;
+        } catch (Exception e) {
+            LOGGER.error(e.toString());
+            return false;
+        }
     }
 
     public ArrayList<org.web3j.protocol.core.methods.response.Transaction> getFromHistory(String address) throws InterruptedException {
