@@ -9,10 +9,7 @@ import pl.piomin.service.blockchain.model.TaskSwapper;
 import pl.piomin.service.blockchain.service.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/data")
@@ -65,8 +62,12 @@ public class DataController {
         for (String property: data.getData().keySet()) {
             Map<String, DataSwapper> single = data.getData().get(property);
             String scAddr = userService.getOwned(rcAddr, property);
+
+            String[] ids = single.keySet().toArray(new String[0]);
+            Arrays.sort(ids);
+
             if (dataService.checkWriter(scAddr, new Address(rcAddr), userService.getCurrent())) {
-                for (String id : single.keySet()) {
+                for (String id : ids) {
                     String fileNo = dataService.getFileNum(scAddr, id, userService.getCurrent());
 
                     //Try cache
