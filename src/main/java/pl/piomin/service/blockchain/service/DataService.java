@@ -359,7 +359,7 @@ public class DataService {
         return sc.getContractAddress();
     }
 
-    public String getFileNum(String propertyName, String addr, String id, Credentials credentials) throws Exception {
+    public String getFileNum(String addr, String id, Credentials credentials) throws Exception {
         int count = 0;
 
         while(count < REQUEST_LIMIT) {
@@ -367,7 +367,7 @@ public class DataService {
                 Data_sol_Data sc = Data_sol_Data.load(addr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
                 String result = sc.getFileNum(new Utf8String(id)).send().getValue();
                 LOGGER.info("File number calculated: " + result + ", data id: " + id);
-                return propertyName + '_' + result;
+                return result;
             } catch (NullPointerException e) {
                 LOGGER.error(e.toString());
                 count++;

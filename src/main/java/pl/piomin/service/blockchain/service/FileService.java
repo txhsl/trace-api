@@ -47,9 +47,15 @@ public class FileService {
         }
     }
 
-    public TaskSwapper record(String propertyName, String fileName, String id, String value) throws IOException {
+    public TaskSwapper record(String propertyName, String fileName, String id, String value) throws IOException, ClassNotFoundException {
+        return record(propertyName, fileName, id, value, "");
+    }
+
+    public TaskSwapper record(String propertyName, String fileName, String id, String value, String hash) throws IOException, ClassNotFoundException {
         FileSwapper file;
         TaskSwapper task = null;
+
+        //New property?
         if (cache.containsKey(propertyName)) {
              file = cache.get(propertyName);
         }
@@ -58,12 +64,20 @@ public class FileService {
             file.setFileName(fileName);
         }
 
+        //New file?
         if (!file.getFileName().equals(fileName)) {
             cache.remove(propertyName);
             task = new TaskSwapper(file.getFileName(), upload(output(file)));
             file = new FileSwapper();
             file.setFileName(fileName);
         }
+
+        //Existed?
+        if (!hash.equals("")) {
+            file = input(download(hash));
+        }
+
+        //Save
         file.addContent(id, value);
         cache.put(propertyName, file);
 
@@ -103,7 +117,7 @@ public class FileService {
         return target.getAbsolutePath();
     }
 
-    public FileSwapper input(File file) throws IOException,ClassNotFoundException {
+    public FileSwapper input(File file) throws IOException, ClassNotFoundException {
         FileInputStream fileInputStream = new FileInputStream(file);
         ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
 
