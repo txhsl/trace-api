@@ -42,7 +42,8 @@ public class DataController {
         String fileNo = dataService.getFileNum(scAddr, data.getId(), userService.getCurrent());
 
         //Try cache
-        String hash = dataService.read(scAddr, userService.getCurrent(), data.getId());
+        String cachedName = fileService.getFileName(data.getPropertyName());
+        String hash = cachedName == null ? "" : dataService.read(scAddr, userService.getCurrent(), cachedName);
         TaskSwapper task = fileService.record(data.getPropertyName(), fileNo, data.getId(), data.getData(), hash);
 
         //Record hash
@@ -106,26 +107,30 @@ public class DataController {
             for (TaskSwapper tx : pending) {
                 if (tx.getTaskName().equals(dataService.getFileNum(scAddr, data.getId(), userService.getCurrent()))) {
                     hash = tx.getTaskContent();
-                    data.setStatus("pending");
+                    data.setStatus("Pending");
                 }
             }
 
             //Try Eth
             if (hash == null) {
                 hash = dataService.read(scAddr, userService.getCurrent(), data.getId());
-                data.setStatus("confirmed");
+                data.setStatus("Confirmed");
             }
 
             FileSwapper file = fileService.input(fileService.download(hash));
             if (fileService.checkFile(file.getFileName(), dataService.getFileNum(scAddr, data.getId(), userService.getCurrent()))) {
-                data.setData(file.getContent(data.getId()));
+                result = file.getContent(data.getId());
+                data.setData(result);
+                if (result == null) {
+                    data.setStatus("Not found");
+                }
             }
             else {
                 throw new IOException();
             }
         }
         else {
-            data.setStatus("cached");
+            data.setStatus("Cached");
             data.setData(result);
         }
         return data;
@@ -153,20 +158,26 @@ public class DataController {
                         for (TaskSwapper tx : pending) {
                             if (tx.getTaskName().equals(dataService.getFileNum(scAddr, id, userService.getCurrent()))) {
                                 hash = tx.getTaskContent();
-                                status = "pending";
+                                status = "Pending";
                             }
                         }
 
                         //Try Eth
                         if (hash == null) {
-                            hash = dataService.read(scAddr.toString(), userService.getCurrent(), id);
-                            status = "confirmed";
+                            hash = dataService.read(scAddr, userService.getCurrent(), id);
+                            status = "Confirmed";
                         }
 
                         FileSwapper file = fileService.input(fileService.download(hash));
                         if (fileService.checkFile(file.getFileName(), dataService.getFileNum(scAddr, id, userService.getCurrent()))) {
-                            DataSwapper swapper = new DataSwapper(id, property, file.getContent(id));
-                            swapper.setStatus(status);
+                            temp = file.getContent(id);
+                            DataSwapper swapper = new DataSwapper(id, property, temp);
+                            if(temp == null) {
+                                swapper.setStatus("Not found");
+                            }
+                            else {
+                                swapper.setStatus(status);
+                            }
                             result.put(id, swapper);
                         }
                         else {
@@ -175,7 +186,7 @@ public class DataController {
                     }
                     else {
                         DataSwapper swapper = new DataSwapper(id, property, temp);
-                        swapper.setStatus("cached");
+                        swapper.setStatus("Cached");
                         result.put(id, swapper);
                     }
                 }

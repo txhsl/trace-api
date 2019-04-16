@@ -67,14 +67,9 @@ public class FileService {
         //New file?
         if (!file.getFileName().equals(fileName)) {
             cache.remove(propertyName);
-            task = new TaskSwapper(file.getFileName(), upload(output(file)));
+            task = new TaskSwapper(file.getFileName(), upload(output(file, hash)));
             file = new FileSwapper();
             file.setFileName(fileName);
-        }
-
-        //Existed?
-        if (!hash.equals("")) {
-            file = input(download(hash));
         }
 
         //Save
@@ -99,8 +94,29 @@ public class FileService {
         return null;
     }
 
-    private String output(FileSwapper data) throws IOException {
+    public String getFileName(String propertyName) {
+        if (cache.containsKey(propertyName)) {
+            return cache.get(propertyName).getFileName();
+        }
+        return null;
+    }
+
+    private String output(FileSwapper data, String hash) throws IOException, ClassNotFoundException {
         File target = new File(folder.getPath() + '\\' + data.getFileName());
+
+        //Existed?
+        if (!hash.equals("")) {
+            FileSwapper old = input(download(hash));
+            Map<String, String> increment = data.getContent();
+
+            //Merge
+            for(String id : increment.keySet()) {
+                old.addContent(id, increment.get(id));
+            }
+
+            data = old;
+        }
+
         if(target.exists()){
             LOGGER.info("File already existed, path: " + target.getAbsolutePath());
             return target.getPath();

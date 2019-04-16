@@ -178,11 +178,11 @@ public class BlockchainService {
                 cached.add(pending);
                 try {
                     pending.setReceipt(pending.getFuture().get());
+                    completedTx.add(pending);
                 } catch (Exception e) {
                     LOGGER.error(e.getMessage());
                     errorTx.add(pending);
                 }
-                completedTx.add(pending);
             }
         }
 
