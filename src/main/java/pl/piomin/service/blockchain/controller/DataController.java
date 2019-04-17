@@ -41,6 +41,11 @@ public class DataController {
         }
         String fileNo = dataService.getFileNum(scAddr, data.getId(), userService.getCurrent());
 
+        //Check pending
+        if (blockchainService.checkDuplicated(data.getPropertyName() + '_' + fileNo)) {
+            throw new IOException();
+        }
+
         //Try cache
         String cachedName = fileService.getFileName(data.getPropertyName());
         String hash = cachedName == null ? "" : dataService.read(scAddr, userService.getCurrent(), cachedName);
@@ -50,6 +55,7 @@ public class DataController {
         if (task != null) {
             task.setTaskSender(userService.getCurrent().getAddress());
             task.setFuture(dataService.writeAsync(scAddr, userService.getCurrent(), task.getTaskName(), task.getTaskContent()));
+            task.setTaskName(data.getPropertyName() + '_' + task.getTaskName());
             blockchainService.addPending(task);
         }
         return fileNo;
@@ -71,6 +77,12 @@ public class DataController {
                 for (String id : ids) {
                     String fileNo = dataService.getFileNum(scAddr, id, userService.getCurrent());
 
+                    //Check pending
+                    if (blockchainService.checkDuplicated(property + '_' + fileNo)) {
+                        result.add(null);
+                        continue;
+                    }
+
                     //Try cache
                     TaskSwapper task = fileService.record(property, fileNo, id, single.get(id).getData());
 
@@ -78,6 +90,7 @@ public class DataController {
                     if (task != null) {
                         task.setTaskSender(userService.getCurrent().getAddress());
                         task.setFuture(dataService.writeAsync(scAddr, userService.getCurrent(), task.getTaskName(), task.getTaskContent()));
+                        task.setTaskName(property + '_' + task.getTaskName());
                         blockchainService.addPending(task);
                     }
                     result.add(fileNo);

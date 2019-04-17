@@ -191,6 +191,16 @@ public class BlockchainService {
         }
     }
 
+    public boolean checkDuplicated(String taskName) {
+        checkCompleted();
+        for (TaskSwapper pending : pendingTx) {
+            if (pending.getTaskName().equals(taskName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public int getHight() throws IOException {
         return web3j.ethBlockNumber().send().getBlockNumber().intValue();
     }
