@@ -3,6 +3,9 @@ package pl.piomin.service.blockchain.service;
 import io.reactivex.disposables.Disposable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameter;
@@ -19,6 +22,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+@Component
+@EnableScheduling
 @Service
 public class BlockchainService {
 
@@ -136,7 +141,6 @@ public class BlockchainService {
     }
 
     public ArrayList<TaskSwapper> getCompleted() {
-        checkCompleted();
         return completedTx;
     }
     public int[] getCompleted(String[] addresses) {
@@ -162,7 +166,6 @@ public class BlockchainService {
     }
 
     public ArrayList<TaskSwapper> getPending() {
-        checkCompleted();
         return pendingTx;
     }
 
@@ -170,6 +173,7 @@ public class BlockchainService {
         return errorTx;
     }
 
+    @Scheduled(fixedDelay = 5000)
     private void checkCompleted() {
         ArrayList<TaskSwapper> cached = new ArrayList<>();
 
@@ -192,7 +196,6 @@ public class BlockchainService {
     }
 
     public boolean checkDuplicated(String taskName) {
-        checkCompleted();
         for (TaskSwapper pending : pendingTx) {
             if (pending.getTaskName().equals(taskName)) {
                 return true;

@@ -11,8 +11,7 @@ import pl.piomin.service.blockchain.model.FileSwapper;
 import pl.piomin.service.blockchain.model.TaskSwapper;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author: HuShili
@@ -23,6 +22,16 @@ import java.util.Map;
 @Service
 public class FileService {
 
+    private class FileTask {
+        String hash;
+        FileSwapper file;
+
+        FileTask(String hash, FileSwapper file) {
+            this.file = file;
+            this.hash = hash;
+        }
+    }
+
     private static final Logger LOGGER = LoggerFactory.getLogger(FileService.class);
     private static final String IPFS_URL = "/ip4/127.0.0.1/tcp/5001";
 
@@ -30,6 +39,7 @@ public class FileService {
     private final File folder;
 
     private Map<String, FileSwapper> cache = new HashMap<>();
+    private ArrayList<FileTask> waiting = new ArrayList<>();
 
     public FileService() {
         ipfs = new IPFS(IPFS_URL);
@@ -47,36 +57,48 @@ public class FileService {
         }
     }
 
-    public TaskSwapper record(String propertyName, String fileName, String id, String value) throws IOException, ClassNotFoundException {
+    public boolean record(String propertyName, String fileName, String id, String value) {
         return record(propertyName, fileName, id, value, "");
     }
 
-    public TaskSwapper record(String propertyName, String fileName, String id, String value, String hash) throws IOException, ClassNotFoundException {
+    public boolean record(String propertyName, String fileName, String id, String value, String hash) {
         FileSwapper file;
-        TaskSwapper task = null;
-
         //New property?
         if (cache.containsKey(propertyName)) {
              file = cache.get(propertyName);
         }
         else {
             file = new FileSwapper();
-            file.setFileName(fileName);
+            file.setFileName(propertyName + '_' + fileName);
         }
 
         //New file?
-        if (!file.getFileName().equals(fileName)) {
+        if (!file.getFileName().equals(propertyName + '_' + fileName)) {
             cache.remove(propertyName);
-            task = new TaskSwapper(file.getFileName(), upload(output(file, hash)));
+            waiting.add(new FileTask(hash, file));
             file = new FileSwapper();
-            file.setFileName(fileName);
+            file.setFileName(propertyName + '_' + fileName);
         }
 
         //Save
         file.addContent(id, value);
         cache.put(propertyName, file);
+        return true;
+    }
 
-        return task;
+    public TaskSwapper[] process(String[] pendingFile) throws IOException, ClassNotFoundException {
+
+        ArrayList<String> index = new ArrayList<>(Arrays.asList(pendingFile));
+        ArrayList<TaskSwapper> results = new ArrayList<>();
+        Iterator<FileTask> iterator = waiting.iterator();
+        while (iterator.hasNext()) {
+            FileTask task = iterator.next();
+            if (!index.contains(task.file.getFileName())) {
+                results.add(new TaskSwapper(task.file.getFileName(), upload(output(task.file, task.hash))));
+                iterator.remove();
+            }
+        }
+        return results.toArray(new TaskSwapper[0]);
     }
 
     public String query(String propertyName, String id) {
@@ -85,7 +107,6 @@ public class FileService {
         }
         return null;
     }
-
 
     public static String query(FileSwapper data, String id) {
         if (data.contains(id)) {
@@ -133,7 +154,7 @@ public class FileService {
         return target.getAbsolutePath();
     }
 
-    public FileSwapper input(File file) throws IOException, ClassNotFoundException {
+    public static FileSwapper input(File file) throws IOException, ClassNotFoundException {
         FileInputStream fileInputStream = new FileInputStream(file);
         ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
 
@@ -180,7 +201,7 @@ public class FileService {
         }
     }
 
-    public boolean checkFile(String fileName, String expectedName) {
+    public static boolean checkFile(String fileName, String expectedName) {
         if (fileName.equals(expectedName)) {
             LOGGER.info("File checked, name: " + fileName);
             return true;

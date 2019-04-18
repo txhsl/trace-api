@@ -1,5 +1,8 @@
 package pl.piomin.service.blockchain.controller;
 
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 import org.web3j.abi.datatypes.Address;
 import pl.piomin.service.blockchain.model.DataMultipleSwapper;
@@ -11,6 +14,8 @@ import pl.piomin.service.blockchain.service.*;
 import java.io.IOException;
 import java.util.*;
 
+@Component
+@EnableScheduling
 @RestController
 @RequestMapping("/data")
 public class DataController {
@@ -30,6 +35,22 @@ public class DataController {
         this.blockchainService = blockchainService;
     }
 
+    @Scheduled(fixedDelay = 5000)
+    public void process() throws Exception {
+        ArrayList<String> pending = new ArrayList<>();
+        for (TaskSwapper task : blockchainService.getPending()) {
+            pending.add(task.getTaskName());
+        }
+        TaskSwapper[] newTasks = fileService.process(pending.toArray(new String[0]));
+        for (TaskSwapper task : newTasks) {
+            String scAddr = systemService.getSC(task.getTaskName().substring(0, task.getTaskName().lastIndexOf('_')), userService.getCurrent());
+            String fileNo = dataService.getFileNum(scAddr, task.getTaskName().substring(task.getTaskName().lastIndexOf('_') + 1), userService.getCurrent());
+            task.setTaskSender(userService.getCurrent().getAddress());
+            task.setFuture(dataService.writeAsync(scAddr, userService.getCurrent(), fileNo, task.getTaskContent()));
+            blockchainService.addPending(task);
+        }
+    }
+
     //Writer
     @PostMapping("/write")
     public String writeData(@RequestBody DataSwapper data) throws Exception {
@@ -41,23 +62,11 @@ public class DataController {
         }
         String fileNo = dataService.getFileNum(scAddr, data.getId(), userService.getCurrent());
 
-        //Check pending
-        if (blockchainService.checkDuplicated(data.getPropertyName() + '_' + fileNo)) {
-            throw new IOException();
-        }
-
         //Try cache
         String cachedName = fileService.getFileName(data.getPropertyName());
         String hash = cachedName == null ? "" : dataService.read(scAddr, userService.getCurrent(), cachedName);
-        TaskSwapper task = fileService.record(data.getPropertyName(), fileNo, data.getId(), data.getData(), hash);
+        fileService.record(data.getPropertyName(), fileNo, data.getId(), data.getData(), hash);
 
-        //Record hash
-        if (task != null) {
-            task.setTaskSender(userService.getCurrent().getAddress());
-            task.setFuture(dataService.writeAsync(scAddr, userService.getCurrent(), task.getTaskName(), task.getTaskContent()));
-            task.setTaskName(data.getPropertyName() + '_' + task.getTaskName());
-            blockchainService.addPending(task);
-        }
         return fileNo;
     }
 
@@ -77,22 +86,9 @@ public class DataController {
                 for (String id : ids) {
                     String fileNo = dataService.getFileNum(scAddr, id, userService.getCurrent());
 
-                    //Check pending
-                    if (blockchainService.checkDuplicated(property + '_' + fileNo)) {
-                        result.add(null);
-                        continue;
-                    }
-
                     //Try cache
-                    TaskSwapper task = fileService.record(property, fileNo, id, single.get(id).getData());
+                    fileService.record(property, fileNo, id, single.get(id).getData());
 
-                    //Record hash
-                    if (task != null) {
-                        task.setTaskSender(userService.getCurrent().getAddress());
-                        task.setFuture(dataService.writeAsync(scAddr, userService.getCurrent(), task.getTaskName(), task.getTaskContent()));
-                        task.setTaskName(property + '_' + task.getTaskName());
-                        blockchainService.addPending(task);
-                    }
                     result.add(fileNo);
                 }
             }
@@ -130,8 +126,8 @@ public class DataController {
                 data.setStatus("Confirmed");
             }
 
-            FileSwapper file = fileService.input(fileService.download(hash));
-            if (fileService.checkFile(file.getFileName(), dataService.getFileNum(scAddr, data.getId(), userService.getCurrent()))) {
+            FileSwapper file = FileService.input(fileService.download(hash));
+            if (FileService.checkFile(file.getFileName(), data.getPropertyName() + '_' + dataService.getFileNum(scAddr, data.getId(), userService.getCurrent()))) {
                 result = file.getContent(data.getId());
                 data.setData(result);
                 if (result == null) {
@@ -181,8 +177,8 @@ public class DataController {
                             status = "Confirmed";
                         }
 
-                        FileSwapper file = fileService.input(fileService.download(hash));
-                        if (fileService.checkFile(file.getFileName(), dataService.getFileNum(scAddr, id, userService.getCurrent()))) {
+                        FileSwapper file = FileService.input(fileService.download(hash));
+                        if (FileService.checkFile(file.getFileName(), property + '_' + dataService.getFileNum(scAddr, id, userService.getCurrent()))) {
                             temp = file.getContent(id);
                             DataSwapper swapper = new DataSwapper(id, property, temp);
                             if(temp == null) {
