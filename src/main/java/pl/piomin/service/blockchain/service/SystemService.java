@@ -68,37 +68,87 @@ public class SystemService {
     }
 
     public TransactionReceipt addRC(String name, Address rcAddr, Credentials credentials) throws Exception {
-        System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
-        TransactionReceipt transactionReceipt = system.setRcIndex(new Utf8String(name), rcAddr).send();
+        int count = 0;
 
-        LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
-        return transactionReceipt;
+        while(count < REQUEST_LIMIT) {
+            try {
+                System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+                TransactionReceipt transactionReceipt = system.setRcIndex(new Utf8String(name), rcAddr).send();
+
+                LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
+                return transactionReceipt;
+            } catch (NullPointerException e) {
+                LOGGER.error(e.toString());
+                count++;
+            }
+        }
+        throw new NullPointerException();
     }
 
     public CompletableFuture<TransactionReceipt> addRCAsync(String name, Address rcAddr, Credentials credentials) throws Exception {
-        System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
-        return system.setRcIndex(new Utf8String(name), rcAddr).sendAsync();
+        int count = 0;
+
+        while(count < REQUEST_LIMIT) {
+            try {
+                System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+                return system.setRcIndex(new Utf8String(name), rcAddr).sendAsync();
+            } catch (NullPointerException e) {
+                LOGGER.error(e.toString());
+                count++;
+            }
+        }
+        throw new NullPointerException();
     }
 
     public TransactionReceipt addSC(String name, Address scAddr, Credentials credentials) throws Exception {
-        System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
-        TransactionReceipt transactionReceipt = system.setScIndex(new Utf8String(name), scAddr).send();
+        int count = 0;
 
-        LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
-        return transactionReceipt;
+        while(count < REQUEST_LIMIT) {
+            try {
+                System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+                TransactionReceipt transactionReceipt = system.setScIndex(new Utf8String(name), scAddr).send();
+
+                LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
+                return transactionReceipt;
+            } catch (NullPointerException e) {
+                LOGGER.error(e.toString());
+                count++;
+            }
+        }
+        throw new NullPointerException();
     }
 
     public CompletableFuture<TransactionReceipt> addSCAsync(String name, Address scAddr, Credentials credentials) throws Exception {
-        System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
-        return system.setScIndex(new Utf8String(name), scAddr).sendAsync();
+        int count = 0;
+
+        while(count < REQUEST_LIMIT) {
+            try {
+                System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+                return system.setScIndex(new Utf8String(name), scAddr).sendAsync();
+            } catch (NullPointerException e) {
+                LOGGER.error(e.toString());
+                count++;
+            }
+        }
+        throw new NullPointerException();
     }
 
     public TransactionReceipt setRC(String userAddr, String roleName, Credentials credentials) throws Exception {
-        System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
-        TransactionReceipt transactionReceipt = system.register(new Address(userAddr), new Utf8String(roleName)).send();
+        int count = 0;
 
-        LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
-        return transactionReceipt;
+        while(count < REQUEST_LIMIT) {
+            try {
+                System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+                TransactionReceipt transactionReceipt = system.register(new Address(userAddr), new Utf8String(roleName)).send();
+
+                LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
+                return transactionReceipt;
+            } catch (NullPointerException e) {
+                LOGGER.error(e.toString());
+                count++;
+            }
+        }
+        throw new NullPointerException();
     }
 
     public String getRC(Credentials credentials) throws Exception {

@@ -79,11 +79,8 @@ public class DataController {
             Map<String, DataSwapper> single = data.getData().get(property);
             String scAddr = userService.getOwned(rcAddr, property);
 
-            String[] ids = single.keySet().toArray(new String[0]);
-            Arrays.sort(ids);
-
             if (dataService.checkWriter(scAddr, new Address(rcAddr), userService.getCurrent())) {
-                for (String id : ids) {
+                for (String id : single.keySet()) {
                     String fileNo = dataService.getFileNum(scAddr, id, userService.getCurrent());
 
                     //Try cache

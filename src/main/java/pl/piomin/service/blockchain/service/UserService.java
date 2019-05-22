@@ -4,6 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Utf8String;
@@ -22,8 +25,10 @@ import pl.piomin.service.blockchain.contract.System_sol_System;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import static org.web3j.tx.gas.DefaultGasProvider.GAS_LIMIT;
 import static org.web3j.tx.gas.DefaultGasProvider.GAS_PRICE;
@@ -33,20 +38,33 @@ import static org.web3j.tx.gas.DefaultGasProvider.GAS_PRICE;
  * @date: 2019/2/11
  * @description: none
  */
+//@Component
+//@EnableScheduling
 @Service
 public class UserService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
-    public static final String[] accounts = new String[]{"0x6a2fb5e3bf37f0c3d90db4713f7ad4a3b2c24111", "0xdb2bbab1d9eca60c937aa9c995664f86b3da2934", "0xcdfea5a11062fab4cf4c2fda88e32fc6f7753145",
-            "0x329b81e0a2af215c7e41b32251ae4d6ff1a83e3e", "0x370287edd5a5e7c4b0f5e305b00fe95fc702ce47", "0x40b00de2e7b694b494022eef90e874f5e553f996", "0x49e2170e0b1188f2151ac35287c743ee60ea1f6a"};
+    public static final String[] accounts = new String[]{"0x6a2fb5e3bf37f0c3d90db4713f7ad4a3b2c24111", "0x38a5d4e63bbac1af0eba0d99ef927359ab8d7293", "0x40b00de2e7b694b494022eef90e874f5e553f996",
+            "0x49e2170e0b1188f2151ac35287c743ee60ea1f6a", "0x86dec6586bfa1dfe303eafbefee843919b543fd3", "0x135b8fb39d0f06ea1f2466f7e9f39d3136431480", "0x329b81e0a2af215c7e41b32251ae4d6ff1a83e3e",
+            "0x370287edd5a5e7c4b0f5e305b00fe95fc702ce47", "0x5386787c9ef76a235d27f000170abeede038a3db", "0xb41717679a04696a2aaac280d9d45ddd3760ff47", "0xcdfea5a11062fab4cf4c2fda88e32fc6f7753145"};
 
     private final Web3j web3j;
     private final int REQUEST_LIMIT = 10;
     private Credentials current = null;
+    //private ArrayList<RemoteCall<TransactionReceipt>> resetList = new ArrayList<>();
 
     public UserService(Web3j web3j) {
         this.web3j = web3j;
     }
+
+    //@Scheduled(fixedDelay = 3000)
+    //private void checkCompleted() {
+    //    if (resetList.size() > 0) {
+    //        resetList.get(0).sendAsync();
+    //        LOGGER.info("A tx sent");
+    //        resetList.remove(0);
+    //    }
+    //}
 
     public Credentials getCurrent() {
         return current;
@@ -57,7 +75,7 @@ public class UserService {
         //recreate RCs
         String[] roleAddrs = new String[RoleType.Types.size()];
 
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 10; i++) {
             if (signIn(accounts[i + 1], "Innov@teD@ily1")) {
                 Role_sol_Role role = Role_sol_Role.deploy(web3j, current, GAS_PRICE, GAS_LIMIT).send();
                 LOGGER.info("Role Contract " + i + " deployed: " + role.getContractAddress() + ". Role Name: " + RoleType.Types.get(i));
@@ -66,11 +84,12 @@ public class UserService {
                 if (signIn(accounts[0],"Innov@teD@ily1" )) {
                     System_sol_System system = System_sol_System.load(sysAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
                     TransactionReceipt transactionReceipt = system.setRcIndex(new Utf8String(RoleType.Types.get(i)), new Address(roleAddrs[i])).send();
-                    LOGGER.info("Transaction succeed: " + transactionReceipt.getTransactionHash());
+                    LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
 
                     //register users
                     transactionReceipt = system.register(new Address(accounts[i + 1]), new Utf8String(RoleType.Types.get(i))).send();
                     LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
+                    
                 }
             }
         }
@@ -80,297 +99,519 @@ public class UserService {
 
     public boolean resetPermission(String[] roleAddrs, String[] dataAddrs) throws Exception {
         //link RCs and SCs
-        //Producer-Producer
         if (signIn(accounts[1], "Innov@teD@ily1")) {
-            setManaged(roleAddrs[RoleType.getID("Producer")], "Producer_Operator", new Address(dataAddrs[PropertyType.getID("Producer_Operator")]));
-            setOwned(roleAddrs[RoleType.getID("Producer")], "Producer_Operator", new Address(dataAddrs[PropertyType.getID("Producer_Operator")]));
-
-            setManaged(roleAddrs[RoleType.getID("Producer")], "Producer_ProduceDate", new Address(dataAddrs[PropertyType.getID("Producer_ProduceDate")]));
-            setOwned(roleAddrs[RoleType.getID("Producer")], "Producer_ProduceDate", new Address(dataAddrs[PropertyType.getID("Producer_ProduceDate")]));
-
-            setManaged(roleAddrs[RoleType.getID("Producer")], "Producer_OutDate", new Address(dataAddrs[PropertyType.getID("Producer_OutDate")]));
-            setOwned(roleAddrs[RoleType.getID("Producer")], "Producer_OutDate", new Address(dataAddrs[PropertyType.getID("Producer_OutDate")]));
-
-            setManaged(roleAddrs[RoleType.getID("Producer")], "Producer_GuaranteeDate", new Address(dataAddrs[PropertyType.getID("Producer_GuaranteeDate")]));
-            setOwned(roleAddrs[RoleType.getID("Producer")], "Producer_GuaranteeDate", new Address(dataAddrs[PropertyType.getID("Producer_GuaranteeDate")]));
-
-            setManaged(roleAddrs[RoleType.getID("Producer")], "Producer_TestResult", new Address(dataAddrs[PropertyType.getID("Producer_TestResult")]));
-
-            setManaged(roleAddrs[RoleType.getID("Producer")], "Producer_BasePrice", new Address(dataAddrs[PropertyType.getID("Producer_BasePrice")]));
-            setOwned(roleAddrs[RoleType.getID("Producer")], "Producer_BasePrice", new Address(dataAddrs[PropertyType.getID("Producer_BasePrice")]));
-
-            setManaged(roleAddrs[RoleType.getID("Producer")], "Producer_SellPrice", new Address(dataAddrs[PropertyType.getID("Producer_SellPrice")]));
-            setOwned(roleAddrs[RoleType.getID("Producer")], "Producer_SellPrice", new Address(dataAddrs[PropertyType.getID("Producer_SellPrice")]));
-
-            setManaged(roleAddrs[RoleType.getID("Producer")], "Producer_Amount", new Address(dataAddrs[PropertyType.getID("Producer_Amount")]));
-            setOwned(roleAddrs[RoleType.getID("Producer")], "Producer_Amount", new Address(dataAddrs[PropertyType.getID("Producer_Amount")]));
+            setManagedAsync(roleAddrs[RoleType.getID("畜牧方")], "畜牧负责人", new Address(dataAddrs[PropertyType.getID("畜牧负责人")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("畜牧方")], "畜牧负责人", new Address(dataAddrs[PropertyType.getID("畜牧负责人")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("畜牧方")], "品种", new Address(dataAddrs[PropertyType.getID("品种")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("畜牧方")], "品种", new Address(dataAddrs[PropertyType.getID("品种")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("畜牧方")], "出栏日期", new Address(dataAddrs[PropertyType.getID("出栏日期")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("畜牧方")], "出栏日期", new Address(dataAddrs[PropertyType.getID("出栏日期")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("畜牧方")], "出栏重量", new Address(dataAddrs[PropertyType.getID("出栏重量")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("畜牧方")], "出栏重量", new Address(dataAddrs[PropertyType.getID("出栏重量")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("畜牧方")], "畜牧检验负责人", new Address(dataAddrs[PropertyType.getID("畜牧检验负责人")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("畜牧方")], "畜牧检验负责人", new Address(dataAddrs[PropertyType.getID("畜牧检验负责人")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("畜牧方")], "畜牧检验结果", new Address(dataAddrs[PropertyType.getID("畜牧检验结果")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("畜牧方")], "畜牧检验结果", new Address(dataAddrs[PropertyType.getID("畜牧检验结果")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("畜牧方")], "畜牧公司", new Address(dataAddrs[PropertyType.getID("畜牧公司")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("畜牧方")], "畜牧公司", new Address(dataAddrs[PropertyType.getID("畜牧公司")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("畜牧方")], "畜牧许可证", new Address(dataAddrs[PropertyType.getID("畜牧许可证")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("畜牧方")], "畜牧许可证", new Address(dataAddrs[PropertyType.getID("畜牧许可证")])).sendAsync();
+            
         }
-        //Storager-Producer
         if (signIn(accounts[2], "Innov@teD@ily1")) {
-            setManaged(roleAddrs[RoleType.getID("Storager")], "Producer_Operator", new Address(dataAddrs[PropertyType.getID("Producer_Operator")]));
-            setManaged(roleAddrs[RoleType.getID("Storager")], "Producer_ProduceDate", new Address(dataAddrs[PropertyType.getID("Producer_ProduceDate")]));
-            setManaged(roleAddrs[RoleType.getID("Storager")], "Producer_OutDate", new Address(dataAddrs[PropertyType.getID("Producer_OutDate")]));
-            setManaged(roleAddrs[RoleType.getID("Storager")], "Producer_GuaranteeDate", new Address(dataAddrs[PropertyType.getID("Producer_GuaranteeDate")]));
-            setManaged(roleAddrs[RoleType.getID("Storager")], "Producer_TestResult", new Address(dataAddrs[PropertyType.getID("Producer_TestResult")]));
+            setManagedAsync(roleAddrs[RoleType.getID("屠宰方")], "畜牧检验结果", new Address(dataAddrs[PropertyType.getID("畜牧检验结果")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("屠宰方")], "畜牧公司", new Address(dataAddrs[PropertyType.getID("畜牧公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("屠宰方")], "畜牧许可证", new Address(dataAddrs[PropertyType.getID("畜牧许可证")])).sendAsync();
+            
         }
-        //Transporter-Producer
         if (signIn(accounts[3], "Innov@teD@ily1")) {
-            setManaged(roleAddrs[RoleType.getID("Transporter")], "Producer_Operator", new Address(dataAddrs[PropertyType.getID("Producer_Operator")]));
-            setManaged(roleAddrs[RoleType.getID("Transporter")], "Producer_ProduceDate", new Address(dataAddrs[PropertyType.getID("Producer_ProduceDate")]));
-            setManaged(roleAddrs[RoleType.getID("Transporter")], "Producer_GuaranteeDate", new Address(dataAddrs[PropertyType.getID("Producer_GuaranteeDate")]));
-            setManaged(roleAddrs[RoleType.getID("Transporter")], "Producer_TestResult", new Address(dataAddrs[PropertyType.getID("Producer_TestResult")]));
+            setManagedAsync(roleAddrs[RoleType.getID("包装方")], "畜牧检验结果", new Address(dataAddrs[PropertyType.getID("畜牧检验结果")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("包装方")], "畜牧公司", new Address(dataAddrs[PropertyType.getID("畜牧公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("包装方")], "畜牧许可证", new Address(dataAddrs[PropertyType.getID("畜牧许可证")])).sendAsync();
+            
         }
-        //Seller-Producer
         if (signIn(accounts[4], "Innov@teD@ily1")) {
-            setManaged(roleAddrs[RoleType.getID("Seller")], "Producer_Operator", new Address(dataAddrs[PropertyType.getID("Producer_Operator")]));
-            setManaged(roleAddrs[RoleType.getID("Seller")], "Producer_ProduceDate", new Address(dataAddrs[PropertyType.getID("Producer_ProduceDate")]));
-            setManaged(roleAddrs[RoleType.getID("Seller")], "Producer_GuaranteeDate", new Address(dataAddrs[PropertyType.getID("Producer_GuaranteeDate")]));
-            setManaged(roleAddrs[RoleType.getID("Seller")], "Producer_TestResult", new Address(dataAddrs[PropertyType.getID("Producer_TestResult")]));
-            setManaged(roleAddrs[RoleType.getID("Seller")], "Producer_SellPrice", new Address(dataAddrs[PropertyType.getID("Producer_SellPrice")]));
+            setManagedAsync(roleAddrs[RoleType.getID("仓储方")], "畜牧检验结果", new Address(dataAddrs[PropertyType.getID("畜牧检验结果")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("仓储方")], "畜牧公司", new Address(dataAddrs[PropertyType.getID("畜牧公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("仓储方")], "畜牧许可证", new Address(dataAddrs[PropertyType.getID("畜牧许可证")])).sendAsync();
+            
         }
-        //Buyer-Producer
         if (signIn(accounts[5], "Innov@teD@ily1")) {
-            setManaged(roleAddrs[RoleType.getID("Buyer")], "Producer_Operator", new Address(dataAddrs[PropertyType.getID("Producer_Operator")]));
-            setManaged(roleAddrs[RoleType.getID("Buyer")], "Producer_ProduceDate", new Address(dataAddrs[PropertyType.getID("Producer_ProduceDate")]));
-            setManaged(roleAddrs[RoleType.getID("Buyer")], "Producer_GuaranteeDate", new Address(dataAddrs[PropertyType.getID("Producer_GuaranteeDate")]));
-            setManaged(roleAddrs[RoleType.getID("Buyer")], "Producer_TestResult", new Address(dataAddrs[PropertyType.getID("Producer_TestResult")]));
+            setManagedAsync(roleAddrs[RoleType.getID("物流方")], "畜牧检验结果", new Address(dataAddrs[PropertyType.getID("畜牧检验结果")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("物流方")], "畜牧公司", new Address(dataAddrs[PropertyType.getID("畜牧公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("物流方")], "畜牧许可证", new Address(dataAddrs[PropertyType.getID("畜牧许可证")])).sendAsync();
+            
         }
-        //Government-Producer
         if (signIn(accounts[6], "Innov@teD@ily1")) {
-            setManaged(roleAddrs[RoleType.getID("Government")], "Producer_Operator", new Address(dataAddrs[PropertyType.getID("Producer_Operator")]));
-            setManaged(roleAddrs[RoleType.getID("Government")], "Producer_ProduceDate", new Address(dataAddrs[PropertyType.getID("Producer_ProduceDate")]));
-            setManaged(roleAddrs[RoleType.getID("Government")], "Producer_OutDate", new Address(dataAddrs[PropertyType.getID("Producer_OutDate")]));
-            setManaged(roleAddrs[RoleType.getID("Government")], "Producer_GuaranteeDate", new Address(dataAddrs[PropertyType.getID("Producer_GuaranteeDate")]));
-            setManaged(roleAddrs[RoleType.getID("Government")], "Producer_TestResult", new Address(dataAddrs[PropertyType.getID("Producer_TestResult")]));
-            setOwned(roleAddrs[RoleType.getID("Government")], "Producer_TestResult", new Address(dataAddrs[PropertyType.getID("Producer_TestResult")]));
-            setManaged(roleAddrs[RoleType.getID("Government")], "Producer_BasePrice", new Address(dataAddrs[PropertyType.getID("Producer_BasePrice")]));
-            setManaged(roleAddrs[RoleType.getID("Government")], "Producer_SellPrice", new Address(dataAddrs[PropertyType.getID("Producer_SellPrice")]));
-            setManaged(roleAddrs[RoleType.getID("Government")], "Producer_Amount", new Address(dataAddrs[PropertyType.getID("Producer_Amount")]));
+            setManagedAsync(roleAddrs[RoleType.getID("二级加工")], "畜牧检验结果", new Address(dataAddrs[PropertyType.getID("畜牧检验结果")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("二级加工")], "畜牧公司", new Address(dataAddrs[PropertyType.getID("畜牧公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("二级加工")], "畜牧许可证", new Address(dataAddrs[PropertyType.getID("畜牧许可证")])).sendAsync();
+            
         }
-        //Producer-Storager
-        if (signIn(accounts[1], "Innov@teD@ily1")) {
-            setManaged(roleAddrs[RoleType.getID("Producer")], "Storager_Operator", new Address(dataAddrs[PropertyType.getID("Storager_Operator")]));
-            setManaged(roleAddrs[RoleType.getID("Producer")], "Storager_InTime", new Address(dataAddrs[PropertyType.getID("Storager_InTime")]));
-            setManaged(roleAddrs[RoleType.getID("Producer")], "Storager_OutTime", new Address(dataAddrs[PropertyType.getID("Storager_OutTime")]));
-            setManaged(roleAddrs[RoleType.getID("Producer")], "Storager_Price", new Address(dataAddrs[PropertyType.getID("Storager_Price")]));
-            setManaged(roleAddrs[RoleType.getID("Producer")], "Storager_Duration", new Address(dataAddrs[PropertyType.getID("Storager_Duration")]));
-            setManaged(roleAddrs[RoleType.getID("Producer")], "Storager_Amount", new Address(dataAddrs[PropertyType.getID("Storager_Amount")]));
-            setManaged(roleAddrs[RoleType.getID("Producer")], "Storager_Company", new Address(dataAddrs[PropertyType.getID("Storager_Company")]));
+        if (signIn(accounts[7], "Innov@teD@ily1")) {
+            setManagedAsync(roleAddrs[RoleType.getID("二级物流")], "畜牧检验结果", new Address(dataAddrs[PropertyType.getID("畜牧检验结果")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("二级物流")], "畜牧公司", new Address(dataAddrs[PropertyType.getID("畜牧公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("二级物流")], "畜牧许可证", new Address(dataAddrs[PropertyType.getID("畜牧许可证")])).sendAsync();
+            
         }
-        //Storager-Storager
+        if (signIn(accounts[8], "Innov@teD@ily1")) {
+            setManagedAsync(roleAddrs[RoleType.getID("零售方")], "畜牧检验结果", new Address(dataAddrs[PropertyType.getID("畜牧检验结果")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("零售方")], "畜牧公司", new Address(dataAddrs[PropertyType.getID("畜牧公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("零售方")], "畜牧许可证", new Address(dataAddrs[PropertyType.getID("畜牧许可证")])).sendAsync();
+            
+        }
+        if (signIn(accounts[9], "Innov@teD@ily1")) {
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "品种", new Address(dataAddrs[PropertyType.getID("品种")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "出栏日期", new Address(dataAddrs[PropertyType.getID("出栏日期")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "出栏重量", new Address(dataAddrs[PropertyType.getID("出栏重量")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "畜牧检验结果", new Address(dataAddrs[PropertyType.getID("畜牧检验结果")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "畜牧公司", new Address(dataAddrs[PropertyType.getID("畜牧公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "畜牧许可证", new Address(dataAddrs[PropertyType.getID("畜牧许可证")])).sendAsync();
+            
+        }
+        if (signIn(accounts[10], "Innov@teD@ily1")) {
+            setManagedAsync(roleAddrs[RoleType.getID("监管部门")], "畜牧负责人", new Address(dataAddrs[PropertyType.getID("畜牧负责人")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("监管部门")], "畜牧检验负责人", new Address(dataAddrs[PropertyType.getID("畜牧检验负责人")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("监管部门")], "畜牧检验结果", new Address(dataAddrs[PropertyType.getID("畜牧检验结果")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("监管部门")], "畜牧公司", new Address(dataAddrs[PropertyType.getID("畜牧公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("监管部门")], "畜牧许可证", new Address(dataAddrs[PropertyType.getID("畜牧许可证")])).sendAsync();
+            
+        }
+
+
         if (signIn(accounts[2], "Innov@teD@ily1")) {
-            setManaged(roleAddrs[RoleType.getID("Storager")], "Storager_Operator", new Address(dataAddrs[PropertyType.getID("Storager_Operator")]));
-            setOwned(roleAddrs[RoleType.getID("Storager")], "Storager_Operator", new Address(dataAddrs[PropertyType.getID("Storager_Operator")]));
-
-            setManaged(roleAddrs[RoleType.getID("Storager")], "Storager_InTime", new Address(dataAddrs[PropertyType.getID("Storager_InTime")]));
-            setOwned(roleAddrs[RoleType.getID("Storager")], "Storager_InTime", new Address(dataAddrs[PropertyType.getID("Storager_InTime")]));
-
-            setManaged(roleAddrs[RoleType.getID("Storager")], "Storager_OutTime", new Address(dataAddrs[PropertyType.getID("Storager_OutTime")]));
-            setOwned(roleAddrs[RoleType.getID("Storager")], "Storager_OutTime", new Address(dataAddrs[PropertyType.getID("Storager_OutTime")]));
-
-            setManaged(roleAddrs[RoleType.getID("Storager")], "Storager_Price", new Address(dataAddrs[PropertyType.getID("Storager_Price")]));
-            setOwned(roleAddrs[RoleType.getID("Storager")], "Storager_Price", new Address(dataAddrs[PropertyType.getID("Storager_Price")]));
-
-            setManaged(roleAddrs[RoleType.getID("Storager")], "Storager_Duration", new Address(dataAddrs[PropertyType.getID("Storager_Duration")]));
-            setOwned(roleAddrs[RoleType.getID("Storager")], "Storager_Duration", new Address(dataAddrs[PropertyType.getID("Storager_Duration")]));
-
-            setManaged(roleAddrs[RoleType.getID("Storager")], "Storager_Amount", new Address(dataAddrs[PropertyType.getID("Storager_Amount")]));
-            setOwned(roleAddrs[RoleType.getID("Storager")], "Storager_Amount", new Address(dataAddrs[PropertyType.getID("Storager_Amount")]));
-
-            setManaged(roleAddrs[RoleType.getID("Storager")], "Storager_Company", new Address(dataAddrs[PropertyType.getID("Storager_Company")]));
-            setOwned(roleAddrs[RoleType.getID("Storager")], "Storager_Company", new Address(dataAddrs[PropertyType.getID("Storager_Company")]));
+            setManagedAsync(roleAddrs[RoleType.getID("屠宰方")], "屠宰负责人", new Address(dataAddrs[PropertyType.getID("屠宰负责人")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("屠宰方")], "屠宰负责人", new Address(dataAddrs[PropertyType.getID("屠宰负责人")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("屠宰方")], "屠宰日期", new Address(dataAddrs[PropertyType.getID("屠宰日期")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("屠宰方")], "屠宰日期", new Address(dataAddrs[PropertyType.getID("屠宰日期")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("屠宰方")], "屠宰检验负责人", new Address(dataAddrs[PropertyType.getID("屠宰检验负责人")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("屠宰方")], "屠宰检验负责人", new Address(dataAddrs[PropertyType.getID("屠宰检验负责人")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("屠宰方")], "屠宰检验结果", new Address(dataAddrs[PropertyType.getID("屠宰检验结果")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("屠宰方")], "屠宰检验结果", new Address(dataAddrs[PropertyType.getID("屠宰检验结果")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("屠宰方")], "屠宰公司", new Address(dataAddrs[PropertyType.getID("屠宰公司")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("屠宰方")], "屠宰公司", new Address(dataAddrs[PropertyType.getID("屠宰公司")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("屠宰方")], "屠宰许可证", new Address(dataAddrs[PropertyType.getID("屠宰许可证")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("屠宰方")], "屠宰许可证", new Address(dataAddrs[PropertyType.getID("屠宰许可证")])).sendAsync();
+            
         }
-        //Transporter-Storager
         if (signIn(accounts[3], "Innov@teD@ily1")) {
-            setManaged(roleAddrs[RoleType.getID("Transporter")], "Storager_Operator", new Address(dataAddrs[PropertyType.getID("Storager_Operator")]));
-            setManaged(roleAddrs[RoleType.getID("Transporter")], "Storager_OutTime", new Address(dataAddrs[PropertyType.getID("Storager_OutTime")]));
-            setManaged(roleAddrs[RoleType.getID("Transporter")], "Storager_Company", new Address(dataAddrs[PropertyType.getID("Storager_Company")]));
+            setManagedAsync(roleAddrs[RoleType.getID("包装方")], "屠宰检验结果", new Address(dataAddrs[PropertyType.getID("屠宰检验结果")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("包装方")], "屠宰公司", new Address(dataAddrs[PropertyType.getID("屠宰公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("包装方")], "屠宰许可证", new Address(dataAddrs[PropertyType.getID("屠宰许可证")])).sendAsync();
+            
         }
-        //Seller-Storager
         if (signIn(accounts[4], "Innov@teD@ily1")) {
-            setManaged(roleAddrs[RoleType.getID("Seller")], "Storager_Operator", new Address(dataAddrs[PropertyType.getID("Storager_Operator")]));
-            setManaged(roleAddrs[RoleType.getID("Seller")], "Storager_OutTime", new Address(dataAddrs[PropertyType.getID("Storager_OutTime")]));
-            setManaged(roleAddrs[RoleType.getID("Seller")], "Storager_Company", new Address(dataAddrs[PropertyType.getID("Storager_Company")]));
+            setManagedAsync(roleAddrs[RoleType.getID("仓储方")], "屠宰检验结果", new Address(dataAddrs[PropertyType.getID("屠宰检验结果")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("仓储方")], "屠宰公司", new Address(dataAddrs[PropertyType.getID("屠宰公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("仓储方")], "屠宰许可证", new Address(dataAddrs[PropertyType.getID("屠宰许可证")])).sendAsync();;
+            
         }
-        //Buyer-Storager
         if (signIn(accounts[5], "Innov@teD@ily1")) {
-            setManaged(roleAddrs[RoleType.getID("Buyer")], "Storager_Operator", new Address(dataAddrs[PropertyType.getID("Storager_Operator")]));
-            setManaged(roleAddrs[RoleType.getID("Buyer")], "Storager_Company", new Address(dataAddrs[PropertyType.getID("Storager_Company")]));
+            setManagedAsync(roleAddrs[RoleType.getID("物流方")], "屠宰检验结果", new Address(dataAddrs[PropertyType.getID("屠宰检验结果")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("物流方")], "屠宰公司", new Address(dataAddrs[PropertyType.getID("屠宰公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("物流方")], "屠宰许可证", new Address(dataAddrs[PropertyType.getID("屠宰许可证")])).sendAsync();
+            
         }
-        //Government-Storager
         if (signIn(accounts[6], "Innov@teD@ily1")) {
-            setManaged(roleAddrs[RoleType.getID("Government")], "Storager_Operator", new Address(dataAddrs[PropertyType.getID("Storager_Operator")]));
-            setManaged(roleAddrs[RoleType.getID("Government")], "Storager_InTime", new Address(dataAddrs[PropertyType.getID("Storager_InTime")]));
-            setManaged(roleAddrs[RoleType.getID("Government")], "Storager_OutTime", new Address(dataAddrs[PropertyType.getID("Storager_OutTime")]));
-            setManaged(roleAddrs[RoleType.getID("Government")], "Storager_Price", new Address(dataAddrs[PropertyType.getID("Storager_Price")]));
-            setManaged(roleAddrs[RoleType.getID("Government")], "Storager_Duration", new Address(dataAddrs[PropertyType.getID("Storager_Duration")]));
-            setManaged(roleAddrs[RoleType.getID("Government")], "Storager_Amount", new Address(dataAddrs[PropertyType.getID("Storager_Amount")]));
-            setManaged(roleAddrs[RoleType.getID("Government")], "Storager_Company", new Address(dataAddrs[PropertyType.getID("Storager_Company")]));
+            setManagedAsync(roleAddrs[RoleType.getID("二级加工")], "屠宰检验结果", new Address(dataAddrs[PropertyType.getID("屠宰检验结果")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("二级加工")], "屠宰公司", new Address(dataAddrs[PropertyType.getID("屠宰公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("二级加工")], "屠宰许可证", new Address(dataAddrs[PropertyType.getID("屠宰许可证")])).sendAsync();
+            
         }
-        //Producer-Transporter
-        if (signIn(accounts[1], "Innov@teD@ily1")) {
-            setManaged(roleAddrs[RoleType.getID("Producer")], "Transporter_Operator", new Address(dataAddrs[PropertyType.getID("Transporter_Operator")]));
-            setManaged(roleAddrs[RoleType.getID("Producer")], "Transporter_OutTime", new Address(dataAddrs[PropertyType.getID("Transporter_OutTime")]));
-            setManaged(roleAddrs[RoleType.getID("Producer")], "Transporter_Price", new Address(dataAddrs[PropertyType.getID("Transporter_Price")]));
-            setManaged(roleAddrs[RoleType.getID("Producer")], "Transporter_Amount", new Address(dataAddrs[PropertyType.getID("Transporter_Amount")]));
-            setManaged(roleAddrs[RoleType.getID("Producer")], "Transporter_Distance", new Address(dataAddrs[PropertyType.getID("Transporter_Distance")]));
-            setManaged(roleAddrs[RoleType.getID("Producer")], "Transporter_Company", new Address(dataAddrs[PropertyType.getID("Transporter_Company")]));
-            setManaged(roleAddrs[RoleType.getID("Producer")], "Transporter_From", new Address(dataAddrs[PropertyType.getID("Transporter_From")]));
-            setManaged(roleAddrs[RoleType.getID("Producer")], "Transporter_To", new Address(dataAddrs[PropertyType.getID("Transporter_To")]));
+        if (signIn(accounts[7], "Innov@teD@ily1")) {
+            setManagedAsync(roleAddrs[RoleType.getID("二级物流")], "屠宰检验结果", new Address(dataAddrs[PropertyType.getID("屠宰检验结果")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("二级物流")], "屠宰公司", new Address(dataAddrs[PropertyType.getID("屠宰公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("二级物流")], "屠宰许可证", new Address(dataAddrs[PropertyType.getID("屠宰许可证")])).sendAsync();
+            
         }
-        //Storager-Transporter
-        if (signIn(accounts[2], "Innov@teD@ily1")) {
-            setManaged(roleAddrs[RoleType.getID("Storager")], "Transporter_Operator", new Address(dataAddrs[PropertyType.getID("Transporter_Operator")]));
-            setManaged(roleAddrs[RoleType.getID("Storager")], "Transporter_OutTime", new Address(dataAddrs[PropertyType.getID("Transporter_OutTime")]));
-            setManaged(roleAddrs[RoleType.getID("Storager")], "Transporter_Company", new Address(dataAddrs[PropertyType.getID("Transporter_Company")]));
+        if (signIn(accounts[8], "Innov@teD@ily1")) {
+            setManagedAsync(roleAddrs[RoleType.getID("零售方")], "屠宰检验结果", new Address(dataAddrs[PropertyType.getID("屠宰检验结果")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("零售方")], "屠宰公司", new Address(dataAddrs[PropertyType.getID("屠宰公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("零售方")], "屠宰许可证", new Address(dataAddrs[PropertyType.getID("屠宰许可证")])).sendAsync();
+            
         }
-        //Transporter-Transporter
+        if (signIn(accounts[9], "Innov@teD@ily1")) {
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "屠宰日期", new Address(dataAddrs[PropertyType.getID("屠宰日期")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "屠宰检验结果", new Address(dataAddrs[PropertyType.getID("屠宰检验结果")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "屠宰公司", new Address(dataAddrs[PropertyType.getID("屠宰公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "屠宰许可证", new Address(dataAddrs[PropertyType.getID("屠宰许可证")])).sendAsync();
+            
+        }
+        if (signIn(accounts[10], "Innov@teD@ily1")) {
+            setManagedAsync(roleAddrs[RoleType.getID("监管部门")], "屠宰负责人", new Address(dataAddrs[PropertyType.getID("屠宰负责人")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("监管部门")], "屠宰检验负责人", new Address(dataAddrs[PropertyType.getID("屠宰检验负责人")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("监管部门")], "屠宰检验结果", new Address(dataAddrs[PropertyType.getID("屠宰检验结果")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("监管部门")], "屠宰公司", new Address(dataAddrs[PropertyType.getID("屠宰公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("监管部门")], "屠宰许可证", new Address(dataAddrs[PropertyType.getID("屠宰许可证")])).sendAsync();
+            
+        }
+
+
         if (signIn(accounts[3], "Innov@teD@ily1")) {
-            setManaged(roleAddrs[RoleType.getID("Transporter")], "Transporter_Operator", new Address(dataAddrs[PropertyType.getID("Transporter_Operator")]));
-            setOwned(roleAddrs[RoleType.getID("Transporter")], "Transporter_Operator", new Address(dataAddrs[PropertyType.getID("Transporter_Operator")]));
-
-            setManaged(roleAddrs[RoleType.getID("Transporter")], "Transporter_OutTime", new Address(dataAddrs[PropertyType.getID("Transporter_OutTime")]));
-            setOwned(roleAddrs[RoleType.getID("Transporter")], "Transporter_OutTime", new Address(dataAddrs[PropertyType.getID("Transporter_OutTime")]));
-
-            setManaged(roleAddrs[RoleType.getID("Transporter")], "Transporter_Price", new Address(dataAddrs[PropertyType.getID("Transporter_Price")]));
-            setOwned(roleAddrs[RoleType.getID("Transporter")], "Transporter_Price", new Address(dataAddrs[PropertyType.getID("Transporter_Price")]));
-
-            setManaged(roleAddrs[RoleType.getID("Transporter")], "Transporter_Amount", new Address(dataAddrs[PropertyType.getID("Transporter_Amount")]));
-            setOwned(roleAddrs[RoleType.getID("Transporter")], "Transporter_Amount", new Address(dataAddrs[PropertyType.getID("Transporter_Amount")]));
-
-            setManaged(roleAddrs[RoleType.getID("Transporter")], "Transporter_Distance", new Address(dataAddrs[PropertyType.getID("Transporter_Distance")]));
-            setOwned(roleAddrs[RoleType.getID("Transporter")], "Transporter_Distance", new Address(dataAddrs[PropertyType.getID("Transporter_Distance")]));
-
-            setManaged(roleAddrs[RoleType.getID("Transporter")], "Transporter_Company", new Address(dataAddrs[PropertyType.getID("Transporter_Company")]));
-            setOwned(roleAddrs[RoleType.getID("Transporter")], "Transporter_Company", new Address(dataAddrs[PropertyType.getID("Transporter_Company")]));
-
-            setManaged(roleAddrs[RoleType.getID("Transporter")], "Transporter_From", new Address(dataAddrs[PropertyType.getID("Transporter_From")]));
-            setOwned(roleAddrs[RoleType.getID("Transporter")], "Transporter_From", new Address(dataAddrs[PropertyType.getID("Transporter_From")]));
-
-            setManaged(roleAddrs[RoleType.getID("Transporter")], "Transporter_To", new Address(dataAddrs[PropertyType.getID("Transporter_To")]));
-            setOwned(roleAddrs[RoleType.getID("Transporter")], "Transporter_To", new Address(dataAddrs[PropertyType.getID("Transporter_To")]));
+            setManagedAsync(roleAddrs[RoleType.getID("包装方")], "包装负责人", new Address(dataAddrs[PropertyType.getID("包装负责人")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("包装方")], "包装负责人", new Address(dataAddrs[PropertyType.getID("包装负责人")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("包装方")], "包装日期", new Address(dataAddrs[PropertyType.getID("包装日期")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("包装方")], "包装日期", new Address(dataAddrs[PropertyType.getID("包装日期")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("包装方")], "包装检验负责人", new Address(dataAddrs[PropertyType.getID("包装检验负责人")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("包装方")], "包装检验负责人", new Address(dataAddrs[PropertyType.getID("包装检验负责人")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("包装方")], "包装检验结果", new Address(dataAddrs[PropertyType.getID("包装检验结果")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("包装方")], "包装检验结果", new Address(dataAddrs[PropertyType.getID("包装检验结果")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("包装方")], "包装公司", new Address(dataAddrs[PropertyType.getID("包装公司")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("包装方")], "包装公司", new Address(dataAddrs[PropertyType.getID("包装公司")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("包装方")], "包装许可证", new Address(dataAddrs[PropertyType.getID("包装许可证")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("包装方")], "包装许可证", new Address(dataAddrs[PropertyType.getID("包装许可证")])).sendAsync();
+            
         }
-        //Seller-Transporter
         if (signIn(accounts[4], "Innov@teD@ily1")) {
-            setManaged(roleAddrs[RoleType.getID("Seller")], "Transporter_Operator", new Address(dataAddrs[PropertyType.getID("Transporter_Operator")]));
-            setManaged(roleAddrs[RoleType.getID("Seller")], "Transporter_OutTime", new Address(dataAddrs[PropertyType.getID("Transporter_OutTime")]));
-            setManaged(roleAddrs[RoleType.getID("Seller")], "Transporter_Company", new Address(dataAddrs[PropertyType.getID("Transporter_Company")]));
+            setManagedAsync(roleAddrs[RoleType.getID("仓储方")], "包装检验结果", new Address(dataAddrs[PropertyType.getID("包装检验结果")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("仓储方")], "包装公司", new Address(dataAddrs[PropertyType.getID("包装公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("仓储方")], "包装许可证", new Address(dataAddrs[PropertyType.getID("包装许可证")])).sendAsync();
+            
         }
-        //Buyer-Transporter
         if (signIn(accounts[5], "Innov@teD@ily1")) {
-            setManaged(roleAddrs[RoleType.getID("Buyer")], "Transporter_Operator", new Address(dataAddrs[PropertyType.getID("Transporter_Operator")]));
-            setManaged(roleAddrs[RoleType.getID("Buyer")], "Transporter_Company", new Address(dataAddrs[PropertyType.getID("Transporter_Company")]));
+            setManagedAsync(roleAddrs[RoleType.getID("物流方")], "包装检验结果", new Address(dataAddrs[PropertyType.getID("包装检验结果")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("物流方")], "包装公司", new Address(dataAddrs[PropertyType.getID("包装公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("物流方")], "包装许可证", new Address(dataAddrs[PropertyType.getID("包装许可证")])).sendAsync();
+            
         }
-        //Government-Transporter
         if (signIn(accounts[6], "Innov@teD@ily1")) {
-            setManaged(roleAddrs[RoleType.getID("Government")], "Transporter_Operator", new Address(dataAddrs[PropertyType.getID("Transporter_Operator")]));
-            setManaged(roleAddrs[RoleType.getID("Government")], "Transporter_OutTime", new Address(dataAddrs[PropertyType.getID("Transporter_OutTime")]));
-            setManaged(roleAddrs[RoleType.getID("Government")], "Transporter_Price", new Address(dataAddrs[PropertyType.getID("Transporter_Price")]));
-            setManaged(roleAddrs[RoleType.getID("Government")], "Transporter_Amount", new Address(dataAddrs[PropertyType.getID("Transporter_Amount")]));
-            setManaged(roleAddrs[RoleType.getID("Government")], "Transporter_Distance", new Address(dataAddrs[PropertyType.getID("Transporter_Distance")]));
-            setManaged(roleAddrs[RoleType.getID("Government")], "Transporter_Company", new Address(dataAddrs[PropertyType.getID("Transporter_Company")]));
-            setManaged(roleAddrs[RoleType.getID("Government")], "Transporter_From", new Address(dataAddrs[PropertyType.getID("Transporter_From")]));
-            setManaged(roleAddrs[RoleType.getID("Government")], "Transporter_To", new Address(dataAddrs[PropertyType.getID("Transporter_To")]));
+            setManagedAsync(roleAddrs[RoleType.getID("二级加工")], "包装检验结果", new Address(dataAddrs[PropertyType.getID("包装检验结果")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("二级加工")], "包装公司", new Address(dataAddrs[PropertyType.getID("包装公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("二级加工")], "包装许可证", new Address(dataAddrs[PropertyType.getID("包装许可证")])).sendAsync();
+            
         }
-        //Producer-Seller
-        if (signIn(accounts[1], "Innov@teD@ily1")) {
-            setManaged(roleAddrs[RoleType.getID("Producer")], "Seller_Operator", new Address(dataAddrs[PropertyType.getID("Seller_Operator")]));
-            setManaged(roleAddrs[RoleType.getID("Producer")], "Seller_InTime", new Address(dataAddrs[PropertyType.getID("Seller_InTime")]));
-            setManaged(roleAddrs[RoleType.getID("Producer")], "Seller_InPrice", new Address(dataAddrs[PropertyType.getID("Seller_InPrice")]));
-            setManaged(roleAddrs[RoleType.getID("Producer")], "Seller_Amount", new Address(dataAddrs[PropertyType.getID("Seller_Amount")]));
-            setManaged(roleAddrs[RoleType.getID("Producer")], "Seller_Company", new Address(dataAddrs[PropertyType.getID("Seller_Company")]));
-            setManaged(roleAddrs[RoleType.getID("Producer")], "Seller_OutPrice", new Address(dataAddrs[PropertyType.getID("Seller_OutPrice")]));
+        if (signIn(accounts[7], "Innov@teD@ily1")) {
+            setManagedAsync(roleAddrs[RoleType.getID("二级物流")], "包装检验结果", new Address(dataAddrs[PropertyType.getID("包装检验结果")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("二级物流")], "包装公司", new Address(dataAddrs[PropertyType.getID("包装公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("二级物流")], "包装许可证", new Address(dataAddrs[PropertyType.getID("包装许可证")])).sendAsync();
+            
         }
-        //Storager-Seller
-        if (signIn(accounts[2], "Innov@teD@ily1")) {
-            setManaged(roleAddrs[RoleType.getID("Storager")], "Seller_Operator", new Address(dataAddrs[PropertyType.getID("Seller_Operator")]));
-            setManaged(roleAddrs[RoleType.getID("Storager")], "Seller_OutPrice", new Address(dataAddrs[PropertyType.getID("Seller_OutPrice")]));
+        if (signIn(accounts[8], "Innov@teD@ily1")) {
+            setManagedAsync(roleAddrs[RoleType.getID("零售方")], "包装检验结果", new Address(dataAddrs[PropertyType.getID("包装检验结果")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("零售方")], "包装公司", new Address(dataAddrs[PropertyType.getID("包装公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("零售方")], "包装许可证", new Address(dataAddrs[PropertyType.getID("包装许可证")])).sendAsync();
+            
         }
-        //Transporter-Seller
-        if (signIn(accounts[3], "Innov@teD@ily1")) {
-            setManaged(roleAddrs[RoleType.getID("Transporter")], "Seller_Operator", new Address(dataAddrs[PropertyType.getID("Seller_Operator")]));
-            setManaged(roleAddrs[RoleType.getID("Transporter")], "Seller_Company", new Address(dataAddrs[PropertyType.getID("Seller_Company")]));
-            setManaged(roleAddrs[RoleType.getID("Transporter")], "Seller_OutPrice", new Address(dataAddrs[PropertyType.getID("Seller_OutPrice")]));
+        if (signIn(accounts[9], "Innov@teD@ily1")) {
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "包装日期", new Address(dataAddrs[PropertyType.getID("包装日期")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "包装检验结果", new Address(dataAddrs[PropertyType.getID("包装检验结果")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "包装公司", new Address(dataAddrs[PropertyType.getID("包装公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "包装许可证", new Address(dataAddrs[PropertyType.getID("包装许可证")])).sendAsync();
+            
         }
-        //Seller-Seller
+        if (signIn(accounts[10], "Innov@teD@ily1")) {
+            setManagedAsync(roleAddrs[RoleType.getID("监管部门")], "包装负责人", new Address(dataAddrs[PropertyType.getID("包装负责人")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("监管部门")], "包装检验负责人", new Address(dataAddrs[PropertyType.getID("包装检验负责人")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("监管部门")], "包装检验结果", new Address(dataAddrs[PropertyType.getID("包装检验结果")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("监管部门")], "包装公司", new Address(dataAddrs[PropertyType.getID("包装公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("监管部门")], "包装许可证", new Address(dataAddrs[PropertyType.getID("包装许可证")])).sendAsync();
+            
+        }
+
+
         if (signIn(accounts[4], "Innov@teD@ily1")) {
-            setManaged(roleAddrs[RoleType.getID("Seller")], "Seller_Operator", new Address(dataAddrs[PropertyType.getID("Seller_Operator")]));
-            setOwned(roleAddrs[RoleType.getID("Seller")], "Seller_Operator", new Address(dataAddrs[PropertyType.getID("Seller_Operator")]));
-
-            setManaged(roleAddrs[RoleType.getID("Seller")], "Seller_InTime", new Address(dataAddrs[PropertyType.getID("Seller_InTime")]));
-            setOwned(roleAddrs[RoleType.getID("Seller")], "Seller_InTime", new Address(dataAddrs[PropertyType.getID("Seller_InTime")]));
-
-            setManaged(roleAddrs[RoleType.getID("Seller")], "Seller_InPrice", new Address(dataAddrs[PropertyType.getID("Seller_InPrice")]));
-            setOwned(roleAddrs[RoleType.getID("Seller")], "Seller_InPrice", new Address(dataAddrs[PropertyType.getID("Seller_InPrice")]));
-
-            setManaged(roleAddrs[RoleType.getID("Seller")], "Seller_Amount", new Address(dataAddrs[PropertyType.getID("Seller_Amount")]));
-            setOwned(roleAddrs[RoleType.getID("Seller")], "Seller_Amount", new Address(dataAddrs[PropertyType.getID("Seller_Amount")]));
-
-            setManaged(roleAddrs[RoleType.getID("Seller")], "Seller_Company", new Address(dataAddrs[PropertyType.getID("Seller_Company")]));
-            setOwned(roleAddrs[RoleType.getID("Seller")], "Seller_Company", new Address(dataAddrs[PropertyType.getID("Seller_Company")]));
-
-            setManaged(roleAddrs[RoleType.getID("Seller")], "Seller_OutPrice", new Address(dataAddrs[PropertyType.getID("Seller_OutPrice")]));
-            setOwned(roleAddrs[RoleType.getID("Seller")], "Seller_OutPrice", new Address(dataAddrs[PropertyType.getID("Seller_OutPrice")]));
+            setManagedAsync(roleAddrs[RoleType.getID("仓储方")], "仓储负责人", new Address(dataAddrs[PropertyType.getID("仓储负责人")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("仓储方")], "仓储负责人", new Address(dataAddrs[PropertyType.getID("仓储负责人")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("仓储方")], "入仓时间", new Address(dataAddrs[PropertyType.getID("入仓时间")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("仓储方")], "入仓时间", new Address(dataAddrs[PropertyType.getID("入仓时间")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("仓储方")], "出仓时间", new Address(dataAddrs[PropertyType.getID("出仓时间")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("仓储方")], "出仓时间", new Address(dataAddrs[PropertyType.getID("出仓时间")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("仓储方")], "仓储量", new Address(dataAddrs[PropertyType.getID("仓储量")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("仓储方")], "仓储量", new Address(dataAddrs[PropertyType.getID("仓储量")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("仓储方")], "仓储公司", new Address(dataAddrs[PropertyType.getID("仓储公司")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("仓储方")], "仓储公司", new Address(dataAddrs[PropertyType.getID("仓储公司")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("仓储方")], "仓储许可证", new Address(dataAddrs[PropertyType.getID("仓储许可证")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("仓储方")], "仓储许可证", new Address(dataAddrs[PropertyType.getID("仓储许可证")])).sendAsync();
+            
         }
-        //Buyer-Seller
         if (signIn(accounts[5], "Innov@teD@ily1")) {
-            setManaged(roleAddrs[RoleType.getID("Buyer")], "Seller_Operator", new Address(dataAddrs[PropertyType.getID("Seller_Operator")]));
-            setManaged(roleAddrs[RoleType.getID("Buyer")], "Seller_Company", new Address(dataAddrs[PropertyType.getID("Seller_Company")]));
-            setManaged(roleAddrs[RoleType.getID("Buyer")], "Seller_OutPrice", new Address(dataAddrs[PropertyType.getID("Seller_OutPrice")]));
+            setManagedAsync(roleAddrs[RoleType.getID("物流方")], "仓储量", new Address(dataAddrs[PropertyType.getID("仓储量")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("物流方")], "仓储公司", new Address(dataAddrs[PropertyType.getID("仓储公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("物流方")], "仓储许可证", new Address(dataAddrs[PropertyType.getID("仓储许可证")])).sendAsync();
+            
         }
-        //Government-Seller
         if (signIn(accounts[6], "Innov@teD@ily1")) {
-            setManaged(roleAddrs[RoleType.getID("Government")], "Seller_Operator", new Address(dataAddrs[PropertyType.getID("Seller_Operator")]));
-            setManaged(roleAddrs[RoleType.getID("Government")], "Seller_InTime", new Address(dataAddrs[PropertyType.getID("Seller_InTime")]));
-            setManaged(roleAddrs[RoleType.getID("Government")], "Seller_InPrice", new Address(dataAddrs[PropertyType.getID("Seller_InPrice")]));
-            setManaged(roleAddrs[RoleType.getID("Government")], "Seller_Amount", new Address(dataAddrs[PropertyType.getID("Seller_Amount")]));
-            setManaged(roleAddrs[RoleType.getID("Government")], "Seller_Company", new Address(dataAddrs[PropertyType.getID("Seller_Company")]));
-            setManaged(roleAddrs[RoleType.getID("Government")], "Seller_OutPrice", new Address(dataAddrs[PropertyType.getID("Seller_OutPrice")]));
+            setManagedAsync(roleAddrs[RoleType.getID("二级加工")], "仓储量", new Address(dataAddrs[PropertyType.getID("仓储量")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("二级加工")], "仓储公司", new Address(dataAddrs[PropertyType.getID("仓储公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("二级加工")], "仓储许可证", new Address(dataAddrs[PropertyType.getID("仓储许可证")])).sendAsync();
+            
         }
-        //Producer-Buyer
-        if (signIn(accounts[1], "Innov@teD@ily1")) {
-            setManaged(roleAddrs[RoleType.getID("Producer")], "Buyer_Price", new Address(dataAddrs[PropertyType.getID("Buyer_Price")]));
+        if (signIn(accounts[7], "Innov@teD@ily1")) {
+            setManagedAsync(roleAddrs[RoleType.getID("二级物流")], "仓储量", new Address(dataAddrs[PropertyType.getID("仓储量")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("二级物流")], "仓储公司", new Address(dataAddrs[PropertyType.getID("仓储公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("二级物流")], "仓储许可证", new Address(dataAddrs[PropertyType.getID("仓储许可证")])).sendAsync();
+            
         }
-        //Storager-Buyer
-        if (signIn(accounts[2], "Innov@teD@ily1")) {
-            setManaged(roleAddrs[RoleType.getID("Storager")], "Buyer_Price", new Address(dataAddrs[PropertyType.getID("Buyer_Price")]));
+        if (signIn(accounts[8], "Innov@teD@ily1")) {
+
+            setManagedAsync(roleAddrs[RoleType.getID("零售方")], "仓储量", new Address(dataAddrs[PropertyType.getID("仓储量")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("零售方")], "仓储公司", new Address(dataAddrs[PropertyType.getID("仓储公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("零售方")], "仓储许可证", new Address(dataAddrs[PropertyType.getID("仓储许可证")])).sendAsync();
+            
         }
-        //Transporter-Buyer
-        if (signIn(accounts[3], "Innov@teD@ily1")) {
-            setManaged(roleAddrs[RoleType.getID("Transporter")], "Buyer_Price", new Address(dataAddrs[PropertyType.getID("Buyer_Price")]));
+        if (signIn(accounts[9], "Innov@teD@ily1")) {
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "入仓时间", new Address(dataAddrs[PropertyType.getID("入仓时间")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "出仓时间", new Address(dataAddrs[PropertyType.getID("出仓时间")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "仓储量", new Address(dataAddrs[PropertyType.getID("仓储量")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "仓储量", new Address(dataAddrs[PropertyType.getID("仓储量")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "仓储公司", new Address(dataAddrs[PropertyType.getID("仓储公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "仓储许可证", new Address(dataAddrs[PropertyType.getID("仓储许可证")])).sendAsync();
+            
         }
-        //Seller-Buyer
-        if (signIn(accounts[4], "Innov@teD@ily1")) {
-            setManaged(roleAddrs[RoleType.getID("Seller")], "Buyer_Time", new Address(dataAddrs[PropertyType.getID("Buyer_Time")]));
-            setManaged(roleAddrs[RoleType.getID("Seller")], "Buyer_Amount", new Address(dataAddrs[PropertyType.getID("Buyer_Amount")]));
-            setManaged(roleAddrs[RoleType.getID("Seller")], "Buyer_Price", new Address(dataAddrs[PropertyType.getID("Buyer_Price")]));
+        if (signIn(accounts[10], "Innov@teD@ily1")) {
+            setManagedAsync(roleAddrs[RoleType.getID("监管部门")], "仓储负责人", new Address(dataAddrs[PropertyType.getID("仓储负责人")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("监管部门")], "仓储量", new Address(dataAddrs[PropertyType.getID("仓储量")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("监管部门")], "仓储公司", new Address(dataAddrs[PropertyType.getID("仓储公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("监管部门")], "仓储许可证", new Address(dataAddrs[PropertyType.getID("仓储许可证")])).sendAsync();
+            
         }
-        //Government-Buyer
-        if (signIn(accounts[6], "Innov@teD@ily1")) {
-            setManaged(roleAddrs[RoleType.getID("Government")], "Buyer_Name", new Address(dataAddrs[PropertyType.getID("Buyer_Name")]));
-            setManaged(roleAddrs[RoleType.getID("Government")], "Buyer_Mobile", new Address(dataAddrs[PropertyType.getID("Buyer_Mobile")]));
-            setManaged(roleAddrs[RoleType.getID("Government")], "Buyer_Time", new Address(dataAddrs[PropertyType.getID("Buyer_Time")]));
-            setManaged(roleAddrs[RoleType.getID("Government")], "Buyer_Amount", new Address(dataAddrs[PropertyType.getID("Buyer_Amount")]));
-            setManaged(roleAddrs[RoleType.getID("Government")], "Buyer_Price", new Address(dataAddrs[PropertyType.getID("Buyer_Price")]));
-        }
-        //Buyer-Buyer
+
+
         if (signIn(accounts[5], "Innov@teD@ily1")) {
-            setManaged(roleAddrs[RoleType.getID("Buyer")], "Buyer_Name", new Address(dataAddrs[PropertyType.getID("Buyer_Name")]));
-            setOwned(roleAddrs[RoleType.getID("Buyer")], "Buyer_Name", new Address(dataAddrs[PropertyType.getID("Buyer_Name")]));
+            setManagedAsync(roleAddrs[RoleType.getID("物流方")], "物流负责人", new Address(dataAddrs[PropertyType.getID("物流负责人")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("物流方")], "物流负责人", new Address(dataAddrs[PropertyType.getID("物流负责人")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("物流方")], "起运时间", new Address(dataAddrs[PropertyType.getID("起运时间")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("物流方")], "起运时间", new Address(dataAddrs[PropertyType.getID("起运时间")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("物流方")], "到货时间", new Address(dataAddrs[PropertyType.getID("到货时间")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("物流方")], "到货时间", new Address(dataAddrs[PropertyType.getID("到货时间")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("物流方")], "运输量", new Address(dataAddrs[PropertyType.getID("运输量")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("物流方")], "运输量", new Address(dataAddrs[PropertyType.getID("运输量")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("物流方")], "运输距离", new Address(dataAddrs[PropertyType.getID("运输距离")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("物流方")], "运输距离", new Address(dataAddrs[PropertyType.getID("运输距离")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("物流方")], "物流公司", new Address(dataAddrs[PropertyType.getID("物流公司")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("物流方")], "物流公司", new Address(dataAddrs[PropertyType.getID("物流公司")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("物流方")], "物流许可证", new Address(dataAddrs[PropertyType.getID("物流许可证")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("物流方")], "物流许可证", new Address(dataAddrs[PropertyType.getID("物流许可证")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("物流方")], "起始地", new Address(dataAddrs[PropertyType.getID("起始地")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("物流方")], "起始地", new Address(dataAddrs[PropertyType.getID("起始地")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("物流方")], "目的地", new Address(dataAddrs[PropertyType.getID("目的地")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("物流方")], "目的地", new Address(dataAddrs[PropertyType.getID("目的地")])).sendAsync();
+            
+        }
+        if (signIn(accounts[6], "Innov@teD@ily1")) {
+            setManagedAsync(roleAddrs[RoleType.getID("二级加工")], "物流公司", new Address(dataAddrs[PropertyType.getID("物流公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("二级加工")], "物流许可证", new Address(dataAddrs[PropertyType.getID("物流许可证")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("二级加工")], "起始地", new Address(dataAddrs[PropertyType.getID("起始地")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("二级加工")], "目的地", new Address(dataAddrs[PropertyType.getID("目的地")])).sendAsync();
+            
+        }
+        if (signIn(accounts[7], "Innov@teD@ily1")) {
+            setManagedAsync(roleAddrs[RoleType.getID("二级物流")], "物流公司", new Address(dataAddrs[PropertyType.getID("物流公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("二级物流")], "物流许可证", new Address(dataAddrs[PropertyType.getID("物流许可证")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("二级物流")], "起始地", new Address(dataAddrs[PropertyType.getID("起始地")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("二级物流")], "目的地", new Address(dataAddrs[PropertyType.getID("目的地")])).sendAsync();
+            
+        }
+        if (signIn(accounts[8], "Innov@teD@ily1")) {
+            setManagedAsync(roleAddrs[RoleType.getID("零售方")], "物流公司", new Address(dataAddrs[PropertyType.getID("物流公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("零售方")], "物流许可证", new Address(dataAddrs[PropertyType.getID("物流许可证")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("零售方")], "起始地", new Address(dataAddrs[PropertyType.getID("起始地")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("零售方")], "目的地", new Address(dataAddrs[PropertyType.getID("目的地")])).sendAsync();
 
-            setManaged(roleAddrs[RoleType.getID("Buyer")], "Buyer_Mobile", new Address(dataAddrs[PropertyType.getID("Buyer_Mobile")]));
-            setOwned(roleAddrs[RoleType.getID("Buyer")], "Buyer_Mobile", new Address(dataAddrs[PropertyType.getID("Buyer_Mobile")]));
-
-            setManaged(roleAddrs[RoleType.getID("Buyer")], "Buyer_Time", new Address(dataAddrs[PropertyType.getID("Buyer_Time")]));
-            setOwned(roleAddrs[RoleType.getID("Buyer")], "Buyer_Time", new Address(dataAddrs[PropertyType.getID("Buyer_Time")]));
-
-            setManaged(roleAddrs[RoleType.getID("Buyer")], "Buyer_Amount", new Address(dataAddrs[PropertyType.getID("Buyer_Amount")]));
-            setOwned(roleAddrs[RoleType.getID("Buyer")], "Buyer_Amount", new Address(dataAddrs[PropertyType.getID("Buyer_Amount")]));
-
-            setManaged(roleAddrs[RoleType.getID("Buyer")], "Buyer_Price", new Address(dataAddrs[PropertyType.getID("Buyer_Price")]));
-            setOwned(roleAddrs[RoleType.getID("Buyer")], "Buyer_Price", new Address(dataAddrs[PropertyType.getID("Buyer_Price")]));
+            }
+        if (signIn(accounts[9], "Innov@teD@ily1")) {
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "起运时间", new Address(dataAddrs[PropertyType.getID("起运时间")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "到货时间", new Address(dataAddrs[PropertyType.getID("到货时间")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "运输量", new Address(dataAddrs[PropertyType.getID("运输量")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "运输距离", new Address(dataAddrs[PropertyType.getID("运输距离")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "物流公司", new Address(dataAddrs[PropertyType.getID("物流公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "物流许可证", new Address(dataAddrs[PropertyType.getID("物流许可证")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "起始地", new Address(dataAddrs[PropertyType.getID("起始地")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "目的地", new Address(dataAddrs[PropertyType.getID("目的地")])).sendAsync();
+            
+        }
+        if (signIn(accounts[10], "Innov@teD@ily1")) {
+            setManagedAsync(roleAddrs[RoleType.getID("监管部门")], "物流负责人", new Address(dataAddrs[PropertyType.getID("物流负责人")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("监管部门")], "物流公司", new Address(dataAddrs[PropertyType.getID("物流公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("监管部门")], "物流许可证", new Address(dataAddrs[PropertyType.getID("物流许可证")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("监管部门")], "起始地", new Address(dataAddrs[PropertyType.getID("起始地")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("监管部门")], "目的地", new Address(dataAddrs[PropertyType.getID("目的地")])).sendAsync();
+            
         }
 
+
+        if (signIn(accounts[6], "Innov@teD@ily1")) {
+            setManagedAsync(roleAddrs[RoleType.getID("二级加工")], "加工进货负责人", new Address(dataAddrs[PropertyType.getID("加工进货负责人")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("二级加工")], "加工进货负责人", new Address(dataAddrs[PropertyType.getID("加工进货负责人")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("二级加工")], "加工进货日期", new Address(dataAddrs[PropertyType.getID("加工进货日期")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("二级加工")], "加工进货日期", new Address(dataAddrs[PropertyType.getID("加工进货日期")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("二级加工")], "加工负责人", new Address(dataAddrs[PropertyType.getID("加工负责人")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("二级加工")], "加工负责人", new Address(dataAddrs[PropertyType.getID("加工负责人")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("二级加工")], "加工日期", new Address(dataAddrs[PropertyType.getID("加工日期")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("二级加工")], "加工日期", new Address(dataAddrs[PropertyType.getID("加工日期")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("二级加工")], "加工检验负责人", new Address(dataAddrs[PropertyType.getID("加工检验负责人")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("二级加工")], "加工检验负责人", new Address(dataAddrs[PropertyType.getID("加工检验负责人")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("二级加工")], "加工检验结果", new Address(dataAddrs[PropertyType.getID("加工检验结果")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("二级加工")], "加工检验结果", new Address(dataAddrs[PropertyType.getID("加工检验结果")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("二级加工")], "加工公司", new Address(dataAddrs[PropertyType.getID("加工公司")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("二级加工")], "加工公司", new Address(dataAddrs[PropertyType.getID("加工公司")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("二级加工")], "加工许可证", new Address(dataAddrs[PropertyType.getID("加工许可证")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("二级加工")], "加工许可证", new Address(dataAddrs[PropertyType.getID("加工许可证")])).sendAsync();
+            
+        }
+        if (signIn(accounts[7], "Innov@teD@ily1")) {
+            setManagedAsync(roleAddrs[RoleType.getID("二级物流")], "加工检验结果", new Address(dataAddrs[PropertyType.getID("加工检验结果")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("二级物流")], "加工公司", new Address(dataAddrs[PropertyType.getID("加工公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("二级物流")], "加工许可证", new Address(dataAddrs[PropertyType.getID("加工许可证")])).sendAsync();
+            
+        }
+        if (signIn(accounts[8], "Innov@teD@ily1")) {
+            setManagedAsync(roleAddrs[RoleType.getID("零售方")], "加工检验结果", new Address(dataAddrs[PropertyType.getID("加工检验结果")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("零售方")], "加工公司", new Address(dataAddrs[PropertyType.getID("加工公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("零售方")], "加工许可证", new Address(dataAddrs[PropertyType.getID("加工许可证")])).sendAsync();
+            
+        }
+        if (signIn(accounts[9], "Innov@teD@ily1")) {
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "加工进货日期", new Address(dataAddrs[PropertyType.getID("加工进货日期")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "加工日期", new Address(dataAddrs[PropertyType.getID("加工日期")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "加工检验结果", new Address(dataAddrs[PropertyType.getID("加工检验结果")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "加工公司", new Address(dataAddrs[PropertyType.getID("加工公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "加工许可证", new Address(dataAddrs[PropertyType.getID("加工许可证")])).sendAsync();
+            
+        }
+        if (signIn(accounts[10], "Innov@teD@ily1")) {
+            setManagedAsync(roleAddrs[RoleType.getID("监管部门")], "加工进货负责人", new Address(dataAddrs[PropertyType.getID("加工进货负责人")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("监管部门")], "加工负责人", new Address(dataAddrs[PropertyType.getID("加工负责人")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("监管部门")], "加工检验负责人", new Address(dataAddrs[PropertyType.getID("加工检验负责人")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("监管部门")], "加工检验结果", new Address(dataAddrs[PropertyType.getID("加工检验结果")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("监管部门")], "加工公司", new Address(dataAddrs[PropertyType.getID("加工公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("监管部门")], "加工许可证", new Address(dataAddrs[PropertyType.getID("加工许可证")])).sendAsync();
+            
+        }
+
+
+        if (signIn(accounts[7], "Innov@teD@ily1")) {
+            setManagedAsync(roleAddrs[RoleType.getID("二级物流")], "二级物流负责人", new Address(dataAddrs[PropertyType.getID("二级物流负责人")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("二级物流")], "二级物流负责人", new Address(dataAddrs[PropertyType.getID("二级物流负责人")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("二级物流")], "二级起运时间", new Address(dataAddrs[PropertyType.getID("二级起运时间")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("二级物流")], "二级起运时间", new Address(dataAddrs[PropertyType.getID("二级起运时间")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("二级物流")], "二级到货时间", new Address(dataAddrs[PropertyType.getID("二级到货时间")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("二级物流")], "二级到货时间", new Address(dataAddrs[PropertyType.getID("二级到货时间")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("二级物流")], "二级运输量", new Address(dataAddrs[PropertyType.getID("二级运输量")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("二级物流")], "二级运输量", new Address(dataAddrs[PropertyType.getID("二级运输量")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("二级物流")], "二级运输距离", new Address(dataAddrs[PropertyType.getID("二级运输距离")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("二级物流")], "二级运输距离", new Address(dataAddrs[PropertyType.getID("二级运输距离")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("二级物流")], "二级物流公司", new Address(dataAddrs[PropertyType.getID("二级物流公司")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("二级物流")], "二级物流公司", new Address(dataAddrs[PropertyType.getID("二级物流公司")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("二级物流")], "二级物流许可证", new Address(dataAddrs[PropertyType.getID("二级物流许可证")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("二级物流")], "二级物流许可证", new Address(dataAddrs[PropertyType.getID("二级物流许可证")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("二级物流")], "二级起始地", new Address(dataAddrs[PropertyType.getID("二级起始地")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("二级物流")], "二级起始地", new Address(dataAddrs[PropertyType.getID("二级起始地")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("二级物流")], "二级目的地", new Address(dataAddrs[PropertyType.getID("二级目的地")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("二级物流")], "二级目的地", new Address(dataAddrs[PropertyType.getID("二级目的地")])).sendAsync();
+            
+        }
+        if (signIn(accounts[8], "Innov@teD@ily1")) {
+            setManagedAsync(roleAddrs[RoleType.getID("零售方")], "二级物流公司", new Address(dataAddrs[PropertyType.getID("二级物流公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("零售方")], "二级物流许可证", new Address(dataAddrs[PropertyType.getID("二级物流许可证")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("零售方")], "二级起始地", new Address(dataAddrs[PropertyType.getID("二级起始地")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("零售方")], "二级目的地", new Address(dataAddrs[PropertyType.getID("二级目的地")])).sendAsync();
+            
+        }
+        if (signIn(accounts[9], "Innov@teD@ily1")) {
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "二级起运时间", new Address(dataAddrs[PropertyType.getID("二级起运时间")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "二级到货时间", new Address(dataAddrs[PropertyType.getID("二级到货时间")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "二级运输量", new Address(dataAddrs[PropertyType.getID("二级运输量")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "二级运输距离", new Address(dataAddrs[PropertyType.getID("二级运输距离")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "二级物流公司", new Address(dataAddrs[PropertyType.getID("二级物流公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "二级物流许可证", new Address(dataAddrs[PropertyType.getID("二级物流许可证")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "二级起始地", new Address(dataAddrs[PropertyType.getID("二级起始地")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "二级目的地", new Address(dataAddrs[PropertyType.getID("二级目的地")])).sendAsync();
+        }
+        if (signIn(accounts[10], "Innov@teD@ily1")) {
+            setManagedAsync(roleAddrs[RoleType.getID("监管部门")], "二级物流负责人", new Address(dataAddrs[PropertyType.getID("二级物流负责人")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("监管部门")], "二级物流公司", new Address(dataAddrs[PropertyType.getID("二级物流公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("监管部门")], "二级物流许可证", new Address(dataAddrs[PropertyType.getID("二级物流许可证")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("监管部门")], "二级起始地", new Address(dataAddrs[PropertyType.getID("二级起始地")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("监管部门")], "二级目的地", new Address(dataAddrs[PropertyType.getID("二级目的地")])).sendAsync();
+            
+        }
+
+
+        if (signIn(accounts[8], "Innov@teD@ily1")) {
+            setManagedAsync(roleAddrs[RoleType.getID("零售方")], "零售进货负责人", new Address(dataAddrs[PropertyType.getID("零售进货负责人")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("零售方")], "零售进货负责人", new Address(dataAddrs[PropertyType.getID("零售进货负责人")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("零售方")], "零售进货时间", new Address(dataAddrs[PropertyType.getID("零售进货时间")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("零售方")], "零售进货时间", new Address(dataAddrs[PropertyType.getID("零售进货时间")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("零售方")], "进货量", new Address(dataAddrs[PropertyType.getID("进货量")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("零售方")], "进货量", new Address(dataAddrs[PropertyType.getID("进货量")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("零售方")], "零售公司", new Address(dataAddrs[PropertyType.getID("零售公司")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("零售方")], "零售公司", new Address(dataAddrs[PropertyType.getID("零售公司")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("零售方")], "零售许可证", new Address(dataAddrs[PropertyType.getID("零售许可证")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("零售方")], "零售许可证", new Address(dataAddrs[PropertyType.getID("零售许可证")])).sendAsync();
+            
+            setManagedAsync(roleAddrs[RoleType.getID("零售方")], "零售价", new Address(dataAddrs[PropertyType.getID("零售价")])).sendAsync();
+            setOwnedAsync(roleAddrs[RoleType.getID("零售方")], "零售价", new Address(dataAddrs[PropertyType.getID("零售价")])).sendAsync();
+            
+        }
+        if (signIn(accounts[9], "Innov@teD@ily1")) {
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "零售进货时间", new Address(dataAddrs[PropertyType.getID("零售进货时间")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "进货量", new Address(dataAddrs[PropertyType.getID("进货量")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "零售公司", new Address(dataAddrs[PropertyType.getID("零售公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "零售许可证", new Address(dataAddrs[PropertyType.getID("零售许可证")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("消费者")], "零售价", new Address(dataAddrs[PropertyType.getID("零售价")])).sendAsync();
+            
+        }
+        if (signIn(accounts[10], "Innov@teD@ily1")) {
+            setManagedAsync(roleAddrs[RoleType.getID("监管部门")], "零售进货负责人", new Address(dataAddrs[PropertyType.getID("零售进货负责人")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("监管部门")], "零售公司", new Address(dataAddrs[PropertyType.getID("零售公司")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("监管部门")], "零售许可证", new Address(dataAddrs[PropertyType.getID("零售许可证")])).sendAsync();
+            setManagedAsync(roleAddrs[RoleType.getID("监管部门")], "零售价", new Address(dataAddrs[PropertyType.getID("零售价")])).sendAsync();
+            
+        }
         return true;
     }
 
@@ -421,29 +662,73 @@ public class UserService {
     }
 
     public TransactionReceipt setOwned(String rcAddr, String name, Address scAddr) throws Exception {
-        Role_sol_Role rc = Role_sol_Role.load(rcAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
-        TransactionReceipt transactionReceipt = rc.setOwned(new Utf8String(name), scAddr).send();
+        int count = 0;
 
-        LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
-        return transactionReceipt;
+        while(count < REQUEST_LIMIT) {
+            try {
+                Role_sol_Role rc = Role_sol_Role.load(rcAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
+                TransactionReceipt transactionReceipt = rc.setOwned(new Utf8String(name), scAddr).send();
+
+                LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
+                return transactionReceipt;
+            } catch (NullPointerException e) {
+                LOGGER.error(e.toString());
+                count++;
+            }
+        }
+        throw new NullPointerException();
     }
 
     public RemoteCall<TransactionReceipt> setOwnedAsync(String rcAddr, String name, Address scAddr) throws Exception {
-        Role_sol_Role rc = Role_sol_Role.load(rcAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
-        return rc.setOwned(new Utf8String(name), scAddr);
+        int count = 0;
+
+        while(count < REQUEST_LIMIT) {
+            try {
+                Role_sol_Role rc = Role_sol_Role.load(rcAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
+                RemoteCall<TransactionReceipt> tx = rc.setOwned(new Utf8String(name), scAddr);
+                //resetList.add(tx);
+                return tx;
+            } catch (NullPointerException e) {
+                LOGGER.error(e.toString());
+                count++;
+            }
+        }
+        throw new NullPointerException();
     }
 
     private TransactionReceipt setManaged(String rcAddr, String name, Address scAddr) throws Exception {
-        Role_sol_Role rc = Role_sol_Role.load(rcAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
-        TransactionReceipt transactionReceipt = rc.setManaged(new Utf8String(name), scAddr).send();
+        int count = 0;
 
-        LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
-        return transactionReceipt;
+        while(count < REQUEST_LIMIT) {
+            try {
+                Role_sol_Role rc = Role_sol_Role.load(rcAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
+                TransactionReceipt transactionReceipt = rc.setManaged(new Utf8String(name), scAddr).send();
+
+                LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
+                return transactionReceipt;
+            } catch (NullPointerException e) {
+                LOGGER.error(e.toString());
+                count++;
+            }
+        }
+        throw new NullPointerException();
     }
 
     public RemoteCall<TransactionReceipt> setManagedAsync(String rcAddr, String name, Address scAddr) throws Exception {
-        Role_sol_Role rc = Role_sol_Role.load(rcAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
-        return rc.setManaged(new Utf8String(name), scAddr);
+        int count = 0;
+
+        while(count < REQUEST_LIMIT) {
+            try {
+                Role_sol_Role rc = Role_sol_Role.load(rcAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
+                RemoteCall<TransactionReceipt> tx = rc.setManaged(new Utf8String(name), scAddr);
+                //resetList.add(tx);
+                return tx;
+            } catch (NullPointerException e) {
+                LOGGER.error(e.toString());
+                count++;
+            }
+        }
+        throw new NullPointerException();
     }
 
     public String getOwned(String rcAddr, String name) throws Exception {
@@ -489,11 +774,21 @@ public class UserService {
     }
 
     public String getManaged(String rcAddr, String name) throws Exception {
-        Role_sol_Role rc = Role_sol_Role.load(rcAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
-        String scAddr = rc.getManaged(new Utf8String(name)).send().getValue();
+        int count = 0;
 
-        LOGGER.info("Read succeed: " + scAddr);
-        return scAddr;
+        while(count < REQUEST_LIMIT) {
+            try {
+                Role_sol_Role rc = Role_sol_Role.load(rcAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
+                String scAddr = rc.getManaged(new Utf8String(name)).send().getValue();
+
+                LOGGER.info("Read succeed: " + scAddr);
+                return scAddr;
+            } catch (NullPointerException e) {
+                LOGGER.error(e.toString());
+                count++;
+            }
+        }
+        throw new NullPointerException();
     }
 
     public Map<String, String> getManagedAll(String rcAddr) throws Exception {
