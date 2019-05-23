@@ -120,7 +120,14 @@ public class DataController {
             //Try Eth
             if (hash == null) {
                 hash = dataService.read(scAddr, userService.getCurrent(), data.getId());
-                data.setStatus("Confirmed");
+                if (hash.equals("")) {
+                    data.setData("/");
+                    data.setStatus("File not found");
+                    return data;
+                }
+                else {
+                    data.setStatus("Confirmed");
+                }
             }
 
             FileSwapper file = FileService.input(fileService.download(hash));
@@ -128,7 +135,7 @@ public class DataController {
                 result = file.getContent(data.getId());
                 data.setData(result);
                 if (result == null) {
-                    data.setStatus("Not found");
+                    data.setStatus("Data not found");
                 }
             }
             else {
@@ -149,6 +156,9 @@ public class DataController {
 
         for (String property : data.getPropertyNames()) {
             String scAddr = userService.getManaged(rcAddr, property);
+            if (scAddr.equals("0x0000000000000000000000000000000000000000")) {
+                continue;
+            }
             Map<String, DataSwapper> result =  new HashMap<>();
             if (dataService.checkReader(scAddr, new Address(rcAddr), userService.getCurrent())) {
                 for (String id : data.getIds()) {
@@ -171,7 +181,15 @@ public class DataController {
                         //Try Eth
                         if (hash == null) {
                             hash = dataService.read(scAddr, userService.getCurrent(), id);
-                            status = "Confirmed";
+                            if (hash.equals("")) {
+                                DataSwapper swapper = new DataSwapper(id, property, "/");
+                                swapper.setStatus("File not found");
+                                result.put(id, swapper);
+                                continue;
+                            }
+                            else {
+                                status = "Confirmed";
+                            }
                         }
 
                         FileSwapper file = FileService.input(fileService.download(hash));
@@ -179,7 +197,8 @@ public class DataController {
                             temp = file.getContent(id);
                             DataSwapper swapper = new DataSwapper(id, property, temp);
                             if(temp == null) {
-                                swapper.setStatus("Not found");
+                                swapper.setData("/");
+                                swapper.setStatus("Data not found");
                             }
                             else {
                                 swapper.setStatus(status);
