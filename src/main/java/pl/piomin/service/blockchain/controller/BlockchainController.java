@@ -24,28 +24,28 @@ public class BlockchainController {
 
     @GetMapping("/completed")
     public ArrayList<TaskSwapper> getCompleted() {
-        return blockchainService.getCompleted();
+        return BlockchainService.getCompleted();
     }
 
     @GetMapping("/completed/address")
     public int[] queryByRole() {
-        return blockchainService.getCompleted(UserService.accounts);
+        return BlockchainService.getCompleted(UserService.accounts);
     }
 
     @GetMapping("/completed/height")
     public HeightStatusSwapper queryByHeight() throws IOException {
         int height = blockchainService.getHight();
-        return new HeightStatusSwapper(height, blockchainService.getCompleted(height));
+        return new HeightStatusSwapper(height, BlockchainService.getCompleted(height));
     }
 
     @GetMapping("/pending")
     public ArrayList<TaskSwapper> getPending() {
-        return blockchainService.getPending();
+        return BlockchainService.getPending();
     }
 
     @GetMapping("/error")
     public ArrayList<TaskSwapper> getError() {
-        return blockchainService.getErrorTx();
+        return BlockchainService.getErrorTx();
     }
 
     @PostMapping("/execute")

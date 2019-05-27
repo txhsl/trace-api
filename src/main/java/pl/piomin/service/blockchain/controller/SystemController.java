@@ -19,13 +19,15 @@ public class SystemController {
     private final SystemService systemService;
     private final UserService userService;
     private final DataService dataService;
+    private final BlockchainService blockchainService;
     private final MessageService messageService;
 
     public SystemController(SystemService systemService, UserService userService,
-                            DataService dataService, MessageService messageService) {
+                            DataService dataService, BlockchainService blockchainService, MessageService messageService) {
         this.systemService = systemService;
         this.userService = userService;
         this.dataService = dataService;
+        this.blockchainService = blockchainService;
         this.messageService = messageService;
     }
 
@@ -43,11 +45,23 @@ public class SystemController {
     public TransactionReceipt register(@RequestBody UserSwapper user) throws Exception {
         return systemService.setRC(user.getAddress(), user.getRole(), userService.getCurrent());
     }
+    @PostMapping("/signUp")
+    public Result signUp(@RequestBody UserSwapper user) throws Exception {
+        userService.signIn(user.getAddress(), user.getPassword());
+
+        PermissionSwapper permission = new PermissionSwapper(user.getRole(), user.getAddress());
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Message msg = new Message(permission, Message.Type.注册, blockchainService.transfer(systemService.getSysAddress(), 500, userService.getCurrent()),
+                UserService.accounts[0], df.format(new Date()));
+        messageService.add(msg);
+
+        return new Result(true);
+    }
     //Normal
     @PostMapping("/requestRole")
     public Result requestRole(@RequestBody RoleSwapper role) throws Exception {
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Message msg = new Message(new PermissionSwapper(role.getName(), role.hasAddress() ? role.getAddress() : userService.addRole()), Message.Type.Role, null,
+        Message msg = new Message(new PermissionSwapper(role.getName(), role.hasAddress() ? role.getAddress() : userService.addRole()), Message.Type.角色, null,
                 UserService.accounts[0], df.format(new Date()));
         messageService.add(msg);
         return new Result(true);

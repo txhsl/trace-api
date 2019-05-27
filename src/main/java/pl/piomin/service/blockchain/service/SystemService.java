@@ -8,14 +8,18 @@ import org.springframework.core.io.Resource;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.stereotype.Service;
 import org.web3j.abi.datatypes.Address;
+import org.web3j.abi.datatypes.Uint;
 import org.web3j.abi.datatypes.Utf8String;
+import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import pl.piomin.service.blockchain.PropertyType;
 import pl.piomin.service.blockchain.RoleType;
+import pl.piomin.service.blockchain.contract.Role_sol_Role;
 import pl.piomin.service.blockchain.contract.System_sol_System;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -73,7 +77,8 @@ public class SystemService {
         while(count < REQUEST_LIMIT) {
             try {
                 System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
-                TransactionReceipt transactionReceipt = system.setRcIndex(new Utf8String(name), rcAddr).send();
+                Role_sol_Role rc = Role_sol_Role.load(rcAddr.toString(), web3j, credentials, GAS_PRICE, GAS_LIMIT);
+                TransactionReceipt transactionReceipt = system.setRcIndex(new Utf8String(name), rcAddr, new Address(rc.getOwner().send().getValue())).send();
 
                 LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
                 return transactionReceipt;
@@ -91,7 +96,8 @@ public class SystemService {
         while(count < REQUEST_LIMIT) {
             try {
                 System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
-                return system.setRcIndex(new Utf8String(name), rcAddr).sendAsync();
+                Role_sol_Role rc = Role_sol_Role.load(rcAddr.toString(), web3j, credentials, GAS_PRICE, GAS_LIMIT);
+                return system.setRcIndex(new Utf8String(name), rcAddr, new Address(rc.getOwner().send().getValue())).sendAsync();
             } catch (NullPointerException e) {
                 LOGGER.error(e.toString());
                 count++;
@@ -143,6 +149,21 @@ public class SystemService {
 
                 LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
                 return transactionReceipt;
+            } catch (NullPointerException e) {
+                LOGGER.error(e.toString());
+                count++;
+            }
+        }
+        throw new NullPointerException();
+    }
+
+    public CompletableFuture<TransactionReceipt> setRCAsync(String userAddr, String roleName, Credentials credentials) throws Exception {
+        int count = 0;
+
+        while(count < REQUEST_LIMIT) {
+            try {
+                System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+                return system.register(new Address(userAddr), new Utf8String(roleName)).sendAsync();
             } catch (NullPointerException e) {
                 LOGGER.error(e.toString());
                 count++;

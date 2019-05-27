@@ -24,21 +24,19 @@ public class DataController {
     private final UserService userService;
     private final DataService dataService;
     private final FileService fileService;
-    private final BlockchainService blockchainService;
 
     public DataController(SystemService systemService, UserService userService, DataService dataService,
-                         FileService fileService, BlockchainService blockchainService) {
+                         FileService fileService) {
         this.systemService = systemService;
         this.userService = userService;
         this.dataService = dataService;
         this.fileService = fileService;
-        this.blockchainService = blockchainService;
     }
 
     @Scheduled(fixedDelay = 5000)
     public void process() throws Exception {
         ArrayList<String> pending = new ArrayList<>();
-        for (TaskSwapper task : blockchainService.getPending()) {
+        for (TaskSwapper task : BlockchainService.getPending()) {
             pending.add(task.getTaskName());
         }
         TaskSwapper[] newTasks = fileService.process(pending.toArray(new String[0]));
@@ -47,7 +45,7 @@ public class DataController {
             String fileNo = dataService.getFileNum(scAddr, task.getTaskName().substring(task.getTaskName().lastIndexOf('_') + 1), userService.getCurrent());
             task.setTaskSender(userService.getCurrent().getAddress());
             task.setFuture(dataService.writeAsync(scAddr, userService.getCurrent(), fileNo, task.getTaskContent()));
-            blockchainService.addPending(task);
+            BlockchainService.addPending(task);
         }
     }
 
@@ -109,7 +107,7 @@ public class DataController {
         if (result == null) {
             //Try cache
             String hash = null;
-            ArrayList<TaskSwapper> pending = blockchainService.getPending();
+            ArrayList<TaskSwapper> pending = BlockchainService.getPending();
             for (TaskSwapper tx : pending) {
                 if (tx.getTaskName().equals(dataService.getFileNum(scAddr, data.getId(), userService.getCurrent()))) {
                     hash = tx.getTaskContent();
@@ -170,7 +168,7 @@ public class DataController {
                         //Try cache
                         String hash = null;
                         String status = null;
-                        ArrayList<TaskSwapper> pending = blockchainService.getPending();
+                        ArrayList<TaskSwapper> pending = BlockchainService.getPending();
                         for (TaskSwapper tx : pending) {
                             if (tx.getTaskName().equals(dataService.getFileNum(scAddr, id, userService.getCurrent()))) {
                                 hash = tx.getTaskContent();

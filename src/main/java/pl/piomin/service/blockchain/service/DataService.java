@@ -20,6 +20,7 @@ import pl.piomin.service.blockchain.PropertyType;
 import pl.piomin.service.blockchain.RoleType;
 import pl.piomin.service.blockchain.contract.Data_sol_Data;
 import pl.piomin.service.blockchain.contract.System_sol_System;
+import pl.piomin.service.blockchain.model.TaskSwapper;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,8 +35,8 @@ import static org.web3j.tx.gas.DefaultGasProvider.GAS_PRICE;
  * @date: 2019/2/11
  * @description: none
  */
-//@Component
-//@EnableScheduling
+@Component
+@EnableScheduling
 @Service
 public class DataService {
 
@@ -43,20 +44,21 @@ public class DataService {
 
     private final Web3j web3j;
     private final int REQUEST_LIMIT = 10;
-    //private ArrayList<RemoteCall<TransactionReceipt>> resetList = new ArrayList<>();
+    private ArrayList<RemoteCall<TransactionReceipt>> resetList = new ArrayList<>();
 
     public DataService(Web3j web3j) {
         this.web3j = web3j;
     }
 
-    //@Scheduled(fixedDelay = 5000)
-    //private void checkCompleted() {
-    //    if (resetList.size() > 0) {
-    //        resetList.get(0).sendAsync();
-    //        LOGGER.info("A tx sent");
-    //        resetList.remove(0);
-    //    }
-    //}
+    @Scheduled(fixedDelay = 5000)
+    private void checkCompleted() {
+        if (resetList.size() > 0) {
+            TaskSwapper taskSwapper = new TaskSwapper("默认属性合约", "权限初始化", "");
+            taskSwapper.setFuture(resetList.get(0).sendAsync());
+            LOGGER.info("A tx sent. Left " + resetList.size());
+            resetList.remove(0);
+        }
+    }
 
     public String[] resetContract(String[] roleAddrs, String sysAddr) throws Exception {
         //recreate SCs
@@ -109,400 +111,400 @@ public class DataService {
 
         
         Credentials current = signIn(accounts[1], "Innov@teD@ily1");
-        addReaderAsync(dataAddrs[PropertyType.getID("畜牧负责人")], current, roleAddrs[RoleType.getID("畜牧方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("畜牧负责人")], current, roleAddrs[RoleType.getID("畜牧方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("畜牧负责人")], current, roleAddrs[RoleType.getID("畜牧方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("畜牧负责人")], current, roleAddrs[RoleType.getID("畜牧方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("品种")], current, roleAddrs[RoleType.getID("畜牧方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("品种")], current, roleAddrs[RoleType.getID("畜牧方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("品种")], current, roleAddrs[RoleType.getID("畜牧方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("品种")], current, roleAddrs[RoleType.getID("畜牧方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("出栏日期")], current, roleAddrs[RoleType.getID("畜牧方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("出栏日期")], current, roleAddrs[RoleType.getID("畜牧方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("出栏日期")], current, roleAddrs[RoleType.getID("畜牧方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("出栏日期")], current, roleAddrs[RoleType.getID("畜牧方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("出栏重量")], current, roleAddrs[RoleType.getID("畜牧方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("出栏重量")], current, roleAddrs[RoleType.getID("畜牧方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("出栏重量")], current, roleAddrs[RoleType.getID("畜牧方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("出栏重量")], current, roleAddrs[RoleType.getID("畜牧方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("畜牧检验负责人")], current, roleAddrs[RoleType.getID("畜牧方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("畜牧检验负责人")], current, roleAddrs[RoleType.getID("畜牧方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("畜牧检验负责人")], current, roleAddrs[RoleType.getID("畜牧方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("畜牧检验负责人")], current, roleAddrs[RoleType.getID("畜牧方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("畜牧检验结果")], current, roleAddrs[RoleType.getID("畜牧方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("畜牧检验结果")], current, roleAddrs[RoleType.getID("畜牧方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("畜牧检验结果")], current, roleAddrs[RoleType.getID("畜牧方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("畜牧检验结果")], current, roleAddrs[RoleType.getID("畜牧方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("畜牧公司")], current, roleAddrs[RoleType.getID("畜牧方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("畜牧公司")], current, roleAddrs[RoleType.getID("畜牧方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("畜牧公司")], current, roleAddrs[RoleType.getID("畜牧方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("畜牧公司")], current, roleAddrs[RoleType.getID("畜牧方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("畜牧许可证")], current, roleAddrs[RoleType.getID("畜牧方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("畜牧许可证")], current, roleAddrs[RoleType.getID("畜牧方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("畜牧许可证")], current, roleAddrs[RoleType.getID("畜牧方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("畜牧许可证")], current, roleAddrs[RoleType.getID("畜牧方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("畜牧检验结果")], current, roleAddrs[RoleType.getID("屠宰方")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("畜牧公司")], current, roleAddrs[RoleType.getID("屠宰方")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("畜牧许可证")], current, roleAddrs[RoleType.getID("屠宰方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("畜牧检验结果")], current, roleAddrs[RoleType.getID("屠宰方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("畜牧公司")], current, roleAddrs[RoleType.getID("屠宰方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("畜牧许可证")], current, roleAddrs[RoleType.getID("屠宰方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("畜牧检验结果")], current, roleAddrs[RoleType.getID("包装方")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("畜牧公司")], current, roleAddrs[RoleType.getID("包装方")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("畜牧许可证")], current, roleAddrs[RoleType.getID("包装方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("畜牧检验结果")], current, roleAddrs[RoleType.getID("包装方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("畜牧公司")], current, roleAddrs[RoleType.getID("包装方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("畜牧许可证")], current, roleAddrs[RoleType.getID("包装方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("畜牧检验结果")], current, roleAddrs[RoleType.getID("仓储方")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("畜牧公司")], current, roleAddrs[RoleType.getID("仓储方")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("畜牧许可证")], current, roleAddrs[RoleType.getID("仓储方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("畜牧检验结果")], current, roleAddrs[RoleType.getID("仓储方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("畜牧公司")], current, roleAddrs[RoleType.getID("仓储方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("畜牧许可证")], current, roleAddrs[RoleType.getID("仓储方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("畜牧检验结果")], current, roleAddrs[RoleType.getID("物流方")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("畜牧公司")], current, roleAddrs[RoleType.getID("物流方")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("畜牧许可证")], current, roleAddrs[RoleType.getID("物流方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("畜牧检验结果")], current, roleAddrs[RoleType.getID("物流方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("畜牧公司")], current, roleAddrs[RoleType.getID("物流方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("畜牧许可证")], current, roleAddrs[RoleType.getID("物流方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("畜牧检验结果")], current, roleAddrs[RoleType.getID("二级加工")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("畜牧公司")], current, roleAddrs[RoleType.getID("二级加工")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("畜牧许可证")], current, roleAddrs[RoleType.getID("二级加工")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("畜牧检验结果")], current, roleAddrs[RoleType.getID("二级加工")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("畜牧公司")], current, roleAddrs[RoleType.getID("二级加工")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("畜牧许可证")], current, roleAddrs[RoleType.getID("二级加工")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("畜牧检验结果")], current, roleAddrs[RoleType.getID("二级物流")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("畜牧公司")], current, roleAddrs[RoleType.getID("二级物流")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("畜牧许可证")], current, roleAddrs[RoleType.getID("二级物流")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("畜牧检验结果")], current, roleAddrs[RoleType.getID("二级物流")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("畜牧公司")], current, roleAddrs[RoleType.getID("二级物流")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("畜牧许可证")], current, roleAddrs[RoleType.getID("二级物流")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("畜牧检验结果")], current, roleAddrs[RoleType.getID("零售方")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("畜牧公司")], current, roleAddrs[RoleType.getID("零售方")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("畜牧许可证")], current, roleAddrs[RoleType.getID("零售方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("畜牧检验结果")], current, roleAddrs[RoleType.getID("零售方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("畜牧公司")], current, roleAddrs[RoleType.getID("零售方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("畜牧许可证")], current, roleAddrs[RoleType.getID("零售方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("品种")], current, roleAddrs[RoleType.getID("消费者")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("出栏日期")], current, roleAddrs[RoleType.getID("消费者")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("出栏重量")], current, roleAddrs[RoleType.getID("消费者")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("畜牧检验结果")], current, roleAddrs[RoleType.getID("消费者")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("畜牧公司")], current, roleAddrs[RoleType.getID("消费者")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("畜牧许可证")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("品种")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("出栏日期")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("出栏重量")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("畜牧检验结果")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("畜牧公司")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("畜牧许可证")], current, roleAddrs[RoleType.getID("消费者")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("畜牧负责人")], current, roleAddrs[RoleType.getID("监管部门")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("畜牧检验结果")], current, roleAddrs[RoleType.getID("监管部门")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("畜牧公司")], current, roleAddrs[RoleType.getID("监管部门")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("畜牧许可证")], current, roleAddrs[RoleType.getID("监管部门")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("畜牧负责人")], current, roleAddrs[RoleType.getID("监管部门")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("畜牧检验结果")], current, roleAddrs[RoleType.getID("监管部门")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("畜牧公司")], current, roleAddrs[RoleType.getID("监管部门")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("畜牧许可证")], current, roleAddrs[RoleType.getID("监管部门")]);
         
 
         current = signIn(accounts[2], "Innov@teD@ily1");
-        addReaderAsync(dataAddrs[PropertyType.getID("屠宰负责人")], current, roleAddrs[RoleType.getID("屠宰方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("屠宰负责人")], current, roleAddrs[RoleType.getID("屠宰方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("屠宰负责人")], current, roleAddrs[RoleType.getID("屠宰方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("屠宰负责人")], current, roleAddrs[RoleType.getID("屠宰方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("屠宰日期")], current, roleAddrs[RoleType.getID("屠宰方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("屠宰日期")], current, roleAddrs[RoleType.getID("屠宰方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("屠宰日期")], current, roleAddrs[RoleType.getID("屠宰方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("屠宰日期")], current, roleAddrs[RoleType.getID("屠宰方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("屠宰检验负责人")], current, roleAddrs[RoleType.getID("屠宰方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("屠宰检验负责人")], current, roleAddrs[RoleType.getID("屠宰方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("屠宰检验负责人")], current, roleAddrs[RoleType.getID("屠宰方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("屠宰检验负责人")], current, roleAddrs[RoleType.getID("屠宰方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("屠宰检验结果")], current, roleAddrs[RoleType.getID("屠宰方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("屠宰检验结果")], current, roleAddrs[RoleType.getID("屠宰方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("屠宰检验结果")], current, roleAddrs[RoleType.getID("屠宰方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("屠宰检验结果")], current, roleAddrs[RoleType.getID("屠宰方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("屠宰公司")], current, roleAddrs[RoleType.getID("屠宰方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("屠宰公司")], current, roleAddrs[RoleType.getID("屠宰方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("屠宰公司")], current, roleAddrs[RoleType.getID("屠宰方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("屠宰公司")], current, roleAddrs[RoleType.getID("屠宰方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("屠宰许可证")], current, roleAddrs[RoleType.getID("屠宰方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("屠宰许可证")], current, roleAddrs[RoleType.getID("屠宰方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("屠宰许可证")], current, roleAddrs[RoleType.getID("屠宰方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("屠宰许可证")], current, roleAddrs[RoleType.getID("屠宰方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("屠宰检验结果")], current, roleAddrs[RoleType.getID("包装方")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("屠宰公司")], current, roleAddrs[RoleType.getID("包装方")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("屠宰许可证")], current, roleAddrs[RoleType.getID("包装方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("屠宰检验结果")], current, roleAddrs[RoleType.getID("包装方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("屠宰公司")], current, roleAddrs[RoleType.getID("包装方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("屠宰许可证")], current, roleAddrs[RoleType.getID("包装方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("屠宰检验结果")], current, roleAddrs[RoleType.getID("仓储方")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("屠宰公司")], current, roleAddrs[RoleType.getID("仓储方")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("屠宰许可证")], current, roleAddrs[RoleType.getID("仓储方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("屠宰检验结果")], current, roleAddrs[RoleType.getID("仓储方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("屠宰公司")], current, roleAddrs[RoleType.getID("仓储方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("屠宰许可证")], current, roleAddrs[RoleType.getID("仓储方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("屠宰检验结果")], current, roleAddrs[RoleType.getID("物流方")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("屠宰公司")], current, roleAddrs[RoleType.getID("物流方")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("屠宰许可证")], current, roleAddrs[RoleType.getID("物流方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("屠宰检验结果")], current, roleAddrs[RoleType.getID("物流方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("屠宰公司")], current, roleAddrs[RoleType.getID("物流方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("屠宰许可证")], current, roleAddrs[RoleType.getID("物流方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("屠宰检验结果")], current, roleAddrs[RoleType.getID("二级加工")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("屠宰公司")], current, roleAddrs[RoleType.getID("二级加工")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("屠宰许可证")], current, roleAddrs[RoleType.getID("二级加工")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("屠宰检验结果")], current, roleAddrs[RoleType.getID("二级加工")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("屠宰公司")], current, roleAddrs[RoleType.getID("二级加工")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("屠宰许可证")], current, roleAddrs[RoleType.getID("二级加工")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("屠宰检验结果")], current, roleAddrs[RoleType.getID("二级物流")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("屠宰公司")], current, roleAddrs[RoleType.getID("二级物流")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("屠宰许可证")], current, roleAddrs[RoleType.getID("二级物流")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("屠宰检验结果")], current, roleAddrs[RoleType.getID("二级物流")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("屠宰公司")], current, roleAddrs[RoleType.getID("二级物流")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("屠宰许可证")], current, roleAddrs[RoleType.getID("二级物流")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("屠宰检验结果")], current, roleAddrs[RoleType.getID("零售方")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("屠宰公司")], current, roleAddrs[RoleType.getID("零售方")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("屠宰许可证")], current, roleAddrs[RoleType.getID("零售方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("屠宰检验结果")], current, roleAddrs[RoleType.getID("零售方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("屠宰公司")], current, roleAddrs[RoleType.getID("零售方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("屠宰许可证")], current, roleAddrs[RoleType.getID("零售方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("屠宰日期")], current, roleAddrs[RoleType.getID("消费者")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("屠宰检验结果")], current, roleAddrs[RoleType.getID("消费者")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("屠宰公司")], current, roleAddrs[RoleType.getID("消费者")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("屠宰许可证")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("屠宰日期")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("屠宰检验结果")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("屠宰公司")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("屠宰许可证")], current, roleAddrs[RoleType.getID("消费者")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("屠宰负责人")], current, roleAddrs[RoleType.getID("监管部门")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("屠宰检验负责人")], current, roleAddrs[RoleType.getID("监管部门")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("屠宰检验结果")], current, roleAddrs[RoleType.getID("监管部门")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("屠宰公司")], current, roleAddrs[RoleType.getID("监管部门")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("屠宰许可证")], current, roleAddrs[RoleType.getID("监管部门")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("屠宰负责人")], current, roleAddrs[RoleType.getID("监管部门")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("屠宰检验负责人")], current, roleAddrs[RoleType.getID("监管部门")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("屠宰检验结果")], current, roleAddrs[RoleType.getID("监管部门")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("屠宰公司")], current, roleAddrs[RoleType.getID("监管部门")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("屠宰许可证")], current, roleAddrs[RoleType.getID("监管部门")]);
         
 
         current = signIn(accounts[3], "Innov@teD@ily1");
-        addReaderAsync(dataAddrs[PropertyType.getID("包装负责人")], current, roleAddrs[RoleType.getID("包装方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("包装负责人")], current, roleAddrs[RoleType.getID("包装方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("包装负责人")], current, roleAddrs[RoleType.getID("包装方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("包装负责人")], current, roleAddrs[RoleType.getID("包装方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("包装日期")], current, roleAddrs[RoleType.getID("包装方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("包装日期")], current, roleAddrs[RoleType.getID("包装方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("包装日期")], current, roleAddrs[RoleType.getID("包装方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("包装日期")], current, roleAddrs[RoleType.getID("包装方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("包装检验负责人")], current, roleAddrs[RoleType.getID("包装方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("包装检验负责人")], current, roleAddrs[RoleType.getID("包装方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("包装检验负责人")], current, roleAddrs[RoleType.getID("包装方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("包装检验负责人")], current, roleAddrs[RoleType.getID("包装方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("包装检验结果")], current, roleAddrs[RoleType.getID("包装方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("包装检验结果")], current, roleAddrs[RoleType.getID("包装方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("包装检验结果")], current, roleAddrs[RoleType.getID("包装方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("包装检验结果")], current, roleAddrs[RoleType.getID("包装方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("包装公司")], current, roleAddrs[RoleType.getID("包装方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("包装公司")], current, roleAddrs[RoleType.getID("包装方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("包装公司")], current, roleAddrs[RoleType.getID("包装方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("包装公司")], current, roleAddrs[RoleType.getID("包装方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("包装许可证")], current, roleAddrs[RoleType.getID("包装方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("包装许可证")], current, roleAddrs[RoleType.getID("包装方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("包装许可证")], current, roleAddrs[RoleType.getID("包装方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("包装许可证")], current, roleAddrs[RoleType.getID("包装方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("包装检验结果")], current, roleAddrs[RoleType.getID("仓储方")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("包装公司")], current, roleAddrs[RoleType.getID("仓储方")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("包装许可证")], current, roleAddrs[RoleType.getID("仓储方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("包装检验结果")], current, roleAddrs[RoleType.getID("仓储方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("包装公司")], current, roleAddrs[RoleType.getID("仓储方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("包装许可证")], current, roleAddrs[RoleType.getID("仓储方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("包装检验结果")], current, roleAddrs[RoleType.getID("物流方")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("包装公司")], current, roleAddrs[RoleType.getID("物流方")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("包装许可证")], current, roleAddrs[RoleType.getID("物流方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("包装检验结果")], current, roleAddrs[RoleType.getID("物流方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("包装公司")], current, roleAddrs[RoleType.getID("物流方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("包装许可证")], current, roleAddrs[RoleType.getID("物流方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("包装检验结果")], current, roleAddrs[RoleType.getID("二级加工")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("包装公司")], current, roleAddrs[RoleType.getID("二级加工")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("包装许可证")], current, roleAddrs[RoleType.getID("二级加工")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("包装检验结果")], current, roleAddrs[RoleType.getID("二级加工")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("包装公司")], current, roleAddrs[RoleType.getID("二级加工")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("包装许可证")], current, roleAddrs[RoleType.getID("二级加工")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("包装检验结果")], current, roleAddrs[RoleType.getID("二级物流")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("包装公司")], current, roleAddrs[RoleType.getID("二级物流")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("包装许可证")], current, roleAddrs[RoleType.getID("二级物流")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("包装检验结果")], current, roleAddrs[RoleType.getID("二级物流")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("包装公司")], current, roleAddrs[RoleType.getID("二级物流")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("包装许可证")], current, roleAddrs[RoleType.getID("二级物流")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("包装检验结果")], current, roleAddrs[RoleType.getID("零售方")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("包装公司")], current, roleAddrs[RoleType.getID("零售方")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("包装许可证")], current, roleAddrs[RoleType.getID("零售方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("包装检验结果")], current, roleAddrs[RoleType.getID("零售方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("包装公司")], current, roleAddrs[RoleType.getID("零售方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("包装许可证")], current, roleAddrs[RoleType.getID("零售方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("包装日期")], current, roleAddrs[RoleType.getID("消费者")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("包装检验结果")], current, roleAddrs[RoleType.getID("消费者")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("包装公司")], current, roleAddrs[RoleType.getID("消费者")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("包装许可证")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("包装日期")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("包装检验结果")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("包装公司")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("包装许可证")], current, roleAddrs[RoleType.getID("消费者")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("包装负责人")], current, roleAddrs[RoleType.getID("监管部门")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("包装检验负责人")], current, roleAddrs[RoleType.getID("监管部门")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("包装检验结果")], current, roleAddrs[RoleType.getID("监管部门")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("包装公司")], current, roleAddrs[RoleType.getID("监管部门")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("包装许可证")], current, roleAddrs[RoleType.getID("监管部门")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("包装负责人")], current, roleAddrs[RoleType.getID("监管部门")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("包装检验负责人")], current, roleAddrs[RoleType.getID("监管部门")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("包装检验结果")], current, roleAddrs[RoleType.getID("监管部门")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("包装公司")], current, roleAddrs[RoleType.getID("监管部门")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("包装许可证")], current, roleAddrs[RoleType.getID("监管部门")]);
         
 
         current = signIn(accounts[4], "Innov@teD@ily1");
-        addReaderAsync(dataAddrs[PropertyType.getID("仓储负责人")], current, roleAddrs[RoleType.getID("仓储方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("仓储负责人")], current, roleAddrs[RoleType.getID("仓储方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("仓储负责人")], current, roleAddrs[RoleType.getID("仓储方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("仓储负责人")], current, roleAddrs[RoleType.getID("仓储方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("入仓时间")], current, roleAddrs[RoleType.getID("仓储方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("入仓时间")], current, roleAddrs[RoleType.getID("仓储方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("入仓时间")], current, roleAddrs[RoleType.getID("仓储方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("入仓时间")], current, roleAddrs[RoleType.getID("仓储方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("出仓时间")], current, roleAddrs[RoleType.getID("仓储方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("出仓时间")], current, roleAddrs[RoleType.getID("仓储方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("出仓时间")], current, roleAddrs[RoleType.getID("仓储方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("出仓时间")], current, roleAddrs[RoleType.getID("仓储方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("仓储量")], current, roleAddrs[RoleType.getID("仓储方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("仓储量")], current, roleAddrs[RoleType.getID("仓储方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("仓储量")], current, roleAddrs[RoleType.getID("仓储方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("仓储量")], current, roleAddrs[RoleType.getID("仓储方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("仓储公司")], current, roleAddrs[RoleType.getID("仓储方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("仓储公司")], current, roleAddrs[RoleType.getID("仓储方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("仓储公司")], current, roleAddrs[RoleType.getID("仓储方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("仓储公司")], current, roleAddrs[RoleType.getID("仓储方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("仓储许可证")], current, roleAddrs[RoleType.getID("仓储方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("仓储许可证")], current, roleAddrs[RoleType.getID("仓储方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("仓储许可证")], current, roleAddrs[RoleType.getID("仓储方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("仓储许可证")], current, roleAddrs[RoleType.getID("仓储方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("仓储公司")], current, roleAddrs[RoleType.getID("物流方")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("仓储许可证")], current, roleAddrs[RoleType.getID("物流方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("仓储公司")], current, roleAddrs[RoleType.getID("物流方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("仓储许可证")], current, roleAddrs[RoleType.getID("物流方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("仓储公司")], current, roleAddrs[RoleType.getID("二级加工")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("仓储许可证")], current, roleAddrs[RoleType.getID("二级加工")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("仓储公司")], current, roleAddrs[RoleType.getID("二级加工")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("仓储许可证")], current, roleAddrs[RoleType.getID("二级加工")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("仓储公司")], current, roleAddrs[RoleType.getID("二级物流")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("仓储许可证")], current, roleAddrs[RoleType.getID("二级物流")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("仓储公司")], current, roleAddrs[RoleType.getID("二级物流")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("仓储许可证")], current, roleAddrs[RoleType.getID("二级物流")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("仓储公司")], current, roleAddrs[RoleType.getID("零售方")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("仓储许可证")], current, roleAddrs[RoleType.getID("零售方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("仓储公司")], current, roleAddrs[RoleType.getID("零售方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("仓储许可证")], current, roleAddrs[RoleType.getID("零售方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("入仓时间")], current, roleAddrs[RoleType.getID("消费者")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("出仓时间")], current, roleAddrs[RoleType.getID("消费者")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("仓储量")], current, roleAddrs[RoleType.getID("消费者")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("仓储公司")], current, roleAddrs[RoleType.getID("消费者")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("仓储许可证")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("入仓时间")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("出仓时间")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("仓储量")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("仓储公司")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("仓储许可证")], current, roleAddrs[RoleType.getID("消费者")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("仓储负责人")], current, roleAddrs[RoleType.getID("监管部门")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("仓储公司")], current, roleAddrs[RoleType.getID("监管部门")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("仓储许可证")], current, roleAddrs[RoleType.getID("监管部门")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("仓储负责人")], current, roleAddrs[RoleType.getID("监管部门")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("仓储公司")], current, roleAddrs[RoleType.getID("监管部门")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("仓储许可证")], current, roleAddrs[RoleType.getID("监管部门")]);
         
 
         current = signIn(accounts[5], "Innov@teD@ily1");
-        addReaderAsync(dataAddrs[PropertyType.getID("物流负责人")], current, roleAddrs[RoleType.getID("物流方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("物流负责人")], current, roleAddrs[RoleType.getID("物流方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("物流负责人")], current, roleAddrs[RoleType.getID("物流方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("物流负责人")], current, roleAddrs[RoleType.getID("物流方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("起运时间")], current, roleAddrs[RoleType.getID("物流方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("起运时间")], current, roleAddrs[RoleType.getID("物流方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("起运时间")], current, roleAddrs[RoleType.getID("物流方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("起运时间")], current, roleAddrs[RoleType.getID("物流方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("到货时间")], current, roleAddrs[RoleType.getID("物流方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("到货时间")], current, roleAddrs[RoleType.getID("物流方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("到货时间")], current, roleAddrs[RoleType.getID("物流方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("到货时间")], current, roleAddrs[RoleType.getID("物流方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("运输量")], current, roleAddrs[RoleType.getID("物流方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("运输量")], current, roleAddrs[RoleType.getID("物流方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("运输量")], current, roleAddrs[RoleType.getID("物流方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("运输量")], current, roleAddrs[RoleType.getID("物流方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("运输距离")], current, roleAddrs[RoleType.getID("物流方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("运输距离")], current, roleAddrs[RoleType.getID("物流方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("运输距离")], current, roleAddrs[RoleType.getID("物流方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("运输距离")], current, roleAddrs[RoleType.getID("物流方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("物流公司")], current, roleAddrs[RoleType.getID("物流方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("物流公司")], current, roleAddrs[RoleType.getID("物流方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("物流公司")], current, roleAddrs[RoleType.getID("物流方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("物流公司")], current, roleAddrs[RoleType.getID("物流方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("物流许可证")], current, roleAddrs[RoleType.getID("物流方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("物流许可证")], current, roleAddrs[RoleType.getID("物流方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("物流许可证")], current, roleAddrs[RoleType.getID("物流方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("物流许可证")], current, roleAddrs[RoleType.getID("物流方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("起始地")], current, roleAddrs[RoleType.getID("物流方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("起始地")], current, roleAddrs[RoleType.getID("物流方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("起始地")], current, roleAddrs[RoleType.getID("物流方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("起始地")], current, roleAddrs[RoleType.getID("物流方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("目的地")], current, roleAddrs[RoleType.getID("物流方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("目的地")], current, roleAddrs[RoleType.getID("物流方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("目的地")], current, roleAddrs[RoleType.getID("物流方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("目的地")], current, roleAddrs[RoleType.getID("物流方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("物流公司")], current, roleAddrs[RoleType.getID("二级加工")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("物流许可证")], current, roleAddrs[RoleType.getID("二级加工")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("起始地")], current, roleAddrs[RoleType.getID("二级加工")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("目的地")], current, roleAddrs[RoleType.getID("二级加工")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("物流公司")], current, roleAddrs[RoleType.getID("二级加工")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("物流许可证")], current, roleAddrs[RoleType.getID("二级加工")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("起始地")], current, roleAddrs[RoleType.getID("二级加工")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("目的地")], current, roleAddrs[RoleType.getID("二级加工")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("物流公司")], current, roleAddrs[RoleType.getID("二级物流")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("物流许可证")], current, roleAddrs[RoleType.getID("二级物流")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("起始地")], current, roleAddrs[RoleType.getID("二级物流")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("目的地")], current, roleAddrs[RoleType.getID("二级物流")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("物流公司")], current, roleAddrs[RoleType.getID("二级物流")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("物流许可证")], current, roleAddrs[RoleType.getID("二级物流")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("起始地")], current, roleAddrs[RoleType.getID("二级物流")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("目的地")], current, roleAddrs[RoleType.getID("二级物流")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("物流公司")], current, roleAddrs[RoleType.getID("零售方")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("物流许可证")], current, roleAddrs[RoleType.getID("零售方")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("起始地")], current, roleAddrs[RoleType.getID("零售方")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("目的地")], current, roleAddrs[RoleType.getID("零售方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("物流公司")], current, roleAddrs[RoleType.getID("零售方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("物流许可证")], current, roleAddrs[RoleType.getID("零售方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("起始地")], current, roleAddrs[RoleType.getID("零售方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("目的地")], current, roleAddrs[RoleType.getID("零售方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("起运时间")], current, roleAddrs[RoleType.getID("消费者")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("到货时间")], current, roleAddrs[RoleType.getID("消费者")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("运输量")], current, roleAddrs[RoleType.getID("消费者")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("运输距离")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("起运时间")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("到货时间")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("运输量")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("运输距离")], current, roleAddrs[RoleType.getID("消费者")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("物流公司")], current, roleAddrs[RoleType.getID("消费者")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("物流许可证")], current, roleAddrs[RoleType.getID("消费者")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("起始地")], current, roleAddrs[RoleType.getID("消费者")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("目的地")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("物流公司")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("物流许可证")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("起始地")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("目的地")], current, roleAddrs[RoleType.getID("消费者")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("物流负责人")], current, roleAddrs[RoleType.getID("监管部门")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("物流公司")], current, roleAddrs[RoleType.getID("监管部门")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("物流许可证")], current, roleAddrs[RoleType.getID("监管部门")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("起始地")], current, roleAddrs[RoleType.getID("监管部门")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("目的地")], current, roleAddrs[RoleType.getID("监管部门")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("物流负责人")], current, roleAddrs[RoleType.getID("监管部门")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("物流公司")], current, roleAddrs[RoleType.getID("监管部门")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("物流许可证")], current, roleAddrs[RoleType.getID("监管部门")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("起始地")], current, roleAddrs[RoleType.getID("监管部门")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("目的地")], current, roleAddrs[RoleType.getID("监管部门")]);
         
 
         current = signIn(accounts[6], "Innov@teD@ily1");
-        addReaderAsync(dataAddrs[PropertyType.getID("加工进货负责人")], current, roleAddrs[RoleType.getID("二级加工")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("加工进货负责人")], current, roleAddrs[RoleType.getID("二级加工")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("加工进货负责人")], current, roleAddrs[RoleType.getID("二级加工")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("加工进货负责人")], current, roleAddrs[RoleType.getID("二级加工")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("加工进货日期")], current, roleAddrs[RoleType.getID("二级加工")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("加工进货日期")], current, roleAddrs[RoleType.getID("二级加工")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("加工进货日期")], current, roleAddrs[RoleType.getID("二级加工")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("加工进货日期")], current, roleAddrs[RoleType.getID("二级加工")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("加工负责人")], current, roleAddrs[RoleType.getID("二级加工")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("加工负责人")], current, roleAddrs[RoleType.getID("二级加工")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("加工负责人")], current, roleAddrs[RoleType.getID("二级加工")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("加工负责人")], current, roleAddrs[RoleType.getID("二级加工")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("加工日期")], current, roleAddrs[RoleType.getID("二级加工")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("加工日期")], current, roleAddrs[RoleType.getID("二级加工")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("加工日期")], current, roleAddrs[RoleType.getID("二级加工")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("加工日期")], current, roleAddrs[RoleType.getID("二级加工")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("加工检验负责人")], current, roleAddrs[RoleType.getID("二级加工")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("加工检验负责人")], current, roleAddrs[RoleType.getID("二级加工")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("加工检验负责人")], current, roleAddrs[RoleType.getID("二级加工")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("加工检验负责人")], current, roleAddrs[RoleType.getID("二级加工")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("加工检验结果")], current, roleAddrs[RoleType.getID("二级加工")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("加工检验结果")], current, roleAddrs[RoleType.getID("二级加工")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("加工检验结果")], current, roleAddrs[RoleType.getID("二级加工")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("加工检验结果")], current, roleAddrs[RoleType.getID("二级加工")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("加工公司")], current, roleAddrs[RoleType.getID("二级加工")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("加工公司")], current, roleAddrs[RoleType.getID("二级加工")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("加工公司")], current, roleAddrs[RoleType.getID("二级加工")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("加工公司")], current, roleAddrs[RoleType.getID("二级加工")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("加工许可证")], current, roleAddrs[RoleType.getID("二级加工")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("加工许可证")], current, roleAddrs[RoleType.getID("二级加工")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("加工许可证")], current, roleAddrs[RoleType.getID("二级加工")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("加工许可证")], current, roleAddrs[RoleType.getID("二级加工")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("加工检验结果")], current, roleAddrs[RoleType.getID("二级物流")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("加工公司")], current, roleAddrs[RoleType.getID("二级物流")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("加工许可证")], current, roleAddrs[RoleType.getID("二级物流")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("加工检验结果")], current, roleAddrs[RoleType.getID("二级物流")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("加工公司")], current, roleAddrs[RoleType.getID("二级物流")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("加工许可证")], current, roleAddrs[RoleType.getID("二级物流")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("加工检验结果")], current, roleAddrs[RoleType.getID("零售方")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("加工公司")], current, roleAddrs[RoleType.getID("零售方")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("加工许可证")], current, roleAddrs[RoleType.getID("零售方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("加工检验结果")], current, roleAddrs[RoleType.getID("零售方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("加工公司")], current, roleAddrs[RoleType.getID("零售方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("加工许可证")], current, roleAddrs[RoleType.getID("零售方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("加工检验结果")], current, roleAddrs[RoleType.getID("消费者")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("加工公司")], current, roleAddrs[RoleType.getID("消费者")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("加工许可证")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("加工检验结果")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("加工公司")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("加工许可证")], current, roleAddrs[RoleType.getID("消费者")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("加工检验结果")], current, roleAddrs[RoleType.getID("监管部门")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("加工公司")], current, roleAddrs[RoleType.getID("监管部门")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("加工许可证")], current, roleAddrs[RoleType.getID("监管部门")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("加工检验结果")], current, roleAddrs[RoleType.getID("监管部门")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("加工公司")], current, roleAddrs[RoleType.getID("监管部门")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("加工许可证")], current, roleAddrs[RoleType.getID("监管部门")]);
         
 
         current = signIn(accounts[7], "Innov@teD@ily1");
-        addReaderAsync(dataAddrs[PropertyType.getID("二级物流负责人")], current, roleAddrs[RoleType.getID("二级物流")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("二级物流负责人")], current, roleAddrs[RoleType.getID("二级物流")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("二级物流负责人")], current, roleAddrs[RoleType.getID("二级物流")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("二级物流负责人")], current, roleAddrs[RoleType.getID("二级物流")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("二级起运时间")], current, roleAddrs[RoleType.getID("二级物流")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("二级起运时间")], current, roleAddrs[RoleType.getID("二级物流")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("二级起运时间")], current, roleAddrs[RoleType.getID("二级物流")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("二级起运时间")], current, roleAddrs[RoleType.getID("二级物流")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("二级到货时间")], current, roleAddrs[RoleType.getID("二级物流")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("二级到货时间")], current, roleAddrs[RoleType.getID("二级物流")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("二级到货时间")], current, roleAddrs[RoleType.getID("二级物流")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("二级到货时间")], current, roleAddrs[RoleType.getID("二级物流")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("二级运输量")], current, roleAddrs[RoleType.getID("二级物流")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("二级运输量")], current, roleAddrs[RoleType.getID("二级物流")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("二级运输量")], current, roleAddrs[RoleType.getID("二级物流")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("二级运输量")], current, roleAddrs[RoleType.getID("二级物流")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("二级运输距离")], current, roleAddrs[RoleType.getID("二级物流")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("二级运输距离")], current, roleAddrs[RoleType.getID("二级物流")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("二级运输距离")], current, roleAddrs[RoleType.getID("二级物流")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("二级运输距离")], current, roleAddrs[RoleType.getID("二级物流")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("二级物流公司")], current, roleAddrs[RoleType.getID("二级物流")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("二级物流公司")], current, roleAddrs[RoleType.getID("二级物流")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("二级物流公司")], current, roleAddrs[RoleType.getID("二级物流")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("二级物流公司")], current, roleAddrs[RoleType.getID("二级物流")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("二级物流许可证")], current, roleAddrs[RoleType.getID("二级物流")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("二级物流许可证")], current, roleAddrs[RoleType.getID("二级物流")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("二级物流许可证")], current, roleAddrs[RoleType.getID("二级物流")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("二级物流许可证")], current, roleAddrs[RoleType.getID("二级物流")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("二级起始地")], current, roleAddrs[RoleType.getID("二级物流")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("二级起始地")], current, roleAddrs[RoleType.getID("二级物流")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("二级起始地")], current, roleAddrs[RoleType.getID("二级物流")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("二级起始地")], current, roleAddrs[RoleType.getID("二级物流")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("二级目的地")], current, roleAddrs[RoleType.getID("二级物流")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("二级目的地")], current, roleAddrs[RoleType.getID("二级物流")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("二级目的地")], current, roleAddrs[RoleType.getID("二级物流")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("二级目的地")], current, roleAddrs[RoleType.getID("二级物流")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("二级物流公司")], current, roleAddrs[RoleType.getID("零售方")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("二级物流许可证")], current, roleAddrs[RoleType.getID("零售方")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("二级起始地")], current, roleAddrs[RoleType.getID("零售方")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("二级目的地")], current, roleAddrs[RoleType.getID("零售方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("二级物流公司")], current, roleAddrs[RoleType.getID("零售方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("二级物流许可证")], current, roleAddrs[RoleType.getID("零售方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("二级起始地")], current, roleAddrs[RoleType.getID("零售方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("二级目的地")], current, roleAddrs[RoleType.getID("零售方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("二级起运时间")], current, roleAddrs[RoleType.getID("消费者")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("二级到货时间")], current, roleAddrs[RoleType.getID("消费者")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("二级运输量")], current, roleAddrs[RoleType.getID("消费者")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("二级运输距离")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("二级起运时间")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("二级到货时间")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("二级运输量")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("二级运输距离")], current, roleAddrs[RoleType.getID("消费者")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("二级物流公司")], current, roleAddrs[RoleType.getID("消费者")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("二级物流许可证")], current, roleAddrs[RoleType.getID("消费者")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("二级起始地")], current, roleAddrs[RoleType.getID("消费者")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("二级目的地")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("二级物流公司")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("二级物流许可证")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("二级起始地")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("二级目的地")], current, roleAddrs[RoleType.getID("消费者")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("二级物流负责人")], current, roleAddrs[RoleType.getID("监管部门")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("二级物流公司")], current, roleAddrs[RoleType.getID("监管部门")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("二级物流许可证")], current, roleAddrs[RoleType.getID("监管部门")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("二级起始地")], current, roleAddrs[RoleType.getID("监管部门")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("二级目的地")], current, roleAddrs[RoleType.getID("监管部门")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("二级物流负责人")], current, roleAddrs[RoleType.getID("监管部门")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("二级物流公司")], current, roleAddrs[RoleType.getID("监管部门")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("二级物流许可证")], current, roleAddrs[RoleType.getID("监管部门")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("二级起始地")], current, roleAddrs[RoleType.getID("监管部门")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("二级目的地")], current, roleAddrs[RoleType.getID("监管部门")]);
         
 
         current = signIn(accounts[8], "Innov@teD@ily1");
-        addReaderAsync(dataAddrs[PropertyType.getID("零售进货负责人")], current, roleAddrs[RoleType.getID("零售方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("零售进货负责人")], current, roleAddrs[RoleType.getID("零售方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("零售进货负责人")], current, roleAddrs[RoleType.getID("零售方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("零售进货负责人")], current, roleAddrs[RoleType.getID("零售方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("零售进货时间")], current, roleAddrs[RoleType.getID("零售方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("零售进货时间")], current, roleAddrs[RoleType.getID("零售方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("零售进货时间")], current, roleAddrs[RoleType.getID("零售方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("零售进货时间")], current, roleAddrs[RoleType.getID("零售方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("进货量")], current, roleAddrs[RoleType.getID("零售方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("进货量")], current, roleAddrs[RoleType.getID("零售方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("进货量")], current, roleAddrs[RoleType.getID("零售方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("进货量")], current, roleAddrs[RoleType.getID("零售方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("零售公司")], current, roleAddrs[RoleType.getID("零售方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("零售公司")], current, roleAddrs[RoleType.getID("零售方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("零售公司")], current, roleAddrs[RoleType.getID("零售方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("零售公司")], current, roleAddrs[RoleType.getID("零售方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("零售许可证")], current, roleAddrs[RoleType.getID("零售方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("零售许可证")], current, roleAddrs[RoleType.getID("零售方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("零售许可证")], current, roleAddrs[RoleType.getID("零售方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("零售许可证")], current, roleAddrs[RoleType.getID("零售方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("零售价")], current, roleAddrs[RoleType.getID("零售方")]);
-        setWriterAsync(dataAddrs[PropertyType.getID("零售价")], current, roleAddrs[RoleType.getID("零售方")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("零售价")], current, roleAddrs[RoleType.getID("零售方")]);
+        resetWriterAsync(dataAddrs[PropertyType.getID("零售价")], current, roleAddrs[RoleType.getID("零售方")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("零售进货时间")], current, roleAddrs[RoleType.getID("消费者")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("进货量")], current, roleAddrs[RoleType.getID("消费者")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("零售公司")], current, roleAddrs[RoleType.getID("消费者")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("零售许可证")], current, roleAddrs[RoleType.getID("消费者")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("零售价")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("零售进货时间")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("进货量")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("零售公司")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("零售许可证")], current, roleAddrs[RoleType.getID("消费者")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("零售价")], current, roleAddrs[RoleType.getID("消费者")]);
         
-        addReaderAsync(dataAddrs[PropertyType.getID("零售进货负责人")], current, roleAddrs[RoleType.getID("监管部门")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("零售公司")], current, roleAddrs[RoleType.getID("监管部门")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("零售许可证")], current, roleAddrs[RoleType.getID("监管部门")]);
-        addReaderAsync(dataAddrs[PropertyType.getID("零售价")], current, roleAddrs[RoleType.getID("监管部门")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("零售进货负责人")], current, roleAddrs[RoleType.getID("监管部门")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("零售公司")], current, roleAddrs[RoleType.getID("监管部门")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("零售许可证")], current, roleAddrs[RoleType.getID("监管部门")]);
+        resetReaderAsync(dataAddrs[PropertyType.getID("零售价")], current, roleAddrs[RoleType.getID("监管部门")]);
         return true;
     }
 
@@ -521,6 +523,36 @@ public class DataService {
                 String result = sc.getFileNum(new Utf8String(id)).send().getValue();
                 LOGGER.info("File number calculated: " + result + ", data id: " + id);
                 return result;
+            } catch (NullPointerException e) {
+                LOGGER.error(e.toString());
+                count++;
+            }
+        }
+        throw new NullPointerException();
+    }
+
+    public void resetReaderAsync(String addr, Credentials credentials, String roleAddr){
+        int count = 0;
+
+        while(count < REQUEST_LIMIT) {
+            try {
+                Data_sol_Data sc = Data_sol_Data.load(addr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+                resetList.add(sc.addReader(new Address(roleAddr)));
+            } catch (NullPointerException e) {
+                LOGGER.error(e.toString());
+                count++;
+            }
+        }
+        throw new NullPointerException();
+    }
+
+    public void resetWriterAsync(String addr, Credentials credentials, String roleAddr){
+        int count = 0;
+
+        while(count < REQUEST_LIMIT) {
+            try {
+                Data_sol_Data sc = Data_sol_Data.load(addr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+                resetList.add(sc.setWriter(new Address(roleAddr)));
             } catch (NullPointerException e) {
                 LOGGER.error(e.toString());
                 count++;
@@ -558,8 +590,6 @@ public class DataService {
 
                 LOGGER.info("Reader added: " + futrue.toString());
                 return futrue;
-                //resetList.add(sc.addReader(new Address(roleAddr)));
-                //return null;
             } catch (NullPointerException e) {
                 LOGGER.error(e.toString());
                 count++;
@@ -611,8 +641,6 @@ public class DataService {
 
                 LOGGER.info("Writer setted: " + futrue.toString());
                 return futrue;
-                //resetList.add(sc.setWriter(new Address(roleAddr)));
-                //return null;
             } catch (NullPointerException e) {
                 LOGGER.error(e.toString());
                 count++;

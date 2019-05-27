@@ -14,7 +14,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class Message {
     public enum Type {
-        Property, Role, Permission
+        属性, 角色, 权限, 注册, 检举
     }
 
     private PermissionSwapper permission;

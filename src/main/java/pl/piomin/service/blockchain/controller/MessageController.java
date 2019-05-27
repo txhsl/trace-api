@@ -23,16 +23,13 @@ public class MessageController {
     private final SystemService systemService;
     private final UserService userService;
     private final DataService dataService;
-    private final BlockchainService blockchainService;
 
     public MessageController(MessageService messageService, SystemService systemService,
-                             UserService userService, DataService dataService,
-                             BlockchainService blockchainService) {
+                             UserService userService, DataService dataService) {
         this.messageService = messageService;
         this.systemService = systemService;
         this.userService = userService;
         this.dataService = dataService;
-        this.blockchainService = blockchainService;
     }
 
     @Deprecated
@@ -64,22 +61,21 @@ public class MessageController {
     public boolean accept(@PathVariable int index) throws Exception {
         Message msg = messageService.get(userService.getCurrent().getAddress(), index);
 
-        String rcAddr = systemService.getRC(userService.getCurrent());
-        String toAddr = systemService.getRC(msg.getPermission().getTarget(), userService.getCurrent());
-        String scAddr = userService.getOwned(rcAddr, msg.getPermission().getPropertyName());
-
         //Handle permit
-        TaskSwapper permissionTask = new TaskSwapper(msg.getPermission().getPropertyName(), msg.getType().name() + " Permit", userService.getCurrent().getAddress());
+        TaskSwapper permissionTask = new TaskSwapper(msg.getPermission().getPropertyName(), msg.getType().name() + "通过", userService.getCurrent().getAddress());
         switch (msg.getType()) {
-            case Role:
+            case 角色:
                 permissionTask.setFuture(systemService.addRCAsync(msg.getPermission().getPropertyName(), new Address(msg.getPermission().getTarget()), userService.getCurrent()));
                 RoleType.Types.add(msg.getPermission().getPropertyName());
                 break;
-            case Property:
+            case 属性:
                 permissionTask.setFuture(systemService.addSCAsync(msg.getPermission().getPropertyName(), new Address(msg.getPermission().getTarget()), userService.getCurrent()));
                 PropertyType.Types.add(msg.getPermission().getPropertyName());
                 break;
-            case Permission:
+            case 权限:
+                String rcAddr = systemService.getRC(userService.getCurrent());
+                String toAddr = systemService.getRC(msg.getPermission().getTarget(), userService.getCurrent());
+                String scAddr = userService.getOwned(rcAddr, msg.getPermission().getPropertyName());
                 if (msg.getPermission().getIsRead()) {
                     permissionTask.setFuture(dataService.addReaderAsync(scAddr, userService.getCurrent(), toAddr));
                 }
@@ -87,17 +83,20 @@ public class MessageController {
                     permissionTask.setFuture(dataService.setWriterAsync(scAddr, userService.getCurrent(), toAddr));
                 }
                 break;
+            case 注册:
+                permissionTask.setFuture(systemService.setRCAsync(msg.getPermission().getTarget(), msg.getPermission().getTarget(), userService.getCurrent()));
+                break;
             default:
                 return false;
         }
-        blockchainService.addPending(permissionTask);
+        BlockchainService.addPending(permissionTask);
 
         //Handle request
         if(msg.getRequest() != null) {
-            TaskSwapper requestTask = new TaskSwapper(msg.getPermission().getPropertyName(), msg.getType().name() + "Permission Request", msg.getPermission().getTarget());
+            TaskSwapper requestTask = new TaskSwapper(msg.getPermission().getPropertyName(), msg.getType().name() + "申请", msg.getPermission().getTarget());
             CompletableFuture<TransactionReceipt> future = msg.getRequest().sendAsync();
             requestTask.setFuture(future);
-            blockchainService.addPending(requestTask);
+            BlockchainService.addPending(requestTask);
             msg.setReceipt(future);
         }
 

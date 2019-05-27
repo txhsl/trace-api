@@ -7,17 +7,21 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.RemoteCall;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.*;
+import org.web3j.protocol.exceptions.TransactionException;
+import org.web3j.tx.Transfer;
 import org.web3j.utils.Convert;
 import pl.piomin.service.blockchain.model.BlockchainTransaction;
 import pl.piomin.service.blockchain.model.TaskSwapper;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,15 +37,19 @@ public class BlockchainService {
     private final Web3j web3j;
     private static final int RECEIENT = 7;
 
-    private ArrayList<TaskSwapper> pendingTx = new ArrayList<>();
-    private ArrayList<TaskSwapper> completedTx = new ArrayList<>();
-    private ArrayList<TaskSwapper> errorTx = new ArrayList<>();
+    private static ArrayList<TaskSwapper> pendingTx = new ArrayList<>();
+    private static ArrayList<TaskSwapper> completedTx = new ArrayList<>();
+    private static ArrayList<TaskSwapper> errorTx = new ArrayList<>();
 
     private Map<String, ArrayList<org.web3j.protocol.core.methods.response.Transaction>> cache = new HashMap<>();
     private Map<String, Disposable> listener = new HashMap<>();
 
     public BlockchainService(Web3j web3j) {
         this.web3j = web3j;
+    }
+
+    public RemoteCall<TransactionReceipt> transfer(String target, int amount, Credentials credentials) throws IOException, TransactionException, InterruptedException {
+        return Transfer.sendFunds(web3j, credentials, target, BigDecimal.valueOf(amount), Convert.Unit.ETHER);
     }
 
     public BlockchainTransaction process(BlockchainTransaction trx) throws IOException {
@@ -137,14 +145,14 @@ public class BlockchainService {
         return result;
     }
 
-    public void addPending(TaskSwapper future) {
+    public static void addPending(TaskSwapper future) {
         pendingTx.add(future);
     }
 
-    public ArrayList<TaskSwapper> getCompleted() {
+    public static ArrayList<TaskSwapper> getCompleted() {
         return completedTx;
     }
-    public int[] getCompleted(String[] addresses) {
+    public static int[] getCompleted(String[] addresses) {
         int[] result = new int[addresses.length];
         int i = 0;
         for (String address : addresses) {
@@ -152,7 +160,7 @@ public class BlockchainService {
         }
         return result;
     }
-    public int[] getCompleted(int height) {
+    public static int[] getCompleted(int height) {
         int[] result = new int[RECEIENT];
         int[] heights = new int[RECEIENT];
         for(int j = 0; j < RECEIENT; j++) {
@@ -166,11 +174,11 @@ public class BlockchainService {
         return result;
     }
 
-    public ArrayList<TaskSwapper> getPending() {
+    public static ArrayList<TaskSwapper> getPending() {
         return pendingTx;
     }
 
-    public ArrayList<TaskSwapper> getErrorTx() {
+    public static ArrayList<TaskSwapper> getErrorTx() {
         return errorTx;
     }
 

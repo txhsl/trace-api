@@ -19,16 +19,13 @@ public class UserController {
     private final UserService userService;
     private final DataService dataService;
     private final MessageService messageService;
-    private final BlockchainService blockchainService;
 
     public UserController(SystemService systemService, UserService userService,
-                          DataService dataService, MessageService messageService,
-                          BlockchainService blockchainService) {
+                          DataService dataService, MessageService messageService) {
         this.systemService = systemService;
         this.userService = userService;
         this.dataService = dataService;
         this.messageService = messageService;
-        this.blockchainService = blockchainService;
     }
 
     //Normal
@@ -37,20 +34,13 @@ public class UserController {
         return new Result(userService.signIn(user.getAddress(), user.getPassword()));
     }
 
-    @PostMapping("/signUp")
-    @Deprecated
-    public UserSwapper signUp(@RequestBody UserSwapper user) throws Exception {
-        user.setAddress(userService.signUp(user.getPassword()));
-        return user;
-    }
-
     //RC owner
     @PostMapping("/requestRole")
     public Result requestRole(@RequestBody PermissionSwapper permission) throws Exception {
         String rcAddr = userService.addRole();
 
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Message msg = new Message(permission, Message.Type.Role, null, UserService.accounts[0], df.format(new Date()));
+        Message msg = new Message(permission, Message.Type.角色, null, UserService.accounts[0], df.format(new Date()));
         messageService.add(msg);
         return new Result(true);
     }
@@ -61,7 +51,7 @@ public class UserController {
         String scAddr = permission.hasAddress() ? permission.getAddress() : dataService.addProperty(userService.getCurrent());
 
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Message msg = new Message(permission, Message.Type.Property, userService.setOwnedAsync(rcAddr, permission.getPropertyName(), new Address(scAddr)),
+        Message msg = new Message(permission, Message.Type.属性, userService.setOwnedAsync(rcAddr, permission.getPropertyName(), new Address(scAddr)),
                 UserService.accounts[0], df.format(new Date()));
         messageService.add(msg);
         return new Result(true);
@@ -74,7 +64,7 @@ public class UserController {
 
         permission.setIsRead(true);
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Message msg = new Message(permission, Message.Type.Permission, userService.setManagedAsync(targetRC, permission.getPropertyName(), new Address(scAddr)),
+        Message msg = new Message(permission, Message.Type.权限, userService.setManagedAsync(targetRC, permission.getPropertyName(), new Address(scAddr)),
                 dataService.getOwner(scAddr, userService.getCurrent()), df.format(new Date()));
         messageService.add(msg);
         return new Result(true);
@@ -87,7 +77,7 @@ public class UserController {
 
         permission.setIsRead(false);
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Message msg = new Message(permission, Message.Type.Permission, userService.setOwnedAsync(targetRC, permission.getPropertyName(),
+        Message msg = new Message(permission, Message.Type.权限, userService.setOwnedAsync(targetRC, permission.getPropertyName(),
                 new Address(scAddr)),dataService.getOwner(scAddr, userService.getCurrent()), df.format(new Date()));
         messageService.add(msg);
         return new Result(true);
@@ -101,7 +91,7 @@ public class UserController {
 
         TaskSwapper task = new TaskSwapper(permission.getPropertyName(), "Permission Permit", userService.getCurrent().getAddress());
         task.setFuture(dataService.addReaderAsync(scAddr, userService.getCurrent(), permission.getTarget()));
-        blockchainService.addPending(task);
+        BlockchainService.addPending(task);
         return new Result(true);
     }
     //SC owner
@@ -112,7 +102,7 @@ public class UserController {
 
         TaskSwapper task = new TaskSwapper(permission.getPropertyName(), "Permission Permit", userService.getCurrent().getAddress());
         task.setFuture(dataService.setWriterAsync(scAddr, userService.getCurrent(), permission.getTarget()));
-        blockchainService.addPending(task);
+        BlockchainService.addPending(task);
         return new Result(true);
     }
 
