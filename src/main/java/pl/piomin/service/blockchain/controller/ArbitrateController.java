@@ -2,19 +2,17 @@ package pl.piomin.service.blockchain.controller;
 
 import org.springframework.web.bind.annotation.*;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import pl.piomin.service.blockchain.model.Message;
-import pl.piomin.service.blockchain.model.Report;
-import pl.piomin.service.blockchain.model.Result;
-import pl.piomin.service.blockchain.service.ArbitrateService;
-import pl.piomin.service.blockchain.service.MessageService;
-import pl.piomin.service.blockchain.service.SystemService;
-import pl.piomin.service.blockchain.service.UserService;
+import org.web3j.utils.Convert;
+import pl.piomin.service.blockchain.model.*;
+import pl.piomin.service.blockchain.service.*;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.CompletableFuture;
 
+@RestController
+@RequestMapping("/arbitration")
 public class ArbitrateController {
 
     private final SystemService systemService;
@@ -32,6 +30,14 @@ public class ArbitrateController {
 
     @PostMapping("/report")
     public Result report(@RequestBody Report report) {
+        try{
+            String rcAddr = systemService.getRC(report.getTarget(), userService.getCurrent());
+            String admin = userService.getOwner(rcAddr);
+            report.setTo(admin);
+        }
+        catch (Exception e) {
+            return new Result(false);
+        }
         return new Result(arbitrateService.report(report));
     }
 
@@ -45,9 +51,18 @@ public class ArbitrateController {
     public Result agree(@PathVariable int index) throws Exception {
         Report report = arbitrateService.get(userService.getCurrent().getAddress(), index);
         CompletableFuture<TransactionReceipt> receipt = arbitrateService.arbitrate(systemService.getSysAddress(), index, true, userService.getCurrent());
+
+        TaskSwapper task = new TaskSwapper("仲裁结果", Message.Type.检举.name() ,userService.getCurrent().getAddress());
+        task.setFuture(receipt);
+        BlockchainService.addPending(task);
+
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        messageService.addReceipt(new Message(null, Message.Type.检举, null, report.getReporter(), df.format(new Date())));
-        messageService.addReceipt(new Message(null, Message.Type.检举, null, report.getTarget(), df.format(new Date())));
+        Message toReporter = new Message(new PermissionSwapper("系统检举", report.getTarget()), Message.Type.检举, null, report.getFrom(), df.format(new Date()));
+        Message toTarget = new Message(new PermissionSwapper("系统检举", report.getTarget()), Message.Type.检举, null, report.getTarget(), df.format(new Date()));
+        toReporter.setReceipt(receipt);
+        toTarget.setReceipt(receipt);
+        messageService.addReceipt(toReporter);
+        messageService.addReceipt(toTarget);
         return new Result(true);
     }
 
@@ -56,8 +71,13 @@ public class ArbitrateController {
         Report report = arbitrateService.get(userService.getCurrent().getAddress(), index);
         CompletableFuture<TransactionReceipt> receipt = arbitrateService.arbitrate(systemService.getSysAddress(), index, false, userService.getCurrent());
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        messageService.addReceipt(new Message(null, Message.Type.检举, null, report.getReporter(), df.format(new Date())));
+        messageService.addReceipt(new Message(null, Message.Type.检举, null, report.getFrom(), df.format(new Date())));
         messageService.addReceipt(new Message(null, Message.Type.检举, null, report.getTarget(), df.format(new Date())));
         return new Result(true);
+    }
+
+    @GetMapping("/level")
+    public int getLevel() throws Exception {
+        return arbitrateService.getLevel(systemService.getSysAddress(), userService.getCurrent().getAddress(), userService.getCurrent());
     }
 }

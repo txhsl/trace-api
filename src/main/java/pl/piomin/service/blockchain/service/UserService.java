@@ -4,9 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Utf8String;
@@ -14,6 +11,8 @@ import org.web3j.crypto.*;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.RemoteCall;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.tx.Transfer;
+import org.web3j.utils.Convert;
 import pl.piomin.service.blockchain.PropertyType;
 import pl.piomin.service.blockchain.RoleType;
 import pl.piomin.service.blockchain.contract.Role_sol_Role;
@@ -22,6 +21,7 @@ import pl.piomin.service.blockchain.model.TaskSwapper;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,8 +34,6 @@ import static org.web3j.tx.gas.DefaultGasProvider.GAS_PRICE;
  * @date: 2019/2/11
  * @description: none
  */
-@Component
-@EnableScheduling
 @Service
 public class UserService {
 
@@ -53,9 +51,9 @@ public class UserService {
         this.web3j = web3j;
     }
 
-    @Scheduled(fixedDelay = 3000)
-    private void checkCompleted() {
-        if (resetList.size() > 0) {
+    private void sendTx() throws InterruptedException {
+        while (resetList.size() > 0) {
+            Thread.sleep(3000);
             TaskSwapper taskSwapper = new TaskSwapper("默认角色合约", "权限初始化", "");
             taskSwapper.setFuture(resetList.get(0).sendAsync());
             LOGGER.info("A tx sent. Left " + resetList.size());
@@ -76,6 +74,7 @@ public class UserService {
             if (signIn(accounts[i + 1], "Innov@teD@ily1")) {
                 Role_sol_Role role = Role_sol_Role.deploy(web3j, current, GAS_PRICE, GAS_LIMIT).send();
                 LOGGER.info("Role Contract " + i + " deployed: " + role.getContractAddress() + ". Role Name: " + RoleType.Types.get(i));
+                Transfer.sendFunds(web3j, current, sysAddr, BigDecimal.valueOf(500), Convert.Unit.WEI).send();
                 roleAddrs[i] = role.getContractAddress();
 
                 if (signIn(accounts[0],"Innov@teD@ily1" )) {
@@ -609,6 +608,7 @@ public class UserService {
             resetManagedAsync(roleAddrs[RoleType.getID("监管部门")], "零售价", new Address(dataAddrs[PropertyType.getID("零售价")]));
             
         }
+        sendTx();
         return true;
     }
 
@@ -625,6 +625,23 @@ public class UserService {
         Role_sol_Role rc = Role_sol_Role.deploy(web3j, current, GAS_PRICE, GAS_LIMIT).send();
         LOGGER.info("Role Contract deployed: " + rc.getContractAddress());
         return rc.getContractAddress();
+    }
+
+    public String getOwner(String rcAddr) throws Exception {
+        int count = 0;
+
+        while(count < REQUEST_LIMIT) {
+            try {
+                Role_sol_Role rc = Role_sol_Role.load(rcAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
+                String owner = rc.getOwner().send().getValue();
+                LOGGER.info("Read succeed: " + owner);
+                return owner;
+            } catch (NullPointerException e) {
+                LOGGER.error(e.toString());
+                count++;
+            }
+        }
+        throw new NullPointerException();
     }
 
     public TransactionReceipt setOwned(String rcAddr, String name, Address scAddr) throws Exception {
@@ -645,7 +662,7 @@ public class UserService {
         throw new NullPointerException();
     }
 
-    public void resetOwnedAsync(String rcAddr, String name, Address scAddr){
+    private void resetOwnedAsync(String rcAddr, String name, Address scAddr){
         int count = 0;
 
         while(count < REQUEST_LIMIT) {
@@ -653,6 +670,7 @@ public class UserService {
                 Role_sol_Role rc = Role_sol_Role.load(rcAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
                 RemoteCall<TransactionReceipt> tx = rc.setOwned(new Utf8String(name), scAddr);
                 resetList.add(tx);
+                return;
             } catch (NullPointerException e) {
                 LOGGER.error(e.toString());
                 count++;
@@ -661,7 +679,7 @@ public class UserService {
         throw new NullPointerException();
     }
 
-    public void resetManagedAsync(String rcAddr, String name, Address scAddr){
+    private void resetManagedAsync(String rcAddr, String name, Address scAddr){
         int count = 0;
 
         while(count < REQUEST_LIMIT) {
@@ -669,6 +687,7 @@ public class UserService {
                 Role_sol_Role rc = Role_sol_Role.load(rcAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
                 RemoteCall<TransactionReceipt> tx = rc.setManaged(new Utf8String(name), scAddr);
                 resetList.add(tx);
+                return;
             } catch (NullPointerException e) {
                 LOGGER.error(e.toString());
                 count++;

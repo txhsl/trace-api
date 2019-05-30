@@ -49,7 +49,7 @@ public class BlockchainService {
     }
 
     public RemoteCall<TransactionReceipt> transfer(String target, int amount, Credentials credentials) throws IOException, TransactionException, InterruptedException {
-        return Transfer.sendFunds(web3j, credentials, target, BigDecimal.valueOf(amount), Convert.Unit.ETHER);
+        return Transfer.sendFunds(web3j, credentials, target, BigDecimal.valueOf(amount), Convert.Unit.WEI);
     }
 
     public BlockchainTransaction process(BlockchainTransaction trx) throws IOException {
@@ -84,7 +84,9 @@ public class BlockchainService {
 
     public double getBalance(String address) throws IOException {
         BigInteger wei =  web3j.ethGetBalance(address, DefaultBlockParameter.valueOf("latest")).send().getBalance();
-        return Convert.fromWei(wei.toString(), Convert.Unit.ETHER).doubleValue();
+        double balance = Convert.fromWei(wei.toString(), Convert.Unit.ETHER).doubleValue();
+        LOGGER.info("Balance read: " + balance);
+        return balance;
     }
 
     public boolean subscribeContract(String address) throws InterruptedException {

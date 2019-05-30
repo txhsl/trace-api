@@ -51,10 +51,10 @@ public class ArbitrateService {
         Report report = reportbox.get(credentials.getAddress()).get(index);
         reportbox.get(credentials.getAddress()).remove(index);
         if (agree) {
-            return transferFrom(sysAddr, report.getReporter(), report.getTarget(), report.getAmount(), credentials);
+            return transferFrom(sysAddr, report.getFrom(), report.getTarget(), report.getAmount(), credentials);
         }
         else {
-            return transferFrom(sysAddr, report.getTarget(), report.getReporter(), report.getAmount(), credentials);
+            return transferFrom(sysAddr, report.getTarget(), report.getFrom(), report.getAmount(), credentials);
         }
     }
 
@@ -67,7 +67,34 @@ public class ArbitrateService {
     }
 
     public CompletableFuture<TransactionReceipt> transferFrom(String sysAddr, String from, String to, int amount, Credentials credentials) throws Exception {
-        System_sol_System system = System_sol_System.load(sysAddr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
-        return system.transferFrom(new Address(from), new Address(to), new Uint256(BigInteger.valueOf(amount))).sendAsync();
+        int count = 0;
+
+        while(count < REQUEST_LIMIT) {
+            try {
+                System_sol_System system = System_sol_System.load(sysAddr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+                return system.transferFrom(new Address(from), new Address(to), new Uint256(BigInteger.valueOf(amount))).sendAsync();
+            } catch (NullPointerException e) {
+                LOGGER.error(e.toString());
+                count++;
+            }
+        }
+        throw new NullPointerException();
+    }
+
+    public int getLevel(String sysAddr, String addr, Credentials credentials) throws Exception {
+        int count = 0;
+
+        while(count < REQUEST_LIMIT) {
+            try {
+                System_sol_System system = System_sol_System.load(sysAddr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+                int level = system.getLevel(new Address(addr)).send().getValue().intValue();
+                LOGGER.info("Level read: " + level);
+                return level;
+            } catch (NullPointerException e) {
+                LOGGER.error(e.toString());
+                count++;
+            }
+        }
+        throw new NullPointerException();
     }
 }

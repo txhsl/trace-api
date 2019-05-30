@@ -84,7 +84,7 @@ public class MessageController {
                 }
                 break;
             case 注册:
-                permissionTask.setFuture(systemService.setRCAsync(msg.getPermission().getTarget(), msg.getPermission().getTarget(), userService.getCurrent()));
+                permissionTask.setFuture(systemService.setRCAsync(msg.getPermission().getTarget(), msg.getPermission().getPropertyName(), userService.getCurrent()));
                 break;
             default:
                 return false;

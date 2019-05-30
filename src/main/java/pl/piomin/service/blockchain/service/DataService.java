@@ -4,9 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Utf8String;
@@ -35,8 +32,6 @@ import static org.web3j.tx.gas.DefaultGasProvider.GAS_PRICE;
  * @date: 2019/2/11
  * @description: none
  */
-@Component
-@EnableScheduling
 @Service
 public class DataService {
 
@@ -50,9 +45,9 @@ public class DataService {
         this.web3j = web3j;
     }
 
-    @Scheduled(fixedDelay = 5000)
-    private void checkCompleted() {
-        if (resetList.size() > 0) {
+    private void sendTx() throws InterruptedException {
+        while (resetList.size() > 0) {
+            Thread.sleep(3000);
             TaskSwapper taskSwapper = new TaskSwapper("默认属性合约", "权限初始化", "");
             taskSwapper.setFuture(resetList.get(0).sendAsync());
             LOGGER.info("A tx sent. Left " + resetList.size());
@@ -505,6 +500,7 @@ public class DataService {
         resetReaderAsync(dataAddrs[PropertyType.getID("零售公司")], current, roleAddrs[RoleType.getID("监管部门")]);
         resetReaderAsync(dataAddrs[PropertyType.getID("零售许可证")], current, roleAddrs[RoleType.getID("监管部门")]);
         resetReaderAsync(dataAddrs[PropertyType.getID("零售价")], current, roleAddrs[RoleType.getID("监管部门")]);
+        sendTx();
         return true;
     }
 
@@ -531,13 +527,14 @@ public class DataService {
         throw new NullPointerException();
     }
 
-    public void resetReaderAsync(String addr, Credentials credentials, String roleAddr){
+    private void resetReaderAsync(String addr, Credentials credentials, String roleAddr){
         int count = 0;
 
         while(count < REQUEST_LIMIT) {
             try {
                 Data_sol_Data sc = Data_sol_Data.load(addr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
                 resetList.add(sc.addReader(new Address(roleAddr)));
+                return;
             } catch (NullPointerException e) {
                 LOGGER.error(e.toString());
                 count++;
@@ -546,13 +543,14 @@ public class DataService {
         throw new NullPointerException();
     }
 
-    public void resetWriterAsync(String addr, Credentials credentials, String roleAddr){
+    private void resetWriterAsync(String addr, Credentials credentials, String roleAddr){
         int count = 0;
 
         while(count < REQUEST_LIMIT) {
             try {
                 Data_sol_Data sc = Data_sol_Data.load(addr, web3j, credentials, GAS_PRICE, GAS_LIMIT);
                 resetList.add(sc.setWriter(new Address(roleAddr)));
+                return;
             } catch (NullPointerException e) {
                 LOGGER.error(e.toString());
                 count++;

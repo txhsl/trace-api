@@ -19,7 +19,6 @@ import pl.piomin.service.blockchain.RoleType;
 import pl.piomin.service.blockchain.contract.Role_sol_Role;
 import pl.piomin.service.blockchain.contract.System_sol_System;
 
-import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
