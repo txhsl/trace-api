@@ -76,8 +76,8 @@ public class ArbitrateController {
         return new Result(true);
     }
 
-    @GetMapping("/level")
-    public int getLevel() throws Exception {
-        return arbitrateService.getLevel(systemService.getSysAddress(), userService.getCurrent().getAddress(), userService.getCurrent());
+    @GetMapping("/level/{address}")
+    public int getLevel(@PathVariable String address) throws Exception {
+        return arbitrateService.getLevel(systemService.getSysAddress(), address, userService.getCurrent());
     }
 }

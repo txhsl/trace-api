@@ -22,7 +22,6 @@ import pl.piomin.service.blockchain.model.TaskSwapper;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,20 +44,20 @@ public class UserService {
     private final Web3j web3j;
     private final int REQUEST_LIMIT = 10;
     private Credentials current = null;
-    private ArrayList<RemoteCall<TransactionReceipt>> resetList = new ArrayList<>();
+    private Map<String, RemoteCall<TransactionReceipt>> resetList = new HashMap<>();
 
     public UserService(Web3j web3j) {
         this.web3j = web3j;
     }
 
     private void sendTx() throws InterruptedException {
-        while (resetList.size() > 0) {
-            Thread.sleep(3000);
-            TaskSwapper taskSwapper = new TaskSwapper("默认角色合约", "权限初始化", "");
-            taskSwapper.setFuture(resetList.get(0).sendAsync());
+        for (String name : resetList.keySet()) {
+            Thread.sleep(2000);
+            TaskSwapper taskSwapper = new TaskSwapper(name, "权限初始化", "0x6a2fb5e3bf37f0c3d90db4713f7ad4a3b2c24111");
+            taskSwapper.setFuture(resetList.get(name).sendAsync());
             LOGGER.info("A tx sent. Left " + resetList.size());
-            resetList.remove(0);
         }
+        resetList.clear();
     }
 
     public Credentials getCurrent() {
@@ -669,7 +668,7 @@ public class UserService {
             try {
                 Role_sol_Role rc = Role_sol_Role.load(rcAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
                 RemoteCall<TransactionReceipt> tx = rc.setOwned(new Utf8String(name), scAddr);
-                resetList.add(tx);
+                resetList.putIfAbsent(name, tx);
                 return;
             } catch (NullPointerException e) {
                 LOGGER.error(e.toString());
@@ -686,7 +685,7 @@ public class UserService {
             try {
                 Role_sol_Role rc = Role_sol_Role.load(rcAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
                 RemoteCall<TransactionReceipt> tx = rc.setManaged(new Utf8String(name), scAddr);
-                resetList.add(tx);
+                resetList.putIfAbsent(name, tx);
                 return;
             } catch (NullPointerException e) {
                 LOGGER.error(e.toString());

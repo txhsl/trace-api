@@ -51,10 +51,10 @@ public class ArbitrateService {
         Report report = reportbox.get(credentials.getAddress()).get(index);
         reportbox.get(credentials.getAddress()).remove(index);
         if (agree) {
-            return transferFrom(sysAddr, report.getFrom(), report.getTarget(), report.getAmount(), credentials);
+            return transferFrom(sysAddr, report.getTarget(), report.getFrom(), report.getAmount(), credentials);
         }
         else {
-            return transferFrom(sysAddr, report.getTarget(), report.getFrom(), report.getAmount(), credentials);
+            return transferFrom(sysAddr, report.getFrom(), report.getTarget(), report.getAmount(), credentials);
         }
     }
 

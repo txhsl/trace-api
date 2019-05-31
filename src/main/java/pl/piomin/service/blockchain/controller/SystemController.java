@@ -73,6 +73,10 @@ public class SystemController {
         return systemService.addRC(role.getName(), new Address(role.getAddress()), userService.getCurrent());
     }
 
+    @GetMapping("/getRole/{address}")
+    public String getRole(@PathVariable String address) throws Exception {
+        return systemService.getRC(address, userService.getCurrent());
+    }
     //For query
     @GetMapping("/getRoles")
     public Map<String, String> getRoles() throws Exception {
