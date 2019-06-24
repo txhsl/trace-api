@@ -8,10 +8,10 @@ import org.springframework.core.io.Resource;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.stereotype.Service;
 import org.web3j.abi.datatypes.Address;
-import org.web3j.abi.datatypes.Uint;
 import org.web3j.abi.datatypes.Utf8String;
-import org.web3j.abi.datatypes.generated.Uint256;
+import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
+import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import pl.piomin.service.blockchain.PropertyType;
@@ -19,6 +19,8 @@ import pl.piomin.service.blockchain.RoleType;
 import pl.piomin.service.blockchain.contract.Role_sol_Role;
 import pl.piomin.service.blockchain.contract.System_sol_System;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -63,11 +65,55 @@ public class SystemService {
         return null;
     }
 
-    public void reset(Credentials credentials) throws Exception {
+    public boolean reset(Credentials credentials) throws Exception {
+        //System
         System_sol_System system = System_sol_System.deploy(web3j, credentials, GAS_PRICE, GAS_LIMIT).send();
         LOGGER.info("System Contract deployed: " + system.getContractAddress());
-
         this.sysAddress = system.getContractAddress();
+
+        //Roles
+        Credentials current = signIn(UserService.accounts[0], "Innov@teD@ily1");
+        for (int i = 0; i < 10; i++) {
+            TransactionReceipt transactionReceipt = system.addRC(new Utf8String(RoleType.Types.get(i)), new Address(UserService.accounts[i + 1])).send();
+            LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
+
+            //register admin
+            transactionReceipt = system.register(new Address(UserService.accounts[i + 1]), new Utf8String(RoleType.Types.get(i))).send();
+            LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
+        }
+
+        //Properties
+        String admin = UserService.accounts[0];
+        for (int j = 0; j < PropertyType.Types.size(); j++) {
+            if (j == 0) {
+                admin = UserService.accounts[1];
+            }
+            if (j == 8) {
+                admin = UserService.accounts[2];
+            }
+            if (j == 14) {
+                admin = UserService.accounts[3];
+            }
+            if (j == 20) {
+                admin = UserService.accounts[4];
+            }
+            if (j == 26) {
+                admin = UserService.accounts[5];
+            }
+            if (j == 35) {
+                admin = UserService.accounts[6];
+            }
+            if (j == 43) {
+                admin = UserService.accounts[7];
+            }
+            if (j == 52) {
+                admin = UserService.accounts[8];
+            }
+
+            TransactionReceipt transactionReceipt = system.addSC(new Utf8String(PropertyType.Types.get(j)), new Address(admin)).send();
+            LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
+        }
+        return true;
     }
 
     public TransactionReceipt addRC(String name, Address rcAddr, Credentials credentials) throws Exception {
@@ -77,7 +123,7 @@ public class SystemService {
             try {
                 System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
                 Role_sol_Role rc = Role_sol_Role.load(rcAddr.toString(), web3j, credentials, GAS_PRICE, GAS_LIMIT);
-                TransactionReceipt transactionReceipt = system.setRcIndex(new Utf8String(name), rcAddr, new Address(rc.getOwner().send().getValue())).send();
+                TransactionReceipt transactionReceipt = system.addRC(new Utf8String(name), new Address(rc.getAdmin().send().getValue())).send();
 
                 LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
                 return transactionReceipt;
@@ -89,14 +135,13 @@ public class SystemService {
         throw new NullPointerException();
     }
 
-    public CompletableFuture<TransactionReceipt> addRCAsync(String name, Address rcAddr, Credentials credentials) throws Exception {
+    public CompletableFuture<TransactionReceipt> addRCAsync(String name, Address admin , Credentials credentials) throws Exception {
         int count = 0;
 
         while(count < REQUEST_LIMIT) {
             try {
                 System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
-                Role_sol_Role rc = Role_sol_Role.load(rcAddr.toString(), web3j, credentials, GAS_PRICE, GAS_LIMIT);
-                return system.setRcIndex(new Utf8String(name), rcAddr, new Address(rc.getOwner().send().getValue())).sendAsync();
+                return system.addRC(new Utf8String(name), admin).sendAsync();
             } catch (NullPointerException e) {
                 LOGGER.error(e.toString());
                 count++;
@@ -105,13 +150,13 @@ public class SystemService {
         throw new NullPointerException();
     }
 
-    public TransactionReceipt addSC(String name, Address scAddr, Credentials credentials) throws Exception {
+    public TransactionReceipt register(Address user, String roleName, Credentials credentials) throws Exception {
         int count = 0;
 
         while(count < REQUEST_LIMIT) {
             try {
                 System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
-                TransactionReceipt transactionReceipt = system.setScIndex(new Utf8String(name), scAddr).send();
+                TransactionReceipt transactionReceipt = system.register(user, new Utf8String(roleName)).send();
 
                 LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
                 return transactionReceipt;
@@ -123,13 +168,13 @@ public class SystemService {
         throw new NullPointerException();
     }
 
-    public CompletableFuture<TransactionReceipt> addSCAsync(String name, Address scAddr, Credentials credentials) throws Exception {
+    public CompletableFuture<TransactionReceipt> registerAsync(Address user, String roleName, Credentials credentials) throws Exception {
         int count = 0;
 
         while(count < REQUEST_LIMIT) {
             try {
                 System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
-                return system.setScIndex(new Utf8String(name), scAddr).sendAsync();
+                return system.register(user, new Utf8String(roleName)).sendAsync();
             } catch (NullPointerException e) {
                 LOGGER.error(e.toString());
                 count++;
@@ -138,13 +183,13 @@ public class SystemService {
         throw new NullPointerException();
     }
 
-    public TransactionReceipt setRC(String userAddr, String roleName, Credentials credentials) throws Exception {
+    public TransactionReceipt addSC(String name, Address admin, Credentials credentials) throws Exception {
         int count = 0;
 
         while(count < REQUEST_LIMIT) {
             try {
                 System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
-                TransactionReceipt transactionReceipt = system.register(new Address(userAddr), new Utf8String(roleName)).send();
+                TransactionReceipt transactionReceipt = system.addSC(new Utf8String(name), admin).send();
 
                 LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
                 return transactionReceipt;
@@ -156,13 +201,31 @@ public class SystemService {
         throw new NullPointerException();
     }
 
-    public CompletableFuture<TransactionReceipt> setRCAsync(String userAddr, String roleName, Credentials credentials) throws Exception {
+    public CompletableFuture<TransactionReceipt> addSCAsync(String name, Address admin, Credentials credentials) throws Exception {
         int count = 0;
 
         while(count < REQUEST_LIMIT) {
             try {
                 System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
-                return system.register(new Address(userAddr), new Utf8String(roleName)).sendAsync();
+                return system.addSC(new Utf8String(name), admin).sendAsync();
+            } catch (NullPointerException e) {
+                LOGGER.error(e.toString());
+                count++;
+            }
+        }
+        throw new NullPointerException();
+    }
+
+    public String getRole(String user, Credentials credentials) throws Exception {
+        int count = 0;
+
+        while(count < REQUEST_LIMIT) {
+            try {
+                System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+                String roleName = system.getRole(new Address(user)).send().getValue();
+
+                LOGGER.info("Read succeed: " + roleName);
+                return roleName;
             } catch (NullPointerException e) {
                 LOGGER.error(e.toString());
                 count++;
@@ -175,13 +238,13 @@ public class SystemService {
         return getRC(credentials.getAddress(), credentials);
     }
 
-    public String getRC(String userAddr, Credentials credentials) throws Exception {
+    public String getRC(String roleName, Credentials credentials) throws Exception {
         int count = 0;
 
         while(count < REQUEST_LIMIT) {
             try {
                 System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
-                String rcAddr = system.getRC(new Address(userAddr)).send().getValue();
+                String rcAddr = system.getRC(new Utf8String(roleName)).send().getValue();
 
                 LOGGER.info("Read succeed: " + rcAddr);
                 return rcAddr;
@@ -199,28 +262,10 @@ public class SystemService {
         while(count < REQUEST_LIMIT) {
             try {
                 System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
-                String scAddr = system.getScIndex(new Utf8String(propertyName)).send().getValue();
+                String scAddr = system.getSC(new Utf8String(propertyName)).send().getValue();
 
                 LOGGER.info("Read succeed: " + scAddr);
                 return scAddr;
-            } catch (NullPointerException e) {
-                LOGGER.error(e.toString());
-                count++;
-            }
-        }
-        throw new NullPointerException();
-    }
-
-    public String getIndex(String roleName, Credentials credentials) throws Exception {
-        int count = 0;
-
-        while(count < REQUEST_LIMIT) {
-            try {
-                System_sol_System system = System_sol_System.load(this.sysAddress, web3j, credentials, GAS_PRICE, GAS_LIMIT);
-                String rcAddr = system.getRcIndex(new Utf8String(roleName)).send().getValue();
-
-                LOGGER.info("Read succeed: " + rcAddr);
-                return rcAddr;
             } catch (NullPointerException e) {
                 LOGGER.error(e.toString());
                 count++;
@@ -239,7 +284,7 @@ public class SystemService {
 
             while(!flag && count < REQUEST_LIMIT) {
                 try {
-                    String rcAddr = system.getRcIndex(new Utf8String(role)).send().getValue();
+                    String rcAddr = system.getRC(new Utf8String(role)).send().getValue();
                     if (!rcAddr.equals("")) {
                         result.putIfAbsent(role, rcAddr);
                     }
@@ -264,7 +309,7 @@ public class SystemService {
 
             while(!flag && count < REQUEST_LIMIT) {
                 try {
-                    String scAddr = system.getScIndex(new Utf8String(property)).send().getValue();
+                    String scAddr = system.getSC(new Utf8String(property)).send().getValue();
                     if (!scAddr.equals("")) {
                         result.putIfAbsent(property, scAddr);
                     }
@@ -281,5 +326,13 @@ public class SystemService {
 
     public String getSysAddress() {
         return sysAddress;
+    }
+
+    private Credentials signIn(String address, String password) throws IOException, CipherException {
+        Resource resource = new ClassPathResource(address);
+        File file = resource.getFile();
+        return  WalletUtils.loadCredentials(
+                password,
+                file.getAbsolutePath());
     }
 }

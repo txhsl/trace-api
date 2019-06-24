@@ -34,16 +34,13 @@ public class SystemController {
     //System owner
     @PostMapping("/reset")
     public Result reset() throws Exception {
-        systemService.reset(userService.getCurrent());
-        String[] roleaAddrs = userService.resetContract(systemService.getSysAddress());
-        String[] dataAddrs = dataService.resetContract(roleaAddrs, systemService.getSysAddress());
-        boolean rr = userService.resetPermission(roleaAddrs, dataAddrs);
-        boolean rs = dataService.resetPermission(roleaAddrs, dataAddrs);
-        return new Result(rr && rs);
+        boolean rs = systemService.reset(userService.getCurrent());
+        boolean ru = userService.reset(systemService.getSysAddress());
+        return new Result(rs && ru);
     }
     @PostMapping("/register")
     public TransactionReceipt register(@RequestBody UserSwapper user) throws Exception {
-        return systemService.setRC(user.getAddress(), user.getRole(), userService.getCurrent());
+        return systemService.register(new Address(user.getAddress()), user.getRole(), userService.getCurrent());
     }
     @PostMapping("/signUp")
     public Result signUp(@RequestBody UserSwapper user) throws Exception {
@@ -51,8 +48,7 @@ public class SystemController {
 
         PermissionSwapper permission = new PermissionSwapper(user.getRole(), user.getAddress());
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Message msg = new Message(permission, Message.Type.注册, blockchainService.transfer(systemService.getSysAddress(), 500, userService.getCurrent()),
-                UserService.accounts[0], df.format(new Date()));
+        Message msg = new Message(permission, Message.Type.注册, UserService.accounts[0], df.format(new Date()));
         messageService.add(msg);
 
         return new Result(true);
@@ -61,7 +57,7 @@ public class SystemController {
     @PostMapping("/requestRole")
     public Result requestRole(@RequestBody RoleSwapper role) throws Exception {
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Message msg = new Message(new PermissionSwapper(role.getName(), role.hasAddress() ? role.getAddress() : userService.addRole()), Message.Type.角色, null,
+        Message msg = new Message(new PermissionSwapper(role.getName(), role.hasAddress() ? role.getAddress() : ""), Message.Type.角色,
                 UserService.accounts[0], df.format(new Date()));
         messageService.add(msg);
         return new Result(true);

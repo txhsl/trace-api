@@ -13,7 +13,6 @@ import pl.piomin.service.blockchain.service.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/message")
@@ -62,7 +61,7 @@ public class MessageController {
         Message msg = messageService.get(userService.getCurrent().getAddress(), index);
 
         //Handle permit
-        TaskSwapper permissionTask = new TaskSwapper(msg.getPermission().getPropertyName(), msg.getType().name() + "通过", userService.getCurrent().getAddress());
+        TaskSwapper permissionTask = new TaskSwapper(msg.getPermission().getPropertyName(), msg.getType().name(), userService.getCurrent().getAddress());
         switch (msg.getType()) {
             case 角色:
                 permissionTask.setFuture(systemService.addRCAsync(msg.getPermission().getPropertyName(), new Address(msg.getPermission().getTarget()), userService.getCurrent()));
@@ -73,32 +72,22 @@ public class MessageController {
                 PropertyType.Types.add(msg.getPermission().getPropertyName());
                 break;
             case 权限:
-                String rcAddr = systemService.getRC(userService.getCurrent());
-                String toAddr = systemService.getRC(msg.getPermission().getTarget(), userService.getCurrent());
-                String scAddr = userService.getOwned(rcAddr, msg.getPermission().getPropertyName());
+                String toRole = systemService.getRole(msg.getPermission().getTarget(), userService.getCurrent());
                 if (msg.getPermission().getIsRead()) {
-                    permissionTask.setFuture(dataService.addReaderAsync(scAddr, userService.getCurrent(), toAddr));
+                    permissionTask.setFuture(userService.assignReaderAsync(systemService.getSysAddress(), toRole, msg.getPermission().getPropertyName()));
                 }
                 else {
-                    permissionTask.setFuture(dataService.setWriterAsync(scAddr, userService.getCurrent(), toAddr));
+                    permissionTask.setFuture(userService.assignWriterAsync(systemService.getSysAddress(), toRole, msg.getPermission().getPropertyName()));
                 }
                 break;
             case 注册:
-                permissionTask.setFuture(systemService.setRCAsync(msg.getPermission().getTarget(), msg.getPermission().getPropertyName(), userService.getCurrent()));
+                permissionTask.setFuture(systemService.registerAsync(new Address(msg.getPermission().getTarget()), msg.getPermission().getPropertyName(), userService.getCurrent()));
                 break;
             default:
                 return false;
         }
         BlockchainService.addPending(permissionTask);
-
-        //Handle request
-        if(msg.getRequest() != null) {
-            TaskSwapper requestTask = new TaskSwapper(msg.getPermission().getPropertyName(), msg.getType().name() + "申请", msg.getPermission().getTarget());
-            CompletableFuture<TransactionReceipt> future = msg.getRequest().sendAsync();
-            requestTask.setFuture(future);
-            BlockchainService.addPending(requestTask);
-            msg.setReceipt(future);
-        }
+        msg.setReceipt(permissionTask.getFuture());
 
         if(messageService.markAccepted(userService.getCurrent().getAddress(), index)) {
             //Send receipt

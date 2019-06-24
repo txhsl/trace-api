@@ -4,7 +4,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
-import org.web3j.abi.datatypes.Address;
 import pl.piomin.service.blockchain.model.DataMultipleSwapper;
 import pl.piomin.service.blockchain.model.DataSwapper;
 import pl.piomin.service.blockchain.model.FileSwapper;
@@ -41,10 +40,11 @@ public class DataController {
         }
         TaskSwapper[] newTasks = fileService.process(pending.toArray(new String[0]));
         for (TaskSwapper task : newTasks) {
-            String scAddr = systemService.getSC(task.getTaskName().substring(0, task.getTaskName().lastIndexOf('_')), userService.getCurrent());
+            String propertyName = task.getTaskName().substring(0, task.getTaskName().lastIndexOf('_'));
+            String scAddr = systemService.getSC(propertyName, userService.getCurrent());
             String fileNo = dataService.getFileNum(scAddr, task.getTaskName().substring(task.getTaskName().lastIndexOf('_') + 1), userService.getCurrent());
             task.setTaskSender(userService.getCurrent().getAddress());
-            task.setFuture(dataService.writeAsync(scAddr, userService.getCurrent(), fileNo, task.getTaskContent()));
+            task.setFuture(dataService.writeAsync(systemService.getSysAddress(), propertyName, userService.getCurrent(), fileNo, task.getTaskContent()));
             BlockchainService.addPending(task);
         }
     }
@@ -53,16 +53,15 @@ public class DataController {
     @PostMapping("/write")
     public String writeData(@RequestBody DataSwapper data) throws Exception {
         //Check permission
-        String rcAddr = systemService.getRC(userService.getCurrent());
-        String scAddr = userService.getOwned(rcAddr, data.getPropertyName());
-        if (!dataService.checkWriter(scAddr, new Address(rcAddr), userService.getCurrent())) {
+        String scAddr = systemService.getSC(data.getPropertyName(), userService.getCurrent());
+        if (!userService.checkWriter(systemService.getSysAddress(), data.getPropertyName())) {
             return null;
         }
         String fileNo = dataService.getFileNum(scAddr, data.getId(), userService.getCurrent());
 
         //Try cache
         String cachedName = fileService.getFileName(data.getPropertyName());
-        String hash = cachedName == null ? "" : dataService.read(scAddr, userService.getCurrent(), cachedName);
+        String hash = cachedName == null ? "" : dataService.read(systemService.getSysAddress(), data.getPropertyName(),userService.getCurrent(), cachedName);
         fileService.record(data.getPropertyName(), fileNo, data.getId(), data.getData(), hash);
 
         return fileNo;
@@ -71,13 +70,12 @@ public class DataController {
     @PostMapping("/writeMultiple")
     public String[] writeMultipleData(@RequestBody DataMultipleSwapper data) throws Exception {
         List<String> result = new ArrayList<>();
-        String rcAddr = systemService.getRC(userService.getCurrent());
 
         for (String property: data.getData().keySet()) {
             Map<String, DataSwapper> single = data.getData().get(property);
-            String scAddr = userService.getOwned(rcAddr, property);
+            String scAddr = systemService.getSC(property, userService.getCurrent());
 
-            if (dataService.checkWriter(scAddr, new Address(rcAddr), userService.getCurrent())) {
+            if (userService.checkWriter(systemService.getSysAddress(), property)) {
                 for (String id : single.keySet()) {
                     String fileNo = dataService.getFileNum(scAddr, id, userService.getCurrent());
 
@@ -94,9 +92,8 @@ public class DataController {
     @PostMapping("/read")
     public DataSwapper readData(@RequestBody DataSwapper data) throws Exception {
         //Check permission
-        String rcAddr = systemService.getRC(userService.getCurrent());
-        String scAddr = userService.getManaged(rcAddr, data.getPropertyName());
-        if (!dataService.checkReader(scAddr, new Address(rcAddr), userService.getCurrent())) {
+        String scAddr = systemService.getSC(data.getPropertyName(), userService.getCurrent());
+        if (!userService.checkReader(systemService.getSysAddress(), data.getPropertyName())) {
             return data;
         }
 
@@ -117,7 +114,7 @@ public class DataController {
 
             //Try Eth
             if (hash == null) {
-                hash = dataService.read(scAddr, userService.getCurrent(), data.getId());
+                hash = dataService.read(systemService.getSysAddress(), data.getPropertyName(), userService.getCurrent(), data.getId());
                 if (hash.equals("")) {
                     data.setData("/");
                     data.setStatus("File not found");
@@ -150,15 +147,14 @@ public class DataController {
     @PostMapping("/readMultiple")
     public DataMultipleSwapper readMultipleData(@RequestBody DataMultipleSwapper data) throws Exception {
         Map<String, Map<String, DataSwapper>> resultMulti = new HashMap<>();
-        String rcAddr = systemService.getRC(userService.getCurrent());
 
         for (String property : data.getPropertyNames()) {
-            String scAddr = userService.getManaged(rcAddr, property);
+            String scAddr = systemService.getSC(property, userService.getCurrent());
             if (scAddr.equals("0x0000000000000000000000000000000000000000")) {
                 continue;
             }
             Map<String, DataSwapper> result =  new HashMap<>();
-            if (dataService.checkReader(scAddr, new Address(rcAddr), userService.getCurrent())) {
+            if (userService.checkReader(systemService.getSysAddress(), property)) {
                 for (String id : data.getIds()) {
                     //Try the cache
                     String temp = fileService.query(property, id);
@@ -178,7 +174,7 @@ public class DataController {
 
                         //Try Eth
                         if (hash == null) {
-                            hash = dataService.read(scAddr, userService.getCurrent(), id);
+                            hash = dataService.read(systemService.getSysAddress(), property, userService.getCurrent(), id);
                             if (hash.equals("")) {
                                 DataSwapper swapper = new DataSwapper(id, property, "/");
                                 swapper.setStatus("File not found");

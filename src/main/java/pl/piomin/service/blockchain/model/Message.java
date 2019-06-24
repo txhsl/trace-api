@@ -22,16 +22,13 @@ public class Message {
     private String time;
     private Type type;
     @JsonIgnore
-    private RemoteCall<TransactionReceipt> request;
-    @JsonIgnore
     private CompletableFuture<TransactionReceipt> receipt;
     private boolean isAccepted;
     private boolean isRead;
 
     public Message(PermissionSwapper permissionSwapper, Type type,
-                   RemoteCall<TransactionReceipt> request, String to, String time) {
+                   String to, String time) {
         this.permission = permissionSwapper;
-        this.request = request;
         this.to = to;
         this.time = time;
         this.type = type;
@@ -83,14 +80,6 @@ public class Message {
 
     public void setTime(String time) {
         this.time = time;
-    }
-
-    public RemoteCall<TransactionReceipt> getRequest() {
-        return request;
-    }
-
-    public void setRequest(RemoteCall<TransactionReceipt> request) {
-        this.request = request;
     }
 
     public void setReceipt(CompletableFuture<TransactionReceipt> receipt) {

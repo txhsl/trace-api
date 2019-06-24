@@ -2,7 +2,6 @@ package pl.piomin.service.blockchain.controller;
 
 import org.springframework.web.bind.annotation.*;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.web3j.utils.Convert;
 import pl.piomin.service.blockchain.model.*;
 import pl.piomin.service.blockchain.service.*;
 
@@ -32,7 +31,7 @@ public class ArbitrateController {
     public Result report(@RequestBody Report report) {
         try{
             String rcAddr = systemService.getRC(report.getTarget(), userService.getCurrent());
-            String admin = userService.getOwner(rcAddr);
+            String admin = userService.getAdmin(rcAddr);
             report.setTo(admin);
         }
         catch (Exception e) {
@@ -57,8 +56,8 @@ public class ArbitrateController {
         BlockchainService.addPending(task);
 
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Message toReporter = new Message(new PermissionSwapper("系统检举", report.getTarget()), Message.Type.检举, null, report.getFrom(), df.format(new Date()));
-        Message toTarget = new Message(new PermissionSwapper("系统检举", report.getTarget()), Message.Type.检举, null, report.getTarget(), df.format(new Date()));
+        Message toReporter = new Message(new PermissionSwapper("系统检举", report.getTarget()), Message.Type.检举, report.getFrom(), df.format(new Date()));
+        Message toTarget = new Message(new PermissionSwapper("系统检举", report.getTarget()), Message.Type.检举, report.getTarget(), df.format(new Date()));
         toReporter.setReceipt(receipt);
         toTarget.setReceipt(receipt);
         messageService.addReceipt(toReporter);
@@ -70,9 +69,18 @@ public class ArbitrateController {
     public Result disagree(@PathVariable int index) throws Exception {
         Report report = arbitrateService.get(userService.getCurrent().getAddress(), index);
         CompletableFuture<TransactionReceipt> receipt = arbitrateService.arbitrate(systemService.getSysAddress(), index, false, userService.getCurrent());
+
+        TaskSwapper task = new TaskSwapper("仲裁结果", Message.Type.检举.name() ,userService.getCurrent().getAddress());
+        task.setFuture(receipt);
+        BlockchainService.addPending(task);
+
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        messageService.addReceipt(new Message(null, Message.Type.检举, null, report.getFrom(), df.format(new Date())));
-        messageService.addReceipt(new Message(null, Message.Type.检举, null, report.getTarget(), df.format(new Date())));
+        Message toReporter = new Message(new PermissionSwapper("系统检举", report.getTarget()), Message.Type.检举, report.getFrom(), df.format(new Date()));
+        Message toTarget = new Message(new PermissionSwapper("系统检举", report.getTarget()), Message.Type.检举, report.getTarget(), df.format(new Date()));
+        toReporter.setReceipt(receipt);
+        toTarget.setReceipt(receipt);
+        messageService.addReceipt(toReporter);
+        messageService.addReceipt(toTarget);
         return new Result(true);
     }
 

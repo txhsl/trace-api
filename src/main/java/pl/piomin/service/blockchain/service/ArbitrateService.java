@@ -66,7 +66,7 @@ public class ArbitrateService {
         return reportbox.get(address).get(index);
     }
 
-    public CompletableFuture<TransactionReceipt> transferFrom(String sysAddr, String from, String to, int amount, Credentials credentials) throws Exception {
+    private CompletableFuture<TransactionReceipt> transferFrom(String sysAddr, String from, String to, int amount, Credentials credentials) throws Exception {
         int count = 0;
 
         while(count < REQUEST_LIMIT) {
