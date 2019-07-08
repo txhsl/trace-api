@@ -18,8 +18,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
-import static org.web3j.tx.gas.DefaultGasProvider.GAS_LIMIT;
-import static org.web3j.tx.gas.DefaultGasProvider.GAS_PRICE;
+import static pl.piomin.service.blockchain.model.CustomGasProvider.GAS_LIMIT;
+import static pl.piomin.service.blockchain.model.CustomGasProvider.GAS_PRICE;
 
 /**
  * @author: HuShili

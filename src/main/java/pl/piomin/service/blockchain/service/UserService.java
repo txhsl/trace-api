@@ -14,7 +14,6 @@ import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import pl.piomin.service.blockchain.PropertyType;
 import pl.piomin.service.blockchain.contract.Role_sol_Role;
 import pl.piomin.service.blockchain.contract.System_sol_System;
-import pl.piomin.service.blockchain.model.TaskSwapper;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,8 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import static org.web3j.tx.gas.DefaultGasProvider.GAS_LIMIT;
-import static org.web3j.tx.gas.DefaultGasProvider.GAS_PRICE;
+import static pl.piomin.service.blockchain.model.CustomGasProvider.GAS_LIMIT;
+import static pl.piomin.service.blockchain.model.CustomGasProvider.GAS_PRICE;
 
 /**
  * @author: HuShili
@@ -50,9 +49,8 @@ public class UserService {
     private void sendTx() throws InterruptedException {
         for (String name : resetList.keySet()) {
             Thread.sleep(2000);
-            TaskSwapper taskSwapper = new TaskSwapper(name, "权限初始化", "0x6a2fb5e3bf37f0c3d90db4713f7ad4a3b2c24111");
-            taskSwapper.setFuture(resetList.get(name).sendAsync());
-            LOGGER.info("A tx sent. Left " + resetList.size());
+            resetList.get(name).sendAsync();
+            LOGGER.info("A tx sent. Total " + resetList.size());
         }
         resetList.clear();
     }
@@ -87,43 +85,35 @@ public class UserService {
             
             resetReaderAsync(sysAddr, "畜牧方", "畜牧许可证");
             resetWriterAsync(sysAddr, "畜牧方", "畜牧许可证");
-        }
-        if (signIn(accounts[2], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "屠宰方", "畜牧检验结果");
             resetReaderAsync(sysAddr, "屠宰方", "畜牧公司");
             resetReaderAsync(sysAddr, "屠宰方", "畜牧许可证");
-        }
-        if (signIn(accounts[3], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "包装方", "畜牧检验结果");
             resetReaderAsync(sysAddr, "包装方", "畜牧公司");
             resetReaderAsync(sysAddr, "包装方", "畜牧许可证");
-        }
-        if (signIn(accounts[4], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "仓储方", "畜牧检验结果");
             resetReaderAsync(sysAddr, "仓储方", "畜牧公司");
             resetReaderAsync(sysAddr, "仓储方", "畜牧许可证");
-        }
-        if (signIn(accounts[5], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "物流方", "畜牧检验结果");
             resetReaderAsync(sysAddr, "物流方", "畜牧公司");
             resetReaderAsync(sysAddr, "物流方", "畜牧许可证");
-        }
-        if (signIn(accounts[6], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "二级加工", "畜牧检验结果");
             resetReaderAsync(sysAddr, "二级加工", "畜牧公司");
             resetReaderAsync(sysAddr, "二级加工", "畜牧许可证");
-        }
-        if (signIn(accounts[7], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "二级物流", "畜牧检验结果");
             resetReaderAsync(sysAddr, "二级物流", "畜牧公司");
             resetReaderAsync(sysAddr, "二级物流", "畜牧许可证");
-        }
-        if (signIn(accounts[8], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "零售方", "畜牧检验结果");
             resetReaderAsync(sysAddr, "零售方", "畜牧公司");
             resetReaderAsync(sysAddr, "零售方", "畜牧许可证");
-        }
-        if (signIn(accounts[9], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "消费者", "品种");
             resetReaderAsync(sysAddr, "消费者", "出栏日期");
             resetReaderAsync(sysAddr, "消费者", "出栏重量");
@@ -131,8 +121,7 @@ public class UserService {
             resetReaderAsync(sysAddr, "消费者", "畜牧检验结果");
             resetReaderAsync(sysAddr, "消费者", "畜牧公司");
             resetReaderAsync(sysAddr, "消费者", "畜牧许可证");
-        }
-        if (signIn(accounts[10], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "监管部门", "畜牧负责人");
             resetReaderAsync(sysAddr, "监管部门", "畜牧检验负责人");
             resetReaderAsync(sysAddr, "监管部门", "畜牧检验结果");
@@ -159,44 +148,36 @@ public class UserService {
             
             resetReaderAsync(sysAddr, "屠宰方", "屠宰许可证");
             resetWriterAsync(sysAddr, "屠宰方", "屠宰许可证");
-        }
-        if (signIn(accounts[3], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "包装方", "屠宰检验结果");
             resetReaderAsync(sysAddr, "包装方", "屠宰公司");
             resetReaderAsync(sysAddr, "包装方", "屠宰许可证");
-        }
-        if (signIn(accounts[4], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "仓储方", "屠宰检验结果");
             resetReaderAsync(sysAddr, "仓储方", "屠宰公司");
             resetReaderAsync(sysAddr, "仓储方", "屠宰许可证");
-        }
-        if (signIn(accounts[5], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "物流方", "屠宰检验结果");
             resetReaderAsync(sysAddr, "物流方", "屠宰公司");
             resetReaderAsync(sysAddr, "物流方", "屠宰许可证");
-        }
-        if (signIn(accounts[6], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "二级加工", "屠宰检验结果");
             resetReaderAsync(sysAddr, "二级加工", "屠宰公司");
             resetReaderAsync(sysAddr, "二级加工", "屠宰许可证");
-        }
-        if (signIn(accounts[7], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "二级物流", "屠宰检验结果");
             resetReaderAsync(sysAddr, "二级物流", "屠宰公司");
             resetReaderAsync(sysAddr, "二级物流", "屠宰许可证");
-        }
-        if (signIn(accounts[8], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "零售方", "屠宰检验结果");
             resetReaderAsync(sysAddr, "零售方", "屠宰公司");
             resetReaderAsync(sysAddr, "零售方", "屠宰许可证");
-        }
-        if (signIn(accounts[9], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "消费者", "屠宰日期");
             resetReaderAsync(sysAddr, "消费者", "屠宰检验结果");
             resetReaderAsync(sysAddr, "消费者", "屠宰公司");
             resetReaderAsync(sysAddr, "消费者", "屠宰许可证");
-        }
-        if (signIn(accounts[10], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "监管部门", "屠宰负责人");
             resetReaderAsync(sysAddr, "监管部门", "屠宰检验负责人");
             resetReaderAsync(sysAddr, "监管部门", "屠宰检验结果");
@@ -223,39 +204,32 @@ public class UserService {
             
             resetReaderAsync(sysAddr, "包装方", "包装许可证");
             resetWriterAsync(sysAddr, "包装方", "包装许可证");
-        }
-        if (signIn(accounts[4], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "仓储方", "包装检验结果");
             resetReaderAsync(sysAddr, "仓储方", "包装公司");
             resetReaderAsync(sysAddr, "仓储方", "包装许可证");
-        }
-        if (signIn(accounts[5], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "物流方", "包装检验结果");
             resetReaderAsync(sysAddr, "物流方", "包装公司");
             resetReaderAsync(sysAddr, "物流方", "包装许可证");
-        }
-        if (signIn(accounts[6], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "二级加工", "包装检验结果");
             resetReaderAsync(sysAddr, "二级加工", "包装公司");
             resetReaderAsync(sysAddr, "二级加工", "包装许可证");
-        }
-        if (signIn(accounts[7], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "二级物流", "包装检验结果");
             resetReaderAsync(sysAddr, "二级物流", "包装公司");
             resetReaderAsync(sysAddr, "二级物流", "包装许可证");
-        }
-        if (signIn(accounts[8], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "零售方", "包装检验结果");
             resetReaderAsync(sysAddr, "零售方", "包装公司");
             resetReaderAsync(sysAddr, "零售方", "包装许可证");
-        }
-        if (signIn(accounts[9], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "消费者", "包装日期");
             resetReaderAsync(sysAddr, "消费者", "包装检验结果");
             resetReaderAsync(sysAddr, "消费者", "包装公司");
             resetReaderAsync(sysAddr, "消费者", "包装许可证");
-        }
-        if (signIn(accounts[10], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "监管部门", "包装负责人");
             resetReaderAsync(sysAddr, "监管部门", "包装检验负责人");
             resetReaderAsync(sysAddr, "监管部门", "包装检验结果");
@@ -282,37 +256,30 @@ public class UserService {
             
             resetReaderAsync(sysAddr, "仓储方", "仓储许可证");
             resetWriterAsync(sysAddr, "仓储方", "仓储许可证");
-        }
-        if (signIn(accounts[5], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "物流方", "仓储量");
             resetReaderAsync(sysAddr, "物流方", "仓储公司");
             resetReaderAsync(sysAddr, "物流方", "仓储许可证");
-        }
-        if (signIn(accounts[6], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "二级加工", "仓储量");
             resetReaderAsync(sysAddr, "二级加工", "仓储公司");
             resetReaderAsync(sysAddr, "二级加工", "仓储许可证");
-        }
-        if (signIn(accounts[7], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "二级物流", "仓储量");
             resetReaderAsync(sysAddr, "二级物流", "仓储公司");
             resetReaderAsync(sysAddr, "二级物流", "仓储许可证");
-        }
-        if (signIn(accounts[8], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "零售方", "仓储量");
             resetReaderAsync(sysAddr, "零售方", "仓储公司");
             resetReaderAsync(sysAddr, "零售方", "仓储许可证");
-        }
-        if (signIn(accounts[9], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "消费者", "入仓时间");
             resetReaderAsync(sysAddr, "消费者", "出仓时间");
             resetReaderAsync(sysAddr, "消费者", "仓储量");
             resetReaderAsync(sysAddr, "消费者", "仓储量");
             resetReaderAsync(sysAddr, "消费者", "仓储公司");
             resetReaderAsync(sysAddr, "消费者", "仓储许可证");
-            
-        }
-        if (signIn(accounts[10], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "监管部门", "仓储负责人");
             resetReaderAsync(sysAddr, "监管部门", "仓储量");
             resetReaderAsync(sysAddr, "监管部门", "仓储公司");
@@ -347,27 +314,22 @@ public class UserService {
             
             resetReaderAsync(sysAddr, "物流方", "目的地");
             resetWriterAsync(sysAddr, "物流方", "目的地");            
-        }
-        if (signIn(accounts[6], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "二级加工", "物流公司");
             resetReaderAsync(sysAddr, "二级加工", "物流许可证");
             resetReaderAsync(sysAddr, "二级加工", "起始地");
             resetReaderAsync(sysAddr, "二级加工", "目的地");
-        }
-        if (signIn(accounts[7], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "二级物流", "物流公司");
             resetReaderAsync(sysAddr, "二级物流", "物流许可证");
             resetReaderAsync(sysAddr, "二级物流", "起始地");
             resetReaderAsync(sysAddr, "二级物流", "目的地");
-            
-        }
-        if (signIn(accounts[8], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "零售方", "物流公司");
             resetReaderAsync(sysAddr, "零售方", "物流许可证");
             resetReaderAsync(sysAddr, "零售方", "起始地");
             resetReaderAsync(sysAddr, "零售方", "目的地");
-        }
-        if (signIn(accounts[9], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "消费者", "起运时间");
             resetReaderAsync(sysAddr, "消费者", "到货时间");
             resetReaderAsync(sysAddr, "消费者", "运输量");
@@ -377,8 +339,7 @@ public class UserService {
             resetReaderAsync(sysAddr, "消费者", "物流许可证");
             resetReaderAsync(sysAddr, "消费者", "起始地");
             resetReaderAsync(sysAddr, "消费者", "目的地");
-        }
-        if (signIn(accounts[10], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "监管部门", "物流负责人");
             resetReaderAsync(sysAddr, "监管部门", "物流公司");
             resetReaderAsync(sysAddr, "监管部门", "物流许可证");
@@ -411,26 +372,21 @@ public class UserService {
             
             resetReaderAsync(sysAddr, "二级加工", "加工许可证");
             resetWriterAsync(sysAddr, "二级加工", "加工许可证");
-        }
-        if (signIn(accounts[7], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "二级物流", "加工检验结果");
             resetReaderAsync(sysAddr, "二级物流", "加工公司");
             resetReaderAsync(sysAddr, "二级物流", "加工许可证");
-            
-        }
-        if (signIn(accounts[8], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "零售方", "加工检验结果");
             resetReaderAsync(sysAddr, "零售方", "加工公司");
             resetReaderAsync(sysAddr, "零售方", "加工许可证");
-        }
-        if (signIn(accounts[9], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "消费者", "加工进货日期");
             resetReaderAsync(sysAddr, "消费者", "加工日期");
             resetReaderAsync(sysAddr, "消费者", "加工检验结果");
             resetReaderAsync(sysAddr, "消费者", "加工公司");
             resetReaderAsync(sysAddr, "消费者", "加工许可证");
-        }
-        if (signIn(accounts[10], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "监管部门", "加工进货负责人");
             resetReaderAsync(sysAddr, "监管部门", "加工负责人");
             resetReaderAsync(sysAddr, "监管部门", "加工检验负责人");
@@ -468,14 +424,12 @@ public class UserService {
             
             resetReaderAsync(sysAddr, "二级物流", "二级目的地");
             resetWriterAsync(sysAddr, "二级物流", "二级目的地");
-        }
-        if (signIn(accounts[8], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "零售方", "二级物流公司");
             resetReaderAsync(sysAddr, "零售方", "二级物流许可证");
             resetReaderAsync(sysAddr, "零售方", "二级起始地");
             resetReaderAsync(sysAddr, "零售方", "二级目的地");
-        }
-        if (signIn(accounts[9], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "消费者", "二级起运时间");
             resetReaderAsync(sysAddr, "消费者", "二级到货时间");
             resetReaderAsync(sysAddr, "消费者", "二级运输量");
@@ -485,8 +439,7 @@ public class UserService {
             resetReaderAsync(sysAddr, "消费者", "二级物流许可证");
             resetReaderAsync(sysAddr, "消费者", "二级起始地");
             resetReaderAsync(sysAddr, "消费者", "二级目的地");
-        }
-        if (signIn(accounts[10], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "监管部门", "二级物流负责人");
             resetReaderAsync(sysAddr, "监管部门", "二级物流公司");
             resetReaderAsync(sysAddr, "监管部门", "二级物流许可证");
@@ -513,15 +466,13 @@ public class UserService {
             
             resetReaderAsync(sysAddr, "零售方", "零售价");
             resetWriterAsync(sysAddr, "零售方", "零售价");
-        }
-        if (signIn(accounts[9], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "消费者", "零售进货时间");
             resetReaderAsync(sysAddr, "消费者", "进货量");
             resetReaderAsync(sysAddr, "消费者", "零售公司");
             resetReaderAsync(sysAddr, "消费者", "零售许可证");
             resetReaderAsync(sysAddr, "消费者", "零售价");
-        }
-        if (signIn(accounts[10], "Innov@teD@ily1")) {
+
             resetReaderAsync(sysAddr, "监管部门", "零售进货负责人");
             resetReaderAsync(sysAddr, "监管部门", "零售公司");
             resetReaderAsync(sysAddr, "监管部门", "零售许可证");

@@ -25,8 +25,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import static org.web3j.tx.gas.DefaultGasProvider.GAS_LIMIT;
-import static org.web3j.tx.gas.DefaultGasProvider.GAS_PRICE;
+import static pl.piomin.service.blockchain.model.CustomGasProvider.GAS_LIMIT;
+import static pl.piomin.service.blockchain.model.CustomGasProvider.GAS_PRICE;
 
 /**
  * @author: HuShili
@@ -72,13 +72,8 @@ public class SystemService {
         this.sysAddress = system.getContractAddress();
 
         //Roles
-        Credentials current = signIn(UserService.accounts[0], "Innov@teD@ily1");
         for (int i = 0; i < 10; i++) {
             TransactionReceipt transactionReceipt = system.addRC(new Utf8String(RoleType.Types.get(i)), new Address(UserService.accounts[i + 1])).send();
-            LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
-
-            //register admin
-            transactionReceipt = system.register(new Address(UserService.accounts[i + 1]), new Utf8String(RoleType.Types.get(i))).send();
             LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
         }
 
@@ -111,6 +106,13 @@ public class SystemService {
             }
 
             TransactionReceipt transactionReceipt = system.addSC(new Utf8String(PropertyType.Types.get(j)), new Address(admin)).send();
+            LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
+        }
+
+        for (int i = 0; i < 10; i++) {
+            //register admin
+            Credentials current = signIn(UserService.accounts[i + 1], "Innov@teD@ily1");
+            TransactionReceipt transactionReceipt = register(new Address(UserService.accounts[i + 1]), RoleType.Types.get(i), current);
             LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
         }
         return true;
