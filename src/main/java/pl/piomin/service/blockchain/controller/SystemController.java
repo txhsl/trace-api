@@ -53,20 +53,35 @@ public class SystemController {
 
         return new Result(true);
     }
-    //Normal
+
+    //RC owner
     @PostMapping("/requestRole")
-    public Result requestRole(@RequestBody RoleSwapper role) throws Exception {
+    public Result requestRole(@RequestBody NewContractSwapper role) throws Exception {
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Message msg = new Message(new PermissionSwapper(role.getName(), role.hasAddress() ? role.getAddress() : ""), Message.Type.角色,
-                UserService.accounts[0], df.format(new Date()));
+        Message msg = new Message(new PermissionSwapper(role.getName(), role.getAdmin()), Message.Type.角色, UserService.accounts[0], df.format(new Date()));
         messageService.add(msg);
         return new Result(true);
     }
+
+    @PostMapping("/requestProperty")
+    public Result requestProperty(@RequestBody NewContractSwapper property) throws Exception {
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Message msg = new Message(new PermissionSwapper(property.getName(), property.getAdmin()), Message.Type.属性, UserService.accounts[0], df.format(new Date()));
+        messageService.add(msg);
+        return new Result(true);
+    }
+
     //System owner
     @PostMapping("/permitRole")
-    public TransactionReceipt permitRole(@RequestBody RoleSwapper role) throws Exception {
+    public TransactionReceipt permitRole(@RequestBody NewContractSwapper role) throws Exception {
         RoleType.Types.add(role.getName());
-        return systemService.addRC(role.getName(), new Address(role.getAddress()), userService.getCurrent());
+        return systemService.addRC(role.getName(), new Address(role.getAdmin()), userService.getCurrent());
+    }
+
+    @PostMapping("/permitProperty")
+    public TransactionReceipt permitProperty(@RequestBody NewContractSwapper property) throws Exception {
+        RoleType.Types.add(property.getName());
+        return systemService.addSC(property.getName(), new Address(property.getAdmin()), userService.getCurrent());
     }
 
     @GetMapping("/getRole/{address}")

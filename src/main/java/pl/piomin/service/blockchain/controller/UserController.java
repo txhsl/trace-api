@@ -33,23 +33,6 @@ public class UserController {
         return new Result(userService.signIn(user.getAddress(), user.getPassword()));
     }
 
-    //RC owner
-    @PostMapping("/requestRole")
-    public Result requestRole(@RequestBody PermissionSwapper permission) throws Exception {
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Message msg = new Message(permission, Message.Type.角色, UserService.accounts[0], df.format(new Date()));
-        messageService.add(msg);
-        return new Result(true);
-    }
-
-    @PostMapping("/requestProperty")
-    public Result requestProperty(@RequestBody PermissionSwapper permission) throws Exception {
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Message msg = new Message(permission, Message.Type.属性, UserService.accounts[0], df.format(new Date()));
-        messageService.add(msg);
-        return new Result(true);
-    }
-
     @PostMapping("/requestReader")
     public Result requestReader(@RequestBody PermissionSwapper permission) throws Exception {
         String scAddr = systemService.getSC(permission.getPropertyName(), userService.getCurrent());

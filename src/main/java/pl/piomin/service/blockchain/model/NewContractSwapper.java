@@ -2,11 +2,12 @@ package pl.piomin.service.blockchain.model;
 
 /**
  * @author: HuShili
- * @date: 2019/3/21
+ * @date: 2019/7/8
  * @description: none
  */
-public class RoleSwapper {
+public class NewContractSwapper {
     private String name;
+    private String admin;
     private String address;
 
     public String getName() {
@@ -17,15 +18,19 @@ public class RoleSwapper {
         this.name = name;
     }
 
+    public String getAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(String admin) {
+        this.admin = admin;
+    }
+
     public String getAddress() {
         return address;
     }
 
     public void setAddress(String address) {
         this.address = address;
-    }
-
-    public boolean hasAddress() {
-        return address != null;
     }
 }
