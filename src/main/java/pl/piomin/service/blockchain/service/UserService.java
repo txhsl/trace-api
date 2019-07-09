@@ -14,6 +14,8 @@ import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import pl.piomin.service.blockchain.PropertyType;
 import pl.piomin.service.blockchain.contract.Role_sol_Role;
 import pl.piomin.service.blockchain.contract.System_sol_System;
+import pl.piomin.service.blockchain.model.Message;
+import pl.piomin.service.blockchain.model.TaskSwapper;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,6 +34,20 @@ import static pl.piomin.service.blockchain.model.CustomGasProvider.GAS_PRICE;
 @Service
 public class UserService {
 
+    private class Info {
+        private String property;
+        private String target;
+        private boolean isRead;
+        private String sender;
+
+        private Info(String property, String target, boolean isRead, String sender) {
+            this.property = property;
+            this.target = target;
+            this.isRead = isRead;
+            this.sender = sender;
+        }
+    }
+
     private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
     public static final String[] accounts = new String[]{"0x6a2fb5e3bf37f0c3d90db4713f7ad4a3b2c24111", "0x38a5d4e63bbac1af0eba0d99ef927359ab8d7293", "0x40b00de2e7b694b494022eef90e874f5e553f996",
             "0x49e2170e0b1188f2151ac35287c743ee60ea1f6a", "0x86dec6586bfa1dfe303eafbefee843919b543fd3", "0x135b8fb39d0f06ea1f2466f7e9f39d3136431480", "0x329b81e0a2af215c7e41b32251ae4d6ff1a83e3e",
@@ -40,16 +56,19 @@ public class UserService {
     private final Web3j web3j;
     private final int REQUEST_LIMIT = 10;
     private Credentials current = null;
-    private Map<String, RemoteCall<TransactionReceipt>> resetList = new HashMap<>();
+    private Map<Info, RemoteCall<TransactionReceipt>> resetList = new HashMap<>();
 
     public UserService(Web3j web3j) {
         this.web3j = web3j;
     }
 
     private void sendTx() throws InterruptedException {
-        for (String name : resetList.keySet()) {
+        for (Info info : resetList.keySet()) {
             Thread.sleep(2000);
-            resetList.get(name).sendAsync();
+
+            TaskSwapper permissionTask = new TaskSwapper(info.property, Message.Type.权限.toString(), info.sender);
+            permissionTask.setFuture(resetList.get(info).sendAsync());
+            BlockchainService.addPending(permissionTask);
             LOGGER.info("A tx sent. Total " + resetList.size());
         }
         resetList.clear();
@@ -533,7 +552,7 @@ public class UserService {
             try {
                 System_sol_System system = System_sol_System.load(sysAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
                 RemoteCall<TransactionReceipt> tx = system.assignWriter(new Utf8String(propertyName), new Utf8String(roleName));
-                resetList.putIfAbsent(propertyName, tx);
+                resetList.putIfAbsent(new Info(propertyName, roleName, false, current.getAddress()), tx);
                 return;
             } catch (NullPointerException e) {
                 LOGGER.error(e.toString());
@@ -550,7 +569,7 @@ public class UserService {
             try {
                 System_sol_System system = System_sol_System.load(sysAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
                 RemoteCall<TransactionReceipt> tx = system.assignReader(new Utf8String(propertyName), new Utf8String(roleName));
-                resetList.putIfAbsent(propertyName, tx);
+                resetList.putIfAbsent(new Info(propertyName, roleName, true, current.getAddress()), tx);
                 return;
             } catch (NullPointerException e) {
                 LOGGER.error(e.toString());

@@ -30,7 +30,8 @@ public class ArbitrateController {
     @PostMapping("/report")
     public Result report(@RequestBody Report report) {
         try{
-            String rcAddr = systemService.getRC(report.getTarget(), userService.getCurrent());
+            String roleName = systemService.getRole(report.getTarget(), userService.getCurrent());
+            String rcAddr = systemService.getRC(roleName, userService.getCurrent());
             String admin = userService.getAdmin(rcAddr);
             report.setTo(admin);
         }

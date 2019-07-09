@@ -236,8 +236,8 @@ public class SystemService {
         throw new NullPointerException();
     }
 
-    public String getRC(Credentials credentials) throws Exception {
-        return getRC(credentials.getAddress(), credentials);
+    public String getRole(Credentials credentials) throws Exception {
+        return getRole(credentials.getAddress(), credentials);
     }
 
     public String getRC(String roleName, Credentials credentials) throws Exception {

@@ -73,11 +73,12 @@ public class MessageController {
                 break;
             case 权限:
                 String toRole = systemService.getRole(msg.getPermission().getTarget(), userService.getCurrent());
+                String rcAddr = systemService.getRC(toRole, userService.getCurrent());
                 if (msg.getPermission().getIsRead()) {
-                    permissionTask.setFuture(userService.assignReaderAsync(systemService.getSysAddress(), toRole, msg.getPermission().getPropertyName()));
+                    permissionTask.setFuture(userService.assignReaderAsync(systemService.getSysAddress(), rcAddr, msg.getPermission().getPropertyName()));
                 }
                 else {
-                    permissionTask.setFuture(userService.assignWriterAsync(systemService.getSysAddress(), toRole, msg.getPermission().getPropertyName()));
+                    permissionTask.setFuture(userService.assignWriterAsync(systemService.getSysAddress(), rcAddr, msg.getPermission().getPropertyName()));
                 }
                 break;
             case 注册:

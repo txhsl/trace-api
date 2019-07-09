@@ -86,7 +86,8 @@ public class SystemController {
 
     @GetMapping("/getRole/{address}")
     public String getRole(@PathVariable String address) throws Exception {
-        return systemService.getRC(address, userService.getCurrent());
+        String roleName = systemService.getRole(address, userService.getCurrent());
+        return systemService.getRC(roleName, userService.getCurrent());
     }
     //For query
     @GetMapping("/getRoles")

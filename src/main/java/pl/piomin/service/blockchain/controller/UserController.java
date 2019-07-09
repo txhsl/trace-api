@@ -58,8 +58,6 @@ public class UserController {
     //SC owner
     @PostMapping("/permitReader")
     public Result permitReader(@RequestBody PermissionSwapper permission) throws Exception {
-        String rcAddr = systemService.getRC(userService.getCurrent());
-
         TaskSwapper task = new TaskSwapper(permission.getPropertyName(), "Permission Permit", userService.getCurrent().getAddress());
         task.setFuture(userService.assignReaderAsync(systemService.getSysAddress(), permission.getTarget(), permission.getPropertyName()));
         BlockchainService.addPending(task);
@@ -68,8 +66,6 @@ public class UserController {
     //SC owner
     @PostMapping("/permitWriter")
     public Result permitWriter(@RequestBody PermissionSwapper permission) throws Exception {
-        String rcAddr = systemService.getRC(userService.getCurrent());
-
         TaskSwapper task = new TaskSwapper(permission.getPropertyName(), "Permission Permit", userService.getCurrent().getAddress());
         task.setFuture(userService.assignWriterAsync(systemService.getSysAddress(), permission.getTarget(), permission.getPropertyName()));
         BlockchainService.addPending(task);
@@ -79,13 +75,15 @@ public class UserController {
     //For query
     @GetMapping("/getManaged")
     public Map<String, String> getManaged() throws Exception {
-        String rcAddr = systemService.getRC(userService.getCurrent());
-        return userService.getManagedAll(rcAddr.toString());
+        String roleName = systemService.getRole(userService.getCurrent());
+        String rcAddr = systemService.getRC(roleName, userService.getCurrent());
+        return userService.getManagedAll(rcAddr);
     }
 
     @GetMapping("/getOwned")
     public Map<String, String> getOwned() throws Exception {
-        String rcAddr = systemService.getRC(userService.getCurrent());
-        return userService.getOwnedAll(rcAddr.toString());
+        String roleName = systemService.getRole(userService.getCurrent());
+        String rcAddr = systemService.getRC(roleName, userService.getCurrent());
+        return userService.getOwnedAll(rcAddr);
     }
 }
