@@ -58,7 +58,7 @@ public class UserController {
     //SC owner
     @PostMapping("/permitReader")
     public Result permitReader(@RequestBody PermissionSwapper permission) throws Exception {
-        TaskSwapper task = new TaskSwapper(permission.getPropertyName(), "Permission Permit", userService.getCurrent().getAddress());
+        TaskSwapper task = new TaskSwapper(permission.getPropertyName(), Message.Type.权限.toString(), userService.getCurrent().getAddress());
         task.setFuture(userService.assignReaderAsync(systemService.getSysAddress(), permission.getTarget(), permission.getPropertyName()));
         BlockchainService.addPending(task);
         return new Result(true);
@@ -66,7 +66,7 @@ public class UserController {
     //SC owner
     @PostMapping("/permitWriter")
     public Result permitWriter(@RequestBody PermissionSwapper permission) throws Exception {
-        TaskSwapper task = new TaskSwapper(permission.getPropertyName(), "Permission Permit", userService.getCurrent().getAddress());
+        TaskSwapper task = new TaskSwapper(permission.getPropertyName(), Message.Type.权限.toString(), userService.getCurrent().getAddress());
         task.setFuture(userService.assignWriterAsync(systemService.getSysAddress(), permission.getTarget(), permission.getPropertyName()));
         BlockchainService.addPending(task);
         return new Result(true);
@@ -85,5 +85,16 @@ public class UserController {
         String roleName = systemService.getRole(userService.getCurrent());
         String rcAddr = systemService.getRC(roleName, userService.getCurrent());
         return userService.getOwnedAll(rcAddr);
+    }
+
+    @GetMapping("/getAdministrated")
+    public Map<String, String> getAdministrated() throws Exception {
+        return userService.getAdministratedAll(systemService.getSysAddress(), userService.getCurrent().getAddress());
+    }
+
+    @PostMapping("/checkAdmin")
+    public boolean checkAdmin(@RequestBody NewContractSwapper rc) throws Exception {
+        String rcAddr = systemService.getRC(rc.getName(), userService.getCurrent());
+        return !userService.getAdmin(rcAddr).equals(rc.getAdmin());
     }
 }

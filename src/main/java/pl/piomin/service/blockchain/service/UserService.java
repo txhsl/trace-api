@@ -12,6 +12,7 @@ import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.RemoteCall;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import pl.piomin.service.blockchain.PropertyType;
+import pl.piomin.service.blockchain.contract.Data_sol_Data;
 import pl.piomin.service.blockchain.contract.Role_sol_Role;
 import pl.piomin.service.blockchain.contract.System_sol_System;
 import pl.piomin.service.blockchain.model.Message;
@@ -699,6 +700,32 @@ public class UserService {
                 try {
                     String scAddr = rc.getManaged(new Utf8String(property)).send().getValue();
                     if (!scAddr.equals("0x0000000000000000000000000000000000000000")) {
+                        result.putIfAbsent(property, scAddr);
+                    }
+                    flag = true;
+                } catch (NullPointerException e) {
+                    LOGGER.error(e.toString());
+                    count++;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    public Map<String, String> getAdministratedAll(String sysAddr, String userAddr) throws Exception {
+        Map<String, String> result = new HashMap<>();
+        System_sol_System system = System_sol_System.load(sysAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
+
+        for (String property : PropertyType.Types) {
+            boolean flag = false;
+            int count = 0;
+
+            while(!flag && count < REQUEST_LIMIT) {
+                try {
+                    String scAddr = system.getSC(new Utf8String(property)).send().getValue();
+                    Data_sol_Data sc = Data_sol_Data.load(scAddr, web3j, current, GAS_PRICE, GAS_LIMIT);
+                    if (sc.getAdmin().send().getValue().equals(userAddr)) {
                         result.putIfAbsent(property, scAddr);
                     }
                     flag = true;
