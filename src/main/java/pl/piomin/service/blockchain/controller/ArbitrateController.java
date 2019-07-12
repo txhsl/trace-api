@@ -52,13 +52,13 @@ public class ArbitrateController {
         Report report = arbitrateService.get(userService.getCurrent().getAddress(), index);
         CompletableFuture<TransactionReceipt> receipt = arbitrateService.arbitrate(systemService.getSysAddress(), index, true, userService.getCurrent());
 
-        TaskSwapper task = new TaskSwapper("仲裁结果", Message.Type.检举.name() ,userService.getCurrent().getAddress());
+        TaskSwapper task = new TaskSwapper("仲裁结果", Message.Type.Report.name() ,userService.getCurrent().getAddress());
         task.setFuture(receipt);
         BlockchainService.addPending(task);
 
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Message toReporter = new Message(new PermissionSwapper("系统检举", report.getTarget()), Message.Type.检举, report.getFrom(), df.format(new Date()));
-        Message toTarget = new Message(new PermissionSwapper("系统检举", report.getTarget()), Message.Type.检举, report.getTarget(), df.format(new Date()));
+        Message toReporter = new Message(new PermissionSwapper("系统检举", report.getTarget()), Message.Type.Report, report.getFrom(), df.format(new Date()));
+        Message toTarget = new Message(new PermissionSwapper("系统检举", report.getTarget()), Message.Type.Report, report.getTarget(), df.format(new Date()));
         toReporter.setReceipt(receipt);
         toTarget.setReceipt(receipt);
         messageService.addReceipt(toReporter);
@@ -71,13 +71,13 @@ public class ArbitrateController {
         Report report = arbitrateService.get(userService.getCurrent().getAddress(), index);
         CompletableFuture<TransactionReceipt> receipt = arbitrateService.arbitrate(systemService.getSysAddress(), index, false, userService.getCurrent());
 
-        TaskSwapper task = new TaskSwapper("仲裁结果", Message.Type.检举.name() ,userService.getCurrent().getAddress());
+        TaskSwapper task = new TaskSwapper("仲裁结果", Message.Type.Report.name() ,userService.getCurrent().getAddress());
         task.setFuture(receipt);
         BlockchainService.addPending(task);
 
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Message toReporter = new Message(new PermissionSwapper("系统检举", report.getTarget()), Message.Type.检举, report.getFrom(), df.format(new Date()));
-        Message toTarget = new Message(new PermissionSwapper("系统检举", report.getTarget()), Message.Type.检举, report.getTarget(), df.format(new Date()));
+        Message toReporter = new Message(new PermissionSwapper("系统检举", report.getTarget()), Message.Type.Report, report.getFrom(), df.format(new Date()));
+        Message toTarget = new Message(new PermissionSwapper("系统检举", report.getTarget()), Message.Type.Report, report.getTarget(), df.format(new Date()));
         toReporter.setReceipt(receipt);
         toTarget.setReceipt(receipt);
         messageService.addReceipt(toReporter);

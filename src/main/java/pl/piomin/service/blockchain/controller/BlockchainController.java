@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.*;
 import org.web3j.protocol.core.methods.response.Transaction;
 import pl.piomin.service.blockchain.model.*;
 import pl.piomin.service.blockchain.service.BlockchainService;
+import pl.piomin.service.blockchain.service.SystemService;
 import pl.piomin.service.blockchain.service.UserService;
 
 import java.io.IOException;
@@ -15,10 +16,12 @@ import java.util.Map;
 public class BlockchainController {
 
     private final BlockchainService blockchainService;
+    private final SystemService systemService;
     private final UserService userService;
 
-    public BlockchainController(BlockchainService blockchainService, UserService userService) {
+    public BlockchainController(BlockchainService blockchainService, SystemService systemService, UserService userService) {
         this.blockchainService = blockchainService;
+        this.systemService = systemService;
         this.userService = userService;
     }
 
@@ -75,7 +78,7 @@ public class BlockchainController {
 
     @PostMapping("/subscribe")
     public Result subscribe(@RequestBody ContractSwapper contract) throws InterruptedException {
-        return new Result(blockchainService.subscribeContract(contract.getAddress()));
+        return new Result(blockchainService.subscribeContract(systemService.getSysAddress(), contract.getAddress()));
     }
 
     @PostMapping("/unsubscribe")

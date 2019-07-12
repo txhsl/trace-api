@@ -1,7 +1,6 @@
 package pl.piomin.service.blockchain.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.web3j.protocol.core.RemoteCall;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 import java.util.concurrent.CompletableFuture;
@@ -14,7 +13,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class Message {
     public enum Type {
-        属性, 角色, 权限, 注册, 检举
+        Property, Role, Permission, Register, Report
     }
 
     private PermissionSwapper permission;

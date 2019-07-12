@@ -63,15 +63,15 @@ public class MessageController {
         //Handle permit
         TaskSwapper permissionTask = new TaskSwapper(msg.getPermission().getPropertyName(), msg.getType().name(), userService.getCurrent().getAddress());
         switch (msg.getType()) {
-            case 角色:
+            case Role:
                 permissionTask.setFuture(systemService.addRCAsync(msg.getPermission().getPropertyName(), new Address(msg.getPermission().getTarget()), userService.getCurrent()));
                 RoleType.Types.add(msg.getPermission().getPropertyName());
                 break;
-            case 属性:
+            case Property:
                 permissionTask.setFuture(systemService.addSCAsync(msg.getPermission().getPropertyName(), new Address(msg.getPermission().getTarget()), userService.getCurrent()));
                 PropertyType.Types.add(msg.getPermission().getPropertyName());
                 break;
-            case 权限:
+            case Permission:
                 String toRole = systemService.getRole(msg.getPermission().getTarget(), userService.getCurrent());
                 if (msg.getPermission().getIsRead()) {
                     permissionTask.setFuture(userService.assignReaderAsync(systemService.getSysAddress(), toRole, msg.getPermission().getPropertyName()));
@@ -80,7 +80,7 @@ public class MessageController {
                     permissionTask.setFuture(userService.assignWriterAsync(systemService.getSysAddress(), toRole, msg.getPermission().getPropertyName()));
                 }
                 break;
-            case 注册:
+            case Register:
                 permissionTask.setFuture(systemService.registerAsync(new Address(msg.getPermission().getTarget()), msg.getPermission().getPropertyName(), userService.getCurrent()));
                 break;
             default:

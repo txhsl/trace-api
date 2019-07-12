@@ -48,7 +48,7 @@ public class SystemController {
 
         PermissionSwapper permission = new PermissionSwapper(user.getRole(), user.getAddress());
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Message msg = new Message(permission, Message.Type.注册, UserService.accounts[0], df.format(new Date()));
+        Message msg = new Message(permission, Message.Type.Register, UserService.accounts[0], df.format(new Date()));
         messageService.add(msg);
 
         return new Result(true);
@@ -58,7 +58,7 @@ public class SystemController {
     @PostMapping("/requestRole")
     public Result requestRole(@RequestBody NewContractSwapper role) throws Exception {
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Message msg = new Message(new PermissionSwapper(role.getName(), role.getAdmin()), Message.Type.角色, UserService.accounts[0], df.format(new Date()));
+        Message msg = new Message(new PermissionSwapper(role.getName(), role.getAdmin()), Message.Type.Role, UserService.accounts[0], df.format(new Date()));
         messageService.add(msg);
         return new Result(true);
     }
@@ -66,7 +66,7 @@ public class SystemController {
     @PostMapping("/requestProperty")
     public Result requestProperty(@RequestBody NewContractSwapper property) throws Exception {
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Message msg = new Message(new PermissionSwapper(property.getName(), property.getAdmin()), Message.Type.属性, UserService.accounts[0], df.format(new Date()));
+        Message msg = new Message(new PermissionSwapper(property.getName(), property.getAdmin()), Message.Type.Property, UserService.accounts[0], df.format(new Date()));
         messageService.add(msg);
         return new Result(true);
     }

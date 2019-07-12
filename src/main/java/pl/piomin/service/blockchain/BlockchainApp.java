@@ -45,7 +45,7 @@ public class BlockchainApp {
 
         });
 
-        LOGGER.info("Subscribed");
+        LOGGER.info("Transaction Subscribed");
 
     }
 

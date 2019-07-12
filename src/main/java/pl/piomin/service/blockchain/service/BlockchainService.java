@@ -7,6 +7,13 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.web3j.abi.EventEncoder;
+import org.web3j.abi.FunctionReturnDecoder;
+import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.Address;
+import org.web3j.abi.datatypes.Event;
+import org.web3j.abi.datatypes.Utf8String;
+import org.web3j.abi.datatypes.generated.Uint8;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameter;
@@ -23,9 +30,7 @@ import pl.piomin.service.blockchain.model.TaskSwapper;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Component
 @EnableScheduling
@@ -43,6 +48,24 @@ public class BlockchainService {
 
     private Map<String, ArrayList<org.web3j.protocol.core.methods.response.Transaction>> cache = new HashMap<>();
     private Map<String, Disposable> listener = new HashMap<>();
+
+    // Event definition
+    private static final Event NEW_USER = new Event("user", Arrays.<TypeReference<?>>asList(new TypeReference<Address>(true) {}, new TypeReference<Utf8String>(true) {}));
+    private static final Event NEW_ROLE = new Event("role", Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>(true) {}, new TypeReference<Address>(true) {}, new TypeReference<Address>(true) {}));
+    private static final Event NEW_PROPERTY = new Event("data", Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>(true) {}, new TypeReference<Address>(true) {}, new TypeReference<Address>(true) {}));
+    private static final Event ARBITRATE = new Event("transfer", Arrays.<TypeReference<?>>asList(new TypeReference<Address>(true) {}, new TypeReference<Address>(true) {}, new TypeReference<Uint8>(false) {}));
+    private static final Event PERMIT_READER = new Event("manage", Arrays.<TypeReference<?>>asList(new TypeReference<Address>(true) {}, new TypeReference<Utf8String>(true) {}, new TypeReference<Address>(true) {}));
+    private static final Event PERMIT_WRITER = new Event("own", Arrays.<TypeReference<?>>asList(new TypeReference<Address>(true) {}, new TypeReference<Utf8String>(true) {}, new TypeReference<Address>(true) {}));
+    private static final Event WRITE = new Event("user", Arrays.<TypeReference<?>>asList(new TypeReference<Address>(true) {}, new TypeReference<Utf8String>(true) {}, new TypeReference<Utf8String>(false) {}));
+
+    // Event definition hash
+    private static final String NEW_USER_HASH = EventEncoder.encode(NEW_USER);
+    private static final String NEW_ROLE_HASH = EventEncoder.encode(NEW_ROLE);
+    private static final String NEW_PROPERTY_HASH = EventEncoder.encode(NEW_PROPERTY);
+    private static final String ARBITRATE_HASH = EventEncoder.encode(ARBITRATE);
+    private static final String PERMIT_READER_HASH = EventEncoder.encode(PERMIT_READER);
+    private static final String PERMIT_WRITER_HASH = EventEncoder.encode(PERMIT_WRITER);
+    private static final String WRITE_HASH = EventEncoder.encode(WRITE);
 
     public BlockchainService(Web3j web3j) {
         this.web3j = web3j;
@@ -89,15 +112,69 @@ public class BlockchainService {
         return balance;
     }
 
-    public boolean subscribeContract(String address) throws InterruptedException {
+    public boolean subscribeContract(String sysAddr, String address) {
         cache.put(address, new ArrayList<>());
 
-        Disposable sub = web3j.replayPastAndFutureTransactionsFlowable(DefaultBlockParameterName.EARLIEST)
-                .subscribe(tx -> {
-                    if (tx.getTo() != null && tx.getTo().equals(address)) {
-                        cache.get(address).add(tx);
-                    }
-                });
+        org.web3j.protocol.core.methods.request.EthFilter filter = new org.web3j.protocol.core.methods.request.EthFilter(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST, sysAddr);
+
+        // Pull all the events for this contract
+        Disposable sub = web3j.ethLogFlowable(filter).subscribe(log -> {
+            String eventHash = log.getTopics().get(0); // Index 0 is the event definition hash
+
+            if(eventHash.equals(PERMIT_READER_HASH) || eventHash.equals(PERMIT_WRITER_HASH) ||
+                eventHash.equals(WRITE_HASH)) {
+                Address addr = (Address) FunctionReturnDecoder.decodeIndexedValue(log.getTopics().get(1), new TypeReference<Address>() {});
+                if (addr.toString().equals(address)) {
+                    String txHash = log.getTransactionHash();
+                    web3j.ethGetTransactionByHash(txHash).send().getTransaction().ifPresent(tx -> cache.get(address).add(tx));
+                }
+            }
+            else if(eventHash.equals(NEW_PROPERTY_HASH) || eventHash.equals(NEW_ROLE_HASH) ||
+                eventHash.equals(NEW_USER_HASH) || eventHash.equals(ARBITRATE_HASH)) {
+                if (!cache.keySet().contains(sysAddr)) {
+                    cache.put(sysAddr, new ArrayList<>());
+                }
+                String txHash = log.getTransactionHash();
+                web3j.ethGetTransactionByHash(txHash).send().getTransaction().ifPresent(tx -> cache.get(sysAddr).add(tx));
+            }
+
+            /*if(eventHash.equals(NEW_USER_HASH)) {
+                Address user = (Address) FunctionReturnDecoder.decodeIndexedValue(log.getTopics().get(1), new TypeReference<Address>() {});
+                Utf8String roleName = (Utf8String) FunctionReturnDecoder.decodeIndexedValue(log.getTopics().get(2), new TypeReference<Utf8String>() {});
+            }
+            else if(eventHash.equals(NEW_ROLE_HASH)) {
+                Utf8String roleName = (Utf8String) FunctionReturnDecoder.decodeIndexedValue(log.getTopics().get(1), new TypeReference<Utf8String>() {});
+                Address rcAddr = (Address) FunctionReturnDecoder.decodeIndexedValue(log.getTopics().get(2), new TypeReference<Address>() {});
+                Address admin = (Address) FunctionReturnDecoder.decodeIndexedValue(log.getTopics().get(3), new TypeReference<Address>() {});
+            }
+            else if(eventHash.equals(NEW_PROPERTY_HASH)) {
+                Utf8String propertyName = (Utf8String) FunctionReturnDecoder.decodeIndexedValue(log.getTopics().get(1), new TypeReference<Utf8String>() {});
+                Address scAddr = (Address) FunctionReturnDecoder.decodeIndexedValue(log.getTopics().get(2), new TypeReference<Address>() {});
+                Address admin = (Address) FunctionReturnDecoder.decodeIndexedValue(log.getTopics().get(3), new TypeReference<Address>() {});
+            }
+            else if(eventHash.equals(ARBITRATE_HASH)) {
+                Address from = (Address) FunctionReturnDecoder.decodeIndexedValue(log.getTopics().get(1), new TypeReference<Address>() {});
+                Address to = (Address) FunctionReturnDecoder.decodeIndexedValue(log.getTopics().get(2), new TypeReference<Address>() {});
+                Uint8 amount = (Uint8) FunctionReturnDecoder.decodeIndexedValue(log.getTopics().get(3), new TypeReference<Uint8>() {});
+            }
+
+            else if(eventHash.equals(PERMIT_READER_HASH)) {
+                Address rcAddr = (Address) FunctionReturnDecoder.decodeIndexedValue(log.getTopics().get(1), new TypeReference<Address>() {});
+                Utf8String propertyName = (Utf8String) FunctionReturnDecoder.decodeIndexedValue(log.getTopics().get(2), new TypeReference<Utf8String>() {});
+                Address scAddr = (Address) FunctionReturnDecoder.decodeIndexedValue(log.getTopics().get(3), new TypeReference<Address>() {});
+            }
+            else if(eventHash.equals(PERMIT_WRITER_HASH)) {
+                Address rcAddr = (Address) FunctionReturnDecoder.decodeIndexedValue(log.getTopics().get(1), new TypeReference<Address>() {});
+                Utf8String propertyName = (Utf8String) FunctionReturnDecoder.decodeIndexedValue(log.getTopics().get(2), new TypeReference<Utf8String>() {});
+                Address scAddr = (Address) FunctionReturnDecoder.decodeIndexedValue(log.getTopics().get(3), new TypeReference<Address>() {});
+            }
+
+            else if(eventHash.equals(WRITE_HASH)) {
+                Address scAddr = (Address) FunctionReturnDecoder.decodeIndexedValue(log.getTopics().get(1), new TypeReference<Address>() {});
+                Utf8String id = (Utf8String) FunctionReturnDecoder.decodeIndexedValue(log.getTopics().get(2), new TypeReference<Utf8String>() {});
+                Utf8String data = (Utf8String) FunctionReturnDecoder.decodeIndexedValue(log.getTopics().get(3), new TypeReference<Utf8String>() {});
+            }*/
+        });
 
         listener.putIfAbsent(address, sub);
         return true;

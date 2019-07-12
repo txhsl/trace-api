@@ -39,7 +39,7 @@ public class UserController {
 
         permission.setIsRead(true);
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Message msg = new Message(permission, Message.Type.权限, dataService.getAdmin(scAddr, userService.getCurrent()), df.format(new Date()));
+        Message msg = new Message(permission, Message.Type.Permission, dataService.getAdmin(scAddr, userService.getCurrent()), df.format(new Date()));
         messageService.add(msg);
         return new Result(true);
     }
@@ -50,7 +50,7 @@ public class UserController {
 
         permission.setIsRead(false);
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Message msg = new Message(permission, Message.Type.权限, dataService.getAdmin(scAddr, userService.getCurrent()), df.format(new Date()));
+        Message msg = new Message(permission, Message.Type.Permission, dataService.getAdmin(scAddr, userService.getCurrent()), df.format(new Date()));
         messageService.add(msg);
         return new Result(true);
     }
@@ -58,7 +58,7 @@ public class UserController {
     //SC owner
     @PostMapping("/permitReader")
     public Result permitReader(@RequestBody PermissionSwapper permission) throws Exception {
-        TaskSwapper task = new TaskSwapper(permission.getPropertyName(), Message.Type.权限.toString(), userService.getCurrent().getAddress());
+        TaskSwapper task = new TaskSwapper(permission.getPropertyName(), Message.Type.Permission.toString(), userService.getCurrent().getAddress());
         task.setFuture(userService.assignReaderAsync(systemService.getSysAddress(), permission.getTarget(), permission.getPropertyName()));
         BlockchainService.addPending(task);
         return new Result(true);
@@ -66,7 +66,7 @@ public class UserController {
     //SC owner
     @PostMapping("/permitWriter")
     public Result permitWriter(@RequestBody PermissionSwapper permission) throws Exception {
-        TaskSwapper task = new TaskSwapper(permission.getPropertyName(), Message.Type.权限.toString(), userService.getCurrent().getAddress());
+        TaskSwapper task = new TaskSwapper(permission.getPropertyName(), Message.Type.Permission.toString(), userService.getCurrent().getAddress());
         task.setFuture(userService.assignWriterAsync(systemService.getSysAddress(), permission.getTarget(), permission.getPropertyName()));
         BlockchainService.addPending(task);
         return new Result(true);
