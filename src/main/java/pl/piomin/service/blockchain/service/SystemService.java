@@ -72,7 +72,7 @@ public class SystemService {
         this.sysAddress = system.getContractAddress();
 
         //Roles
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < RoleType.Types.size(); i++) {
             TransactionReceipt transactionReceipt = system.addRC(new Utf8String(RoleType.Types.get(i)), new Address(UserService.accounts[i + 1])).send();
             LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
         }
@@ -83,33 +83,21 @@ public class SystemService {
             if (j == 0) {
                 admin = UserService.accounts[1];
             }
-            if (j == 8) {
+            if (j == 7) {
                 admin = UserService.accounts[2];
             }
-            if (j == 14) {
+            if (j == 13) {
                 admin = UserService.accounts[3];
             }
-            if (j == 20) {
+            if (j == 19) {
                 admin = UserService.accounts[4];
-            }
-            if (j == 26) {
-                admin = UserService.accounts[5];
-            }
-            if (j == 35) {
-                admin = UserService.accounts[6];
-            }
-            if (j == 43) {
-                admin = UserService.accounts[7];
-            }
-            if (j == 52) {
-                admin = UserService.accounts[8];
             }
 
             TransactionReceipt transactionReceipt = system.addSC(new Utf8String(PropertyType.Types.get(j)), new Address(admin)).send();
             LOGGER.info("Transaction succeed: " + transactionReceipt.toString());
         }
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < RoleType.Types.size(); i++) {
             //register admin
             Credentials current = signIn(UserService.accounts[i + 1], "Innov@teD@ily1");
             TransactionReceipt transactionReceipt = register(new Address(UserService.accounts[i + 1]), RoleType.Types.get(i), current);

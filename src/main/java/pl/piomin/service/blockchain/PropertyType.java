@@ -12,21 +12,13 @@ public class PropertyType {
 
     public static ArrayList<String> Types = new ArrayList<>(
         Arrays.asList(
-        "Farm PIC", "Breed", "Grown Date", "Weigt", "Quarantine PIC", "Quarantine Result", "Farm Name", "Farm Licence",
+        "生产公司", "生产负责人", "生产日期", "重量", "生产批次", "生产检验结果", "生产许可证",
 
-        "Abattoir PIC", "Slaughter Date", "Quality Inspector1", "Check Result1", "Abattoir Name", "Abattoir Licence",
+        "加工公司", "加工负责人", "加工日期", "加工批次", "加工检验结果", "加工许可证",
 
-        "Packaging PIC", "Packaging Date", "Quality Inspector2", "Quality Result2", "Company Name", "Packaging Licence",
+        "物流公司", "物流负责人", "运输日期", "车辆编号", "到货验收结果", "物流许可证",
 
-        "Warehousing PIC", "Entry Date", "Leaving Date", "Amount1", "Storage Company", "Storage Licence",
-
-        "Logistics PIC", "Start Time", "Reach Time", "Amount2", "Transport Distance", "Logistics Company", "Logistics Licence", "Transport From", "Transport To",
-
-        "Sourcing PIC", "Sourcing Date", "Processor PIC", "Production Date", "Quality Inspector3", "Quality Result3", "Processor Name", "Production License",
-
-        "Distribution PIC", "Load Time", "Delivery Time", "Amount3", "Distribution Distance", "Distribution Company", "Distribution Licence", "Distribution From", "Distribution To",
-
-        "Purchase PIC", "Purchase Date", "Amount4", "Retailer Company", "Retailer Licence", "Price")
+        "销售公司", "销售负责人", "进货日期", "标价", "销售许可证")
     );
 
     public static int getID(String propertyName) {

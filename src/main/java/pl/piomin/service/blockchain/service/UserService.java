@@ -82,422 +82,163 @@ public class UserService {
     public boolean reset(String sysAddr) throws Exception {
         //link RCs and SCs
         if (signIn(accounts[1], "Innov@teD@ily1")) {
-            resetReaderAsync(sysAddr,"Farm", "Farm PIC");
-            resetWriterAsync(sysAddr, "Farm", "Farm PIC");
+            resetReaderAsync(sysAddr,"生产方", "生产公司");
+            resetWriterAsync(sysAddr, "生产方", "生产公司");
             
-            resetReaderAsync(sysAddr, "Farm", "Breed");
-            resetWriterAsync(sysAddr, "Farm", "Breed");
+            resetReaderAsync(sysAddr, "生产方", "生产负责人");
+            resetWriterAsync(sysAddr, "生产方", "生产负责人");
             
-            resetReaderAsync(sysAddr, "Farm", "Grown Date");
-            resetWriterAsync(sysAddr, "Farm", "Grown Date");
+            resetReaderAsync(sysAddr, "生产方", "生产日期");
+            resetWriterAsync(sysAddr, "生产方", "生产日期");
             
-            resetReaderAsync(sysAddr, "Farm", "Weigt");
-            resetWriterAsync(sysAddr, "Farm", "Weigt");
+            resetReaderAsync(sysAddr, "生产方", "重量");
+            resetWriterAsync(sysAddr, "生产方", "重量");
             
-            resetReaderAsync(sysAddr, "Farm", "Quarantine PIC");
-            resetWriterAsync(sysAddr, "Farm", "Quarantine PIC");
+            resetReaderAsync(sysAddr, "生产方", "生产批次");
+            resetWriterAsync(sysAddr, "生产方", "生产批次");
             
-            resetReaderAsync(sysAddr, "Farm", "Quarantine Result");
-            resetWriterAsync(sysAddr, "Farm", "Quarantine Result");
+            resetReaderAsync(sysAddr, "生产方", "生产检验结果");
+            resetWriterAsync(sysAddr, "生产方", "生产检验结果");
             
-            resetReaderAsync(sysAddr, "Farm", "Farm Name");
-            resetWriterAsync(sysAddr, "Farm", "Farm Name");
-            
-            resetReaderAsync(sysAddr, "Farm", "Farm Licence");
-            resetWriterAsync(sysAddr, "Farm", "Farm Licence");
+            resetReaderAsync(sysAddr, "生产方", "生产许可证");
 
-            resetReaderAsync(sysAddr, "Abattoir", "Quarantine Result");
-            resetReaderAsync(sysAddr, "Abattoir", "Farm Name");
-            resetReaderAsync(sysAddr, "Abattoir", "Farm Licence");
+            resetReaderAsync(sysAddr, "加工方", "生产公司");
+            resetReaderAsync(sysAddr, "加工方", "生产日期");
+            resetReaderAsync(sysAddr, "加工方", "重量");
+            resetReaderAsync(sysAddr, "加工方", "生产批次");
+            resetReaderAsync(sysAddr, "加工方", "生产检验结果");
+            resetReaderAsync(sysAddr, "加工方", "生产许可证");
 
-            resetReaderAsync(sysAddr, "Packaging", "Quarantine Result");
-            resetReaderAsync(sysAddr, "Packaging", "Farm Name");
-            resetReaderAsync(sysAddr, "Packaging", "Farm Licence");
+            resetReaderAsync(sysAddr, "消费者", "生产公司");
+            resetReaderAsync(sysAddr, "消费者", "生产日期");
+            resetReaderAsync(sysAddr, "消费者", "重量");
+            resetReaderAsync(sysAddr, "消费者", "生产批次");
+            resetReaderAsync(sysAddr, "消费者", "生产检验结果");
+            resetReaderAsync(sysAddr, "消费者", "生产许可证");
 
-            resetReaderAsync(sysAddr, "Warehousing", "Quarantine Result");
-            resetReaderAsync(sysAddr, "Warehousing", "Farm Name");
-            resetReaderAsync(sysAddr, "Warehousing", "Farm Licence");
+            resetReaderAsync(sysAddr, "监管部门", "生产公司");
+            resetReaderAsync(sysAddr, "监管部门", "生产负责人");
+            resetReaderAsync(sysAddr, "监管部门", "生产日期");
+            resetReaderAsync(sysAddr, "监管部门", "重量");
+            resetReaderAsync(sysAddr, "监管部门", "生产批次");
+            resetReaderAsync(sysAddr, "监管部门", "生产检验结果");
+            resetReaderAsync(sysAddr, "监管部门", "生产许可证");
 
-            resetReaderAsync(sysAddr, "Logistics", "Quarantine Result");
-            resetReaderAsync(sysAddr, "Logistics", "Farm Name");
-            resetReaderAsync(sysAddr, "Logistics", "Farm Licence");
-
-            resetReaderAsync(sysAddr, "Processor", "Quarantine Result");
-            resetReaderAsync(sysAddr, "Processor", "Farm Name");
-            resetReaderAsync(sysAddr, "Processor", "Farm Licence");
-
-            resetReaderAsync(sysAddr, "Distribution ", "Quarantine Result");
-            resetReaderAsync(sysAddr, "Distribution ", "Farm Name");
-            resetReaderAsync(sysAddr, "Distribution ", "Farm Licence");
-
-            resetReaderAsync(sysAddr, "Retailer", "Quarantine Result");
-            resetReaderAsync(sysAddr, "Retailer", "Farm Name");
-            resetReaderAsync(sysAddr, "Retailer", "Farm Licence");
-
-            resetReaderAsync(sysAddr, "Consumer", "Breed");
-            resetReaderAsync(sysAddr, "Consumer", "Grown Date");
-            resetReaderAsync(sysAddr, "Consumer", "Weigt");
-
-            resetReaderAsync(sysAddr, "Consumer", "Quarantine Result");
-            resetReaderAsync(sysAddr, "Consumer", "Farm Name");
-            resetReaderAsync(sysAddr, "Consumer", "Farm Licence");
-
-            resetReaderAsync(sysAddr, "Regulator", "Farm PIC");
-            resetReaderAsync(sysAddr, "Regulator", "Quarantine PIC");
-            resetReaderAsync(sysAddr, "Regulator", "Quarantine Result");
-            resetReaderAsync(sysAddr, "Regulator", "Farm Name");
-            resetReaderAsync(sysAddr, "Regulator", "Farm Licence");
+            resetWriterAsync(sysAddr, "监管部门", "生产许可证");
         }
 
 
         if (signIn(accounts[2], "Innov@teD@ily1")) {
-            resetReaderAsync(sysAddr, "Abattoir", "Abattoir PIC");
-            resetWriterAsync(sysAddr, "Abattoir", "Abattoir PIC");
+            resetReaderAsync(sysAddr, "加工方", "加工公司");
+            resetWriterAsync(sysAddr, "加工方", "加工公司");
             
-            resetReaderAsync(sysAddr, "Abattoir", "Slaughter Date");
-            resetWriterAsync(sysAddr, "Abattoir", "Slaughter Date");
+            resetReaderAsync(sysAddr, "加工方", "加工负责人");
+            resetWriterAsync(sysAddr, "加工方", "加工负责人");
             
-            resetReaderAsync(sysAddr, "Abattoir", "Quality Inspector1");
-            resetWriterAsync(sysAddr, "Abattoir", "Quality Inspector1");
+            resetReaderAsync(sysAddr, "加工方", "加工日期");
+            resetWriterAsync(sysAddr, "加工方", "加工日期");
             
-            resetReaderAsync(sysAddr, "Abattoir", "Check Result1");
-            resetWriterAsync(sysAddr, "Abattoir", "Check Result1");
+            resetReaderAsync(sysAddr, "加工方", "加工批次");
+            resetWriterAsync(sysAddr, "加工方", "加工批次");
             
-            resetReaderAsync(sysAddr, "Abattoir", "Abattoir Name");
-            resetWriterAsync(sysAddr, "Abattoir", "Abattoir Name");
+            resetReaderAsync(sysAddr, "加工方", "加工检验结果");
+            resetWriterAsync(sysAddr, "加工方", "加工检验结果");
             
-            resetReaderAsync(sysAddr, "Abattoir", "Abattoir Licence");
-            resetWriterAsync(sysAddr, "Abattoir", "Abattoir Licence");
+            resetReaderAsync(sysAddr, "加工方", "加工许可证");
 
-            resetReaderAsync(sysAddr, "Packaging", "Check Result1");
-            resetReaderAsync(sysAddr, "Packaging", "Abattoir Name");
-            resetReaderAsync(sysAddr, "Packaging", "Abattoir Licence");
+            resetReaderAsync(sysAddr, "物流方", "加工公司");
+            resetReaderAsync(sysAddr, "物流方", "加工日期");
+            resetReaderAsync(sysAddr, "物流方", "加工批次");
+            resetReaderAsync(sysAddr, "物流方", "加工检验结果");
+            resetReaderAsync(sysAddr, "物流方", "加工许可证");
 
-            resetReaderAsync(sysAddr, "Warehousing", "Check Result1");
-            resetReaderAsync(sysAddr, "Warehousing", "Abattoir Name");
-            resetReaderAsync(sysAddr, "Warehousing", "Abattoir Licence");
+            resetReaderAsync(sysAddr, "消费者", "加工公司");
+            resetReaderAsync(sysAddr, "消费者", "加工日期");
+            resetReaderAsync(sysAddr, "消费者", "加工批次");
+            resetReaderAsync(sysAddr, "消费者", "加工检验结果");
+            resetReaderAsync(sysAddr, "消费者", "加工许可证");
 
-            resetReaderAsync(sysAddr, "Logistics", "Check Result1");
-            resetReaderAsync(sysAddr, "Logistics", "Abattoir Name");
-            resetReaderAsync(sysAddr, "Logistics", "Abattoir Licence");
+            resetReaderAsync(sysAddr, "监管部门", "加工公司");
+            resetReaderAsync(sysAddr, "监管部门", "加工负责人");
+            resetReaderAsync(sysAddr, "监管部门", "加工日期");
+            resetReaderAsync(sysAddr, "监管部门", "加工批次");
+            resetReaderAsync(sysAddr, "监管部门", "加工检验结果");
+            resetReaderAsync(sysAddr, "监管部门", "加工许可证");
 
-            resetReaderAsync(sysAddr, "Processor", "Check Result1");
-            resetReaderAsync(sysAddr, "Processor", "Abattoir Name");
-            resetReaderAsync(sysAddr, "Processor", "Abattoir Licence");
-
-            resetReaderAsync(sysAddr, "Distribution ", "Check Result1");
-            resetReaderAsync(sysAddr, "Distribution ", "Abattoir Name");
-            resetReaderAsync(sysAddr, "Distribution ", "Abattoir Licence");
-
-            resetReaderAsync(sysAddr, "Retailer", "Check Result1");
-            resetReaderAsync(sysAddr, "Retailer", "Abattoir Name");
-            resetReaderAsync(sysAddr, "Retailer", "Abattoir Licence");
-
-            resetReaderAsync(sysAddr, "Consumer", "Slaughter Date");
-            resetReaderAsync(sysAddr, "Consumer", "Check Result1");
-            resetReaderAsync(sysAddr, "Consumer", "Abattoir Name");
-            resetReaderAsync(sysAddr, "Consumer", "Abattoir Licence");
-
-            resetReaderAsync(sysAddr, "Regulator", "Abattoir PIC");
-            resetReaderAsync(sysAddr, "Regulator", "Quality Inspector1");
-            resetReaderAsync(sysAddr, "Regulator", "Check Result1");
-            resetReaderAsync(sysAddr, "Regulator", "Abattoir Name");
-            resetReaderAsync(sysAddr, "Regulator", "Abattoir Licence");
+            resetWriterAsync(sysAddr, "监管部门", "加工许可证");
         }
 
 
         if (signIn(accounts[3], "Innov@teD@ily1")) {
-            resetReaderAsync(sysAddr, "Packaging", "Packaging PIC");
-            resetWriterAsync(sysAddr, "Packaging", "Packaging PIC");
+            resetReaderAsync(sysAddr, "物流方", "物流公司");
+            resetWriterAsync(sysAddr, "物流方", "物流公司");
             
-            resetReaderAsync(sysAddr, "Packaging", "Packaging Date");
-            resetWriterAsync(sysAddr, "Packaging", "Packaging Date");
+            resetReaderAsync(sysAddr, "物流方", "物流负责人");
+            resetWriterAsync(sysAddr, "物流方", "物流负责人");
             
-            resetReaderAsync(sysAddr, "Packaging", "Quality Inspector2");
-            resetWriterAsync(sysAddr, "Packaging", "Quality Inspector2");
+            resetReaderAsync(sysAddr, "物流方", "运输日期");
+            resetWriterAsync(sysAddr, "物流方", "运输日期");
             
-            resetReaderAsync(sysAddr, "Packaging", "Quality Result2");
-            resetWriterAsync(sysAddr, "Packaging", "Quality Result2");
+            resetReaderAsync(sysAddr, "物流方", "车辆编号");
+            resetWriterAsync(sysAddr, "物流方", "车辆编号");
             
-            resetReaderAsync(sysAddr, "Packaging", "Company Name");
-            resetWriterAsync(sysAddr, "Packaging", "Company Name");
+            resetReaderAsync(sysAddr, "物流方", "到货验收结果");
+            resetWriterAsync(sysAddr, "物流方", "到货验收结果");
             
-            resetReaderAsync(sysAddr, "Packaging", "Packaging Licence");
-            resetWriterAsync(sysAddr, "Packaging", "Packaging Licence");
+            resetReaderAsync(sysAddr, "物流方", "物流许可证");
 
-            resetReaderAsync(sysAddr, "Warehousing", "Quality Result2");
-            resetReaderAsync(sysAddr, "Warehousing", "Company Name");
-            resetReaderAsync(sysAddr, "Warehousing", "Packaging Licence");
+            resetReaderAsync(sysAddr, "销售方", "物流公司");
+            resetReaderAsync(sysAddr, "销售方", "运输日期");
+            resetReaderAsync(sysAddr, "销售方", "车辆编号");
+            resetReaderAsync(sysAddr, "销售方", "到货验收结果");
+            resetReaderAsync(sysAddr, "销售方", "物流许可证");
 
-            resetReaderAsync(sysAddr, "Logistics", "Quality Result2");
-            resetReaderAsync(sysAddr, "Logistics", "Company Name");
-            resetReaderAsync(sysAddr, "Logistics", "Packaging Licence");
+            resetReaderAsync(sysAddr, "消费者", "物流公司");
+            resetReaderAsync(sysAddr, "消费者", "运输日期");
+            resetReaderAsync(sysAddr, "消费者", "车辆编号");
+            resetReaderAsync(sysAddr, "消费者", "到货验收结果");
+            resetReaderAsync(sysAddr, "消费者", "物流许可证");
 
-            resetReaderAsync(sysAddr, "Processor", "Quality Result2");
-            resetReaderAsync(sysAddr, "Processor", "Company Name");
-            resetReaderAsync(sysAddr, "Processor", "Packaging Licence");
+            resetReaderAsync(sysAddr, "监管部门", "物流公司");
+            resetReaderAsync(sysAddr, "监管部门", "物流负责人");
+            resetReaderAsync(sysAddr, "监管部门", "运输日期");
+            resetReaderAsync(sysAddr, "监管部门", "车辆编号");
+            resetReaderAsync(sysAddr, "监管部门", "到货验收结果");
+            resetReaderAsync(sysAddr, "监管部门", "物流许可证");
 
-            resetReaderAsync(sysAddr, "Distribution ", "Quality Result2");
-            resetReaderAsync(sysAddr, "Distribution ", "Company Name");
-            resetReaderAsync(sysAddr, "Distribution ", "Packaging Licence");
-
-            resetReaderAsync(sysAddr, "Retailer", "Quality Result2");
-            resetReaderAsync(sysAddr, "Retailer", "Company Name");
-            resetReaderAsync(sysAddr, "Retailer", "Packaging Licence");
-
-            resetReaderAsync(sysAddr, "Consumer", "Packaging Date");
-            resetReaderAsync(sysAddr, "Consumer", "Quality Result2");
-            resetReaderAsync(sysAddr, "Consumer", "Company Name");
-            resetReaderAsync(sysAddr, "Consumer", "Packaging Licence");
-
-            resetReaderAsync(sysAddr, "Regulator", "Packaging PIC");
-            resetReaderAsync(sysAddr, "Regulator", "Quality Inspector2");
-            resetReaderAsync(sysAddr, "Regulator", "Quality Result2");
-            resetReaderAsync(sysAddr, "Regulator", "Company Name");
-            resetReaderAsync(sysAddr, "Regulator", "Packaging Licence");
+            resetWriterAsync(sysAddr, "监管部门", "物流许可证");
         }
 
 
         if (signIn(accounts[4], "Innov@teD@ily1")) {
-            resetReaderAsync(sysAddr, "Warehousing", "Warehousing PIC");
-            resetWriterAsync(sysAddr, "Warehousing", "Warehousing PIC");
-            
-            resetReaderAsync(sysAddr, "Warehousing", "Entry Date");
-            resetWriterAsync(sysAddr, "Warehousing", "Entry Date");
-            
-            resetReaderAsync(sysAddr, "Warehousing", "Leaving Date");
-            resetWriterAsync(sysAddr, "Warehousing", "Leaving Date");
-            
-            resetReaderAsync(sysAddr, "Warehousing", "Amount1");
-            resetWriterAsync(sysAddr, "Warehousing", "Amount1");
-            
-            resetReaderAsync(sysAddr, "Warehousing", "Storage Company");
-            resetWriterAsync(sysAddr, "Warehousing", "Storage Company");
-            
-            resetReaderAsync(sysAddr, "Warehousing", "Storage Licence");
-            resetWriterAsync(sysAddr, "Warehousing", "Storage Licence");
+            resetReaderAsync(sysAddr, "销售方", "销售公司");
+            resetWriterAsync(sysAddr, "销售方", "销售公司");
 
-            resetReaderAsync(sysAddr, "Logistics", "Amount1");
-            resetReaderAsync(sysAddr, "Logistics", "Storage Company");
-            resetReaderAsync(sysAddr, "Logistics", "Storage Licence");
+            resetReaderAsync(sysAddr, "销售方", "销售负责人");
+            resetWriterAsync(sysAddr, "销售方", "销售负责人");
 
-            resetReaderAsync(sysAddr, "Processor", "Amount1");
-            resetReaderAsync(sysAddr, "Processor", "Storage Company");
-            resetReaderAsync(sysAddr, "Processor", "Storage Licence");
+            resetReaderAsync(sysAddr, "销售方", "进货日期");
+            resetWriterAsync(sysAddr, "销售方", "进货日期");
 
-            resetReaderAsync(sysAddr, "Distribution ", "Amount1");
-            resetReaderAsync(sysAddr, "Distribution ", "Storage Company");
-            resetReaderAsync(sysAddr, "Distribution ", "Storage Licence");
+            resetReaderAsync(sysAddr, "销售方", "标价");
+            resetWriterAsync(sysAddr, "销售方", "标价");
 
-            resetReaderAsync(sysAddr, "Retailer", "Amount1");
-            resetReaderAsync(sysAddr, "Retailer", "Storage Company");
-            resetReaderAsync(sysAddr, "Retailer", "Storage Licence");
+            resetReaderAsync(sysAddr, "销售方", "销售许可证");
 
-            resetReaderAsync(sysAddr, "Consumer", "Entry Date");
-            resetReaderAsync(sysAddr, "Consumer", "Leaving Date");
-            resetReaderAsync(sysAddr, "Consumer", "Amount1");
-            resetReaderAsync(sysAddr, "Consumer", "Amount1");
-            resetReaderAsync(sysAddr, "Consumer", "Storage Company");
-            resetReaderAsync(sysAddr, "Consumer", "Storage Licence");
+            resetReaderAsync(sysAddr, "消费者", "销售公司");
+            resetReaderAsync(sysAddr, "消费者", "进货日期");
+            resetReaderAsync(sysAddr, "消费者", "标价");
+            resetReaderAsync(sysAddr, "消费者", "销售许可证");
 
-            resetReaderAsync(sysAddr, "Regulator", "Warehousing PIC");
-            resetReaderAsync(sysAddr, "Regulator", "Amount1");
-            resetReaderAsync(sysAddr, "Regulator", "Storage Company");
-            resetReaderAsync(sysAddr, "Regulator", "Storage Licence");            
+            resetReaderAsync(sysAddr, "监管部门", "销售公司");
+            resetReaderAsync(sysAddr, "监管部门", "销售负责人");
+            resetReaderAsync(sysAddr, "监管部门", "进货日期");
+            resetReaderAsync(sysAddr, "监管部门", "标价");
+            resetReaderAsync(sysAddr, "监管部门", "销售许可证");
+
+            resetWriterAsync(sysAddr, "监管部门", "销售许可证");
         }
 
-
-        if (signIn(accounts[5], "Innov@teD@ily1")) {
-            resetReaderAsync(sysAddr, "Logistics", "Logistics PIC");
-            resetWriterAsync(sysAddr, "Logistics", "Logistics PIC");
-            
-            resetReaderAsync(sysAddr, "Logistics", "Start Time");
-            resetWriterAsync(sysAddr, "Logistics", "Start Time");
-            
-            resetReaderAsync(sysAddr, "Logistics", "Reach Time");
-            resetWriterAsync(sysAddr, "Logistics", "Reach Time");
-            
-            resetReaderAsync(sysAddr, "Logistics", "Amount2");
-            resetWriterAsync(sysAddr, "Logistics", "Amount2");
-            
-            resetReaderAsync(sysAddr, "Logistics", "Transport Distance");
-            resetWriterAsync(sysAddr, "Logistics", "Transport Distance");
-            
-            resetReaderAsync(sysAddr, "Logistics", "Logistics Company");
-            resetWriterAsync(sysAddr, "Logistics", "Logistics Company");
-            
-            resetReaderAsync(sysAddr, "Logistics", "Logistics Licence");
-            resetWriterAsync(sysAddr, "Logistics", "Logistics Licence");
-            
-            resetReaderAsync(sysAddr, "Logistics", "Transport From");
-            resetWriterAsync(sysAddr, "Logistics", "Transport From");
-            
-            resetReaderAsync(sysAddr, "Logistics", "Transport To");
-            resetWriterAsync(sysAddr, "Logistics", "Transport To");            
-
-            resetReaderAsync(sysAddr, "Processor", "Logistics Company");
-            resetReaderAsync(sysAddr, "Processor", "Logistics Licence");
-            resetReaderAsync(sysAddr, "Processor", "Transport From");
-            resetReaderAsync(sysAddr, "Processor", "Transport To");
-
-            resetReaderAsync(sysAddr, "Distribution ", "Logistics Company");
-            resetReaderAsync(sysAddr, "Distribution ", "Logistics Licence");
-            resetReaderAsync(sysAddr, "Distribution ", "Transport From");
-            resetReaderAsync(sysAddr, "Distribution ", "Transport To");
-
-            resetReaderAsync(sysAddr, "Retailer", "Logistics Company");
-            resetReaderAsync(sysAddr, "Retailer", "Logistics Licence");
-            resetReaderAsync(sysAddr, "Retailer", "Transport From");
-            resetReaderAsync(sysAddr, "Retailer", "Transport To");
-
-            resetReaderAsync(sysAddr, "Consumer", "Start Time");
-            resetReaderAsync(sysAddr, "Consumer", "Reach Time");
-            resetReaderAsync(sysAddr, "Consumer", "Amount2");
-            resetReaderAsync(sysAddr, "Consumer", "Transport Distance");
-            
-            resetReaderAsync(sysAddr, "Consumer", "Logistics Company");
-            resetReaderAsync(sysAddr, "Consumer", "Logistics Licence");
-            resetReaderAsync(sysAddr, "Consumer", "Transport From");
-            resetReaderAsync(sysAddr, "Consumer", "Transport To");
-
-            resetReaderAsync(sysAddr, "Regulator", "Logistics PIC");
-            resetReaderAsync(sysAddr, "Regulator", "Logistics Company");
-            resetReaderAsync(sysAddr, "Regulator", "Logistics Licence");
-            resetReaderAsync(sysAddr, "Regulator", "Transport From");
-            resetReaderAsync(sysAddr, "Regulator", "Transport To");
-        }
-
-
-        if (signIn(accounts[6], "Innov@teD@ily1")) {
-            resetReaderAsync(sysAddr, "Processor", "Sourcing PIC");
-            resetWriterAsync(sysAddr, "Processor", "Sourcing PIC");
-            
-            resetReaderAsync(sysAddr, "Processor", "Sourcing Date");
-            resetWriterAsync(sysAddr, "Processor", "Sourcing Date");
-            
-            resetReaderAsync(sysAddr, "Processor", "Processor PIC");
-            resetWriterAsync(sysAddr, "Processor", "Processor PIC");
-            
-            resetReaderAsync(sysAddr, "Processor", "Production Date");
-            resetWriterAsync(sysAddr, "Processor", "Production Date");
-            
-            resetReaderAsync(sysAddr, "Processor", "Quality Inspector3");
-            resetWriterAsync(sysAddr, "Processor", "Quality Inspector3");
-            
-            resetReaderAsync(sysAddr, "Processor", "Quality Result3");
-            resetWriterAsync(sysAddr, "Processor", "Quality Result3");
-            
-            resetReaderAsync(sysAddr, "Processor", "Processor Name");
-            resetWriterAsync(sysAddr, "Processor", "Processor Name");
-            
-            resetReaderAsync(sysAddr, "Processor", "Production License");
-            resetWriterAsync(sysAddr, "Processor", "Production License");
-
-            resetReaderAsync(sysAddr, "Distribution ", "Quality Result3");
-            resetReaderAsync(sysAddr, "Distribution ", "Processor Name");
-            resetReaderAsync(sysAddr, "Distribution ", "Production License");
-
-            resetReaderAsync(sysAddr, "Retailer", "Quality Result3");
-            resetReaderAsync(sysAddr, "Retailer", "Processor Name");
-            resetReaderAsync(sysAddr, "Retailer", "Production License");
-
-            resetReaderAsync(sysAddr, "Consumer", "Sourcing Date");
-            resetReaderAsync(sysAddr, "Consumer", "Production Date");
-            resetReaderAsync(sysAddr, "Consumer", "Quality Result3");
-            resetReaderAsync(sysAddr, "Consumer", "Processor Name");
-            resetReaderAsync(sysAddr, "Consumer", "Production License");
-
-            resetReaderAsync(sysAddr, "Regulator", "Sourcing PIC");
-            resetReaderAsync(sysAddr, "Regulator", "Processor PIC");
-            resetReaderAsync(sysAddr, "Regulator", "Quality Inspector3");
-            
-            resetReaderAsync(sysAddr, "Regulator", "Quality Result3");
-            resetReaderAsync(sysAddr, "Regulator", "Processor Name");
-            resetReaderAsync(sysAddr, "Regulator", "Production License");
-        }
-
-
-        if (signIn(accounts[7], "Innov@teD@ily1")) {
-            resetReaderAsync(sysAddr, "Distribution ", "Distribution PIC");
-            resetWriterAsync(sysAddr, "Distribution ", "Distribution PIC");
-            
-            resetReaderAsync(sysAddr, "Distribution ", "Load Time");
-            resetWriterAsync(sysAddr, "Distribution ", "Load Time");
-            
-            resetReaderAsync(sysAddr, "Distribution ", "Delivery Time");
-            resetWriterAsync(sysAddr, "Distribution ", "Delivery Time");
-            
-            resetReaderAsync(sysAddr, "Distribution ", "Amount3");
-            resetWriterAsync(sysAddr, "Distribution ", "Amount3");
-            
-            resetReaderAsync(sysAddr, "Distribution ", "Distribution Distance");
-            resetWriterAsync(sysAddr, "Distribution ", "Distribution Distance");
-            
-            resetReaderAsync(sysAddr, "Distribution ", "Distribution Company");
-            resetWriterAsync(sysAddr, "Distribution ", "Distribution Company");
-            
-            resetReaderAsync(sysAddr, "Distribution ", "Distribution Licence");
-            resetWriterAsync(sysAddr, "Distribution ", "Distribution Licence");
-            
-            resetReaderAsync(sysAddr, "Distribution ", "Distribution From");
-            resetWriterAsync(sysAddr, "Distribution ", "Distribution From");
-            
-            resetReaderAsync(sysAddr, "Distribution ", "Distribution To");
-            resetWriterAsync(sysAddr, "Distribution ", "Distribution To");
-
-            resetReaderAsync(sysAddr, "Retailer", "Distribution Company");
-            resetReaderAsync(sysAddr, "Retailer", "Distribution Licence");
-            resetReaderAsync(sysAddr, "Retailer", "Distribution From");
-            resetReaderAsync(sysAddr, "Retailer", "Distribution To");
-
-            resetReaderAsync(sysAddr, "Consumer", "Load Time");
-            resetReaderAsync(sysAddr, "Consumer", "Delivery Time");
-            resetReaderAsync(sysAddr, "Consumer", "Amount3");
-            resetReaderAsync(sysAddr, "Consumer", "Distribution Distance");
-            
-            resetReaderAsync(sysAddr, "Consumer", "Distribution Company");
-            resetReaderAsync(sysAddr, "Consumer", "Distribution Licence");
-            resetReaderAsync(sysAddr, "Consumer", "Distribution From");
-            resetReaderAsync(sysAddr, "Consumer", "Distribution To");
-
-            resetReaderAsync(sysAddr, "Regulator", "Distribution PIC");
-            resetReaderAsync(sysAddr, "Regulator", "Distribution Company");
-            resetReaderAsync(sysAddr, "Regulator", "Distribution Licence");
-            resetReaderAsync(sysAddr, "Regulator", "Distribution From");
-            resetReaderAsync(sysAddr, "Regulator", "Distribution To");
-        }
-
-
-        if (signIn(accounts[8], "Innov@teD@ily1")) {
-            resetReaderAsync(sysAddr, "Retailer", "Purchase PIC");
-            resetWriterAsync(sysAddr, "Retailer", "Purchase PIC");
-            
-            resetReaderAsync(sysAddr, "Retailer", "Purchase Date");
-            resetWriterAsync(sysAddr, "Retailer", "Purchase Date");
-            
-            resetReaderAsync(sysAddr, "Retailer", "Amount4");
-            resetWriterAsync(sysAddr, "Retailer", "Amount4");
-            
-            resetReaderAsync(sysAddr, "Retailer", "Retailer Company");
-            resetWriterAsync(sysAddr, "Retailer", "Retailer Company");
-            
-            resetReaderAsync(sysAddr, "Retailer", "Retailer Licence");
-            resetWriterAsync(sysAddr, "Retailer", "Retailer Licence");
-            
-            resetReaderAsync(sysAddr, "Retailer", "Price");
-            resetWriterAsync(sysAddr, "Retailer", "Price");
-
-            resetReaderAsync(sysAddr, "Consumer", "Purchase Date");
-            resetReaderAsync(sysAddr, "Consumer", "Amount4");
-            resetReaderAsync(sysAddr, "Consumer", "Retailer Company");
-            resetReaderAsync(sysAddr, "Consumer", "Retailer Licence");
-            resetReaderAsync(sysAddr, "Consumer", "Price");
-
-            resetReaderAsync(sysAddr, "Regulator", "Purchase PIC");
-            resetReaderAsync(sysAddr, "Regulator", "Retailer Company");
-            resetReaderAsync(sysAddr, "Regulator", "Retailer Licence");
-            resetReaderAsync(sysAddr, "Regulator", "Price");
-        }
         sendTx();
         return true;
     }

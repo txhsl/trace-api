@@ -12,16 +12,12 @@ public class RoleType {
 
     public static ArrayList<String> Types = new ArrayList<>(
         Arrays.asList(
-        "Farm",
-        "Abattoir",
-        "Packaging",
-        "Warehousing",
-        "Logistics",
-        "Processor",
-        "Distribution ",
-        "Retailer",
-        "Consumer",
-        "Regulator")
+        "生产方",
+        "加工方",
+        "物流方",
+        "销售方",
+        "消费者",
+        "监管部门")
     );
 
     public static int getID(String roleName) {
