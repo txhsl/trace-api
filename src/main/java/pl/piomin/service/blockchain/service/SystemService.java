@@ -56,8 +56,9 @@ public class SystemService {
 
     private String recover() {
         try {
-            Resource resource = new ClassPathResource("system.json");
-            JSONObject json = new JSONObject(new String(FileCopyUtils.copyToByteArray(resource.getFile())));
+            //Resource resource = new ClassPathResource("system.json");
+            //JSONObject json = new JSONObject(new String(FileCopyUtils.copyToByteArray(resource.getFile())));
+            JSONObject json = new JSONObject(new String(FileCopyUtils.copyToByteArray(new File("system.json"))));
             return json.getString("address");
         } catch (Exception e) {
             LOGGER.error("Address of System Contract not found. " + e.getMessage());
@@ -319,10 +320,8 @@ public class SystemService {
     }
 
     private Credentials signIn(String address, String password) throws IOException, CipherException {
-        Resource resource = new ClassPathResource(address);
-        File file = resource.getFile();
-        return  WalletUtils.loadCredentials(
-                password,
-                file.getAbsolutePath());
+        //Resource resource = new ClassPathResource(address);
+        //File file = resource.getFile();
+        return  WalletUtils.loadCredentials(password, address);
     }
 }

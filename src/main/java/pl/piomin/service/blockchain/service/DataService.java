@@ -124,10 +124,8 @@ public class DataService {
     }
 
     private Credentials signIn(String address, String password) throws IOException, CipherException {
-        Resource resource = new ClassPathResource(address);
-        File file = resource.getFile();
-        return  WalletUtils.loadCredentials(
-                password,
-                file.getAbsolutePath());
+        //Resource resource = new ClassPathResource(address);
+        //File file = resource.getFile();
+        return  WalletUtils.loadCredentials(password, address);
     }
 }

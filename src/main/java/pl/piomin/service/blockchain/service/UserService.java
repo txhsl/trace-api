@@ -244,11 +244,10 @@ public class UserService {
     }
 
     public boolean signIn(String address, String password) throws IOException, CipherException {
-        Resource resource = new ClassPathResource(address);
-        File file = resource.getFile();
-        current = WalletUtils.loadCredentials(
-                password,
-                file.getAbsolutePath());
+        //Resource resource = new ClassPathResource(address);
+        //File file = resource.getFile();
+        //current = WalletUtils.loadCredentials(password, file.getAbsolutePath());
+        current = WalletUtils.loadCredentials(password, address);
         return true;
     }
 

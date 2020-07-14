@@ -4,6 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
@@ -13,7 +15,7 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 
 @SpringBootApplication
-public class BlockchainApp {
+public class BlockchainApp extends SpringBootServletInitializer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BlockchainService.class);
 
@@ -47,6 +49,11 @@ public class BlockchainApp {
 
         LOGGER.info("Transaction Subscribed");
 
+    }
+
+    @Override
+    protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
+        return builder.sources(this.getClass());
     }
 
 }
